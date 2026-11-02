@@ -13,9 +13,9 @@
     nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}
     .brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:20px}.nav-links a{color:var(--muted);text-decoration:none}.nav-links a:hover,.active{color:var(--accent)!important}
     main{padding:90px 0 120px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}
-    h1{max-width:760px;font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.04;letter-spacing:-.05em;margin:16px 0 28px}h2{font-size:1.8rem;margin-top:0}p{color:var(--muted)}
-    .intro{max-width:680px;font-size:1.15rem}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:70px}.card{padding:28px;background:#111b30e0;border:1px solid var(--border);border-radius:14px}.card:hover{border-color:var(--accent);transform:translateY(-4px)}.card{transition:.2s}.tag{color:var(--accent);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
-    @media(max-width:760px){.grid{grid-template-columns:1fr}main{padding:65px 0 90px}.nav-links{gap:12px;font-size:.9rem}}
+    h1{max-width:760px;font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.04;letter-spacing:-.05em;margin:16px 0 28px}h2{font-size:1.55rem;line-height:1.25;margin:0 0 8px}p{color:var(--muted)}
+    .intro{max-width:680px;font-size:1.15rem}.experience-list{margin-top:70px;border-top:1px solid var(--border)}.experience{display:grid;grid-template-columns:190px 1fr;gap:40px;padding:34px 0;border-bottom:1px solid var(--border)}.experience-date{color:var(--accent);font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.experience-place{margin:0 0 18px;color:var(--text);font-size:.95rem}.experience-place span{color:var(--muted)}.experience p{margin:0;max-width:680px}.topic{margin:0 0 8px;color:var(--text);font-weight:650}.advisor{margin-top:14px!important;font-size:.9rem;font-style:italic}.advisor strong{color:var(--muted);font-style:normal}.experience ul{margin:18px 0 0;padding-left:20px;color:var(--muted)}.experience li{padding-left:6px;margin-top:7px}footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+    @media(max-width:760px){main{padding:65px 0 90px}.nav-links{gap:12px;font-size:.9rem}.experience{display:block;padding:28px 0}.experience-date{margin-bottom:18px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
   </style>
 </head>
@@ -24,11 +24,44 @@
   <main class="container">
     <span class="eyebrow">Questions that drive my work</span>
     <h1>Research interests</h1>
-    <p class="intro">I use observations, computation, and careful questions to understand the systems that shape our cosmic neighborhood.</p>
-    <div class="grid">
-      <article class="card"><p class="tag">01 / Exoplanets</p><h2>Worlds beyond our own</h2><p>Add your work on planetary systems, their formation, or the characterization of distant worlds.</p></article>
-      <article class="card"><p class="tag">02 / Galaxies</p><h2>A universe of galaxies</h2><p>Introduce your questions about galaxy evolution, stellar populations, or the structure of the cosmos.</p></article>
-      <article class="card"><p class="tag">03 / Data & tools</p><h2>Turning light into insight</h2><p>Share your observing techniques, simulations, data pipelines, or open-source research software.</p></article>
+    <p class="intro">My research spans exoplanet atmospheres, adaptive optics, weak gravitational lensing, and molecular gas in star-forming environments.</p>
+    <div class="experience-list">
+      <article class="experience">
+        <div class="experience-date">Mar 2026 — Sep 2026</div>
+        <div>
+          <h2>Modelling the high-resolution spectrum of a directly-imaged exoplanet</h2>
+          <p class="experience-place">Observatoire de la Côte d’Azur <span>· Nice, France</span></p>
+          <p>I simulated the high-resolution spectra of the planetary-mass companion VHS 1256 b to investigate its time-variable atmospheric dynamics.</p>
+          <p class="advisor"><strong>Advisor:</strong> Prof. Vivien Parmentier</p>
+        </div>
+      </article>
+      <article class="experience">
+        <div class="experience-date">Dec 2025 — Feb 2026</div>
+        <div>
+          <h2>Development of the adaptive optics system installed at C2PU</h2>
+          <p class="experience-place">Observatoire de la Côte d’Azur <span>· Nice, France</span></p>
+          <p>I developed a Python code used for assessing the real-time performance of the adaptive optics system at the Calern Observatory.</p>
+          <p class="advisor"><strong>Advisors:</strong> Prof. Marcel Carbillet, Dr. Lyu Abe</p>
+        </div>
+      </article>
+      <article class="experience">
+        <div class="experience-date">Jun 2023 — Oct 2023</div>
+        <div>
+          <h2>Measuring shapes of galaxies for weak lensing</h2>
+          <p class="experience-place">Astroparticule et Cosmologie Laboratoire <span>· Paris, France</span></p>
+          <p>I carried out simulations to examine how accurately current shape-measurement techniques will perform for future Euclid observations.</p>
+          <p class="advisor"><strong>Advisors:</strong> Dr. Axel Guinot, Dr. Cyrille Rosset</p>
+        </div>
+      </article>
+      <article class="experience">
+        <div class="experience-date">Oct 2022 — Mar 2023</div>
+        <div>
+          <h2>Molecular gas in Carina Keyhole</h2>
+          <p class="experience-place">Max Planck Institute for Radio Astronomy <span>· Remote, Germany</span></p>
+          <p>I studied the presence of CO molecules near the intense UV radiation source Eta Carinae, specifically within the region known as Keyhole.</p>
+          <p class="advisor"><strong>Advisor:</strong> Dr. Le Ngoc Tram</p>
+        </div>
+      </article>
     </div>
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · <a href="index.html">Return home</a></footer>
