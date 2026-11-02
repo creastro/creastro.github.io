@@ -1,131 +1,404 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="creastro — a personal space for selected work, ideas, and experiments."
-    />
-    <title>creastro — Selected work & ideas</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="page-shell">
-      <header class="site-header">
-        <a class="brand" href="#" aria-label="creastro home">
-          <span class="brand-mark">c<span>.</span></span>
-          <span>creastro</span>
-        </a>
-        <nav class="site-nav" aria-label="Primary navigation">
-          <a href="#work">Work</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
-        </nav>
-        <button class="theme-toggle" type="button" aria-label="Toggle color theme">
-          <span class="theme-icon">☼</span>
-        </button>
-      </header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+        content="Personal website of Tin Mai (Mai Như Tín), astronomer.">
+  <title>Tin Mai (Mai Như Tín) | Astronomer</title>
 
-      <main>
-        <section class="hero" aria-labelledby="hero-title">
-          <div class="hero-copy">
-            <p class="eyebrow"><span class="status-dot"></span> Available for thoughtful collaborations</p>
-            <h1 id="hero-title">Making the digital world feel a little more <em>human.</em></h1>
-            <p class="hero-description">
-              A personal space for selected work, curious experiments, and ideas in progress.
-            </p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="#work">Explore the work <span>↘</span></a>
-              <a class="text-link" href="mailto:hello@creastro.dev">Say hello <span>↗</span></a>
-            </div>
-          </div>
-          <div class="hero-art" aria-hidden="true">
-            <div class="orbit orbit-one"></div>
-            <div class="orbit orbit-two"></div>
-            <div class="orb"></div>
-            <div class="orbital-label label-top">ideas → form</div>
-            <div class="orbital-label label-bottom">curiosity / craft</div>
-          </div>
-        </section>
+  <style>
+    :root {
+      --bg: #080d1c;
+      --text: #edf2ff;
+      --muted: #b3bfd8;
+      --accent: #8fe3ff;
+      --border: rgba(255, 255, 255, .14);
+    }
 
-        <section class="marquee" aria-label="Areas of interest">
-          <div class="marquee-track">
-            <span>Design systems</span><i>✳</i><span>Digital products</span><i>✳</i><span>Creative technology</span><i>✳</i><span>Good ideas</span><i>✳</i>
-            <span>Design systems</span><i>✳</i><span>Digital products</span><i>✳</i><span>Creative technology</span><i>✳</i><span>Good ideas</span><i>✳</i>
-          </div>
-        </section>
+    * { box-sizing: border-box; }
 
-        <section id="work" class="section work-section" aria-labelledby="work-title">
-          <div class="section-heading">
-            <p class="eyebrow">01 / Selected work</p>
-            <h2 id="work-title">A few things I’ve helped bring to life.</h2>
-          </div>
-          <div class="project-grid">
-            <a class="project-card project-large" href="#" aria-label="View Northstar project">
-              <div class="project-visual visual-northstar">
-                <span class="visual-caption">01 — Northstar</span>
-                <div class="star-shape">✦</div>
-                <span class="visual-note">finding direction<br />in complexity</span>
-              </div>
-              <div class="project-meta"><span>Product direction</span><span>↗</span></div>
-            </a>
-            <a class="project-card" href="#" aria-label="View Field Notes project">
-              <div class="project-visual visual-field">
-                <span class="visual-caption">02 — Field Notes</span>
-                <div class="field-lines"></div>
-                <span class="visual-note">observations<br />from the edge</span>
-              </div>
-              <div class="project-meta"><span>Editorial experience</span><span>↗</span></div>
-            </a>
-            <a class="project-card" href="#" aria-label="View Small Signals project">
-              <div class="project-visual visual-signals">
-                <span class="visual-caption">03 — Small Signals</span>
-                <div class="signal-bars"><b></b><b></b><b></b><b></b><b></b></div>
-                <span class="visual-note">tiny details,<br />loud impact</span>
-              </div>
-              <div class="project-meta"><span>Interactive identity</span><span>↗</span></div>
-            </a>
-          </div>
-        </section>
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      line-height: 1.7;
+    }
 
-        <section id="about" class="section about-section" aria-labelledby="about-title">
-          <div class="section-heading">
-            <p class="eyebrow">02 / A little about me</p>
-          </div>
-          <div class="about-content">
-            <h2 id="about-title">I like the space between a rough idea and a <em>real thing.</em></h2>
-            <div class="about-details">
-              <p>
-                I’m a multidisciplinary maker interested in the overlap of strategy, design, and technology. I care about clear thinking, warm interfaces, and the small moments that make useful things memorable.
-              </p>
-              <p class="mono-note">Currently exploring<br /><strong>how curiosity becomes craft.</strong></p>
-            </div>
-          </div>
-        </section>
+    .sky {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse at 80% 20%, #18345a55, transparent 55%),
+        radial-gradient(ellipse at 20% 70%, #41266344, transparent 50%);
+    }
 
-        <section id="contact" class="contact-section" aria-labelledby="contact-title">
-          <p class="eyebrow">03 / Start a conversation</p>
-          <h2 id="contact-title">Have a good idea?<br /><em>Let’s make it real.</em></h2>
-          <a class="contact-email" href="mailto:hello@creastro.dev">hello@creastro.dev <span>↗</span></a>
-        </section>
-      </main>
+    .sky::before,
+    .sky::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20px 30px, white 99%, transparent),
+        radial-gradient(2px 2px at 90px 110px, #b5d9ff 99%, transparent),
+        radial-gradient(1px 1px at 160px 60px, white 99%, transparent),
+        radial-gradient(1px 1px at 220px 170px, white 99%, transparent);
+      background-size: 260px 220px;
+      animation: twinkle 5s ease-in-out infinite alternate;
+    }
 
-      <footer class="site-footer">
-        <span>© <span id="year"></span> creastro</span>
-        <span>Built with curiosity.</span>
-        <div class="footer-links">
-          <a href="https://github.com/creastro" target="_blank" rel="noreferrer">GitHub ↗</a>
-          <a href="#hero-title">Back to top ↑</a>
+    .sky::after {
+      transform: translate(65px, 85px);
+      opacity: .4;
+      animation-delay: -3s;
+      animation-duration: 7s;
+    }
+
+    @keyframes twinkle {
+      from { opacity: .25; }
+      to { opacity: .85; }
+    }
+
+    a { color: var(--accent); }
+
+    a:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 5px;
+    }
+
+    .container {
+      width: min(1060px, 90%);
+      margin-inline: auto;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-block: 24px;
+    }
+
+    .brand {
+      color: var(--text);
+      font-weight: 750;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      align-items: center;
+      gap: 40px;
+      min-height: 580px;
+      padding-block: 60px;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4.8rem);
+      line-height: 1.1;
+      margin: 16px 0 24px;
+      letter-spacing: -.04em;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-top: 0;
+    }
+
+    h3 { margin-top: 0; }
+    p { color: var(--muted); }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 11px 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      transition: transform .2s, background .2s;
+    }
+
+    .button.primary {
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 700;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+      background: #25405b;
+      color: white;
+    }
+
+    .universe {
+      position: relative;
+      width: min(340px, 100%);
+      aspect-ratio: 1;
+      margin-inline: auto;
+      display: grid;
+      place-items: center;
+    }
+
+    .sun {
+      width: 100px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%,
+                                  #fff4ca, #ffc56b 45%, #e77d39);
+      box-shadow: 0 0 65px #ffbd6455;
+      animation: glow 4s ease-in-out infinite alternate;
+    }
+
+    .orbit {
+      position: absolute;
+      inset: 20px;
+      border: 1px solid #a8c7ff33;
+      border-radius: 50%;
+      animation: revolve 24s linear infinite;
+    }
+
+    .planet {
+      position: absolute;
+      top: 50%;
+      left: -12px;
+      width: 24px;
+      height: 24px;
+      margin-top: -12px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #b4f5ff, #478dd6);
+      box-shadow: 0 0 20px #83caff55;
+    }
+
+    .orbit.inner {
+      inset: 65px;
+      animation-duration: 13s;
+      animation-direction: reverse;
+    }
+
+    .inner .planet {
+      width: 14px;
+      height: 14px;
+      left: -7px;
+      margin-top: -7px;
+      background: #dca7ff;
+    }
+
+    @keyframes revolve {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes glow {
+      to { box-shadow: 0 0 95px #ffbd6477; }
+    }
+
+    section { padding-block: 45px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      padding: 26px;
+      background: rgba(17, 27, 48, .88);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: transform .2s, border-color .2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+    }
+
+    .tag {
+      color: var(--accent);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .publication {
+      padding-block: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .publication h3 { margin-bottom: 6px; }
+    .publication p { margin: 0 0 8px; }
+
+    footer {
+      margin-top: 40px;
+      padding-block: 30px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; }
+      .universe { width: 260px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sky" aria-hidden="true"></div>
+
+  <header class="container">
+    <nav aria-label="Main navigation">
+      <a class="brand" href="#">TIN MAI ✦</a>
+      <div class="nav-links">
+        <a href="#research">Research</a>
+        <a href="#publications">Publications</a>
+        <a href="#outreach">Outreach</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="hero">
+      <div>
+        <span class="eyebrow">Astronomer · Researcher · Explorer</span>
+        <h1>Exploring our<br>cosmic neighborhood.</h1>
+        <p>
+          I'm Tin Mai (Mai Như Tín), an astronomer and researcher.
+          I study the universe using observations and computational tools
+          to investigate the questions written in starlight.
+        </p>
+        <div class="buttons">
+          <a class="button primary" href="#research">Explore my research</a>
+          <a class="button" href="cv.pdf">View my CV</a>
         </div>
-      </footer>
+      </div>
+
+      <div class="universe" aria-hidden="true">
+        <div class="sun"></div>
+        <div class="orbit"><div class="planet"></div></div>
+        <div class="orbit inner"><div class="planet"></div></div>
+      </div>
     </div>
-    <script src="script.js"></script>
-  </body>
+
+    <section id="research" aria-labelledby="research-title">
+      <span class="eyebrow">Questions that drive my work</span>
+      <h2 id="research-title">Research interests</h2>
+      <div class="grid">
+        <article class="card">
+          <p class="tag">01 / Exoplanets</p>
+          <h3>Worlds beyond our own</h3>
+          <p>
+            Add your work on planetary systems, their formation,
+            or the characterization of distant worlds.
+          </p>
+        </article>
+
+        <article class="card">
+          <p class="tag">02 / Galaxies</p>
+          <h3>A universe of galaxies</h3>
+          <p>
+            Introduce your questions about galaxy evolution, stellar
+            populations, or the structure of the cosmos.
+          </p>
+        </article>
+
+        <article class="card">
+          <p class="tag">03 / Data & tools</p>
+          <h3>Turning light into insight</h3>
+          <p>
+            Share your observing techniques, simulations, data
+            pipelines, or open-source research software.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="publications" aria-labelledby="publications-title">
+      <span class="eyebrow">Selected work</span>
+      <h2 id="publications-title">Publications</h2>
+
+      <article class="publication">
+        <h3>Selected publication title</h3>
+        <p>Tin Mai · Journal · Year</p>
+        <a href="#">Read the paper →</a>
+      </article>
+
+      <article class="publication">
+        <h3>Another selected publication</h3>
+        <p>Tin Mai · Journal · Year</p>
+        <a href="#">Read the paper →</a>
+      </article>
+    </section>
+
+    <section id="outreach" aria-labelledby="outreach-title">
+      <div class="card">
+        <span class="eyebrow">Astronomy for everyone</span>
+        <h2 id="outreach-title">Teaching & outreach</h2>
+        <p>
+          I enjoy sharing astronomy through public talks, observing
+          nights, classroom visits, and science writing.
+        </p>
+      </div>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-title">
+      <span class="eyebrow">Get in touch</span>
+      <h2 id="contact-title">Let's connect.</h2>
+      <p>
+        Interested in a collaboration, a research discussion,
+        or an astronomy event? I'd love to hear from you.
+      </p>
+      <div class="buttons">
+        <a class="button primary" href="mailto:hello@creastro.dev">Email me</a>
+        <a class="button" href="https://github.com/creastro">GitHub</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    © Tin Mai (Mai Như Tín) · Looking up, asking questions.
+  </footer>
+</body>
 </html>

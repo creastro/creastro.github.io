@@ -1,6 +1,6 @@
 # Personal webpage
 
-A lightweight, responsive personal portfolio for [creastro](https://github.com/creastro).
+A lightweight, responsive astronomy portfolio for Tin Mai (Mai Như Tín).
 
 ## Run locally
 
@@ -10,4 +10,4 @@ Open `index.html` in a browser, or serve the folder with any static file server:
 python3 -m http.server
 ```
 
-Update the copy, project links, and email address in `index.html` to personalize the page.
+Update the research, publication, CV, and contact links in `index.html` to personalize the page.
