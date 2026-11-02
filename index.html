@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="creastro — a personal space for selected work, ideas, and experiments."
+    />
+    <title>creastro — Selected work & ideas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="#" aria-label="creastro home">
+          <span class="brand-mark">c<span>.</span></span>
+          <span>creastro</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="#work">Work</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </nav>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme">
+          <span class="theme-icon">☼</span>
+        </button>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="status-dot"></span> Available for thoughtful collaborations</p>
+            <h1 id="hero-title">Making the digital world feel a little more <em>human.</em></h1>
+            <p class="hero-description">
+              A personal space for selected work, curious experiments, and ideas in progress.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#work">Explore the work <span>↘</span></a>
+              <a class="text-link" href="mailto:hello@creastro.dev">Say hello <span>↗</span></a>
+            </div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="orb"></div>
+            <div class="orbital-label label-top">ideas → form</div>
+            <div class="orbital-label label-bottom">curiosity / craft</div>
+          </div>
+        </section>
+
+        <section class="marquee" aria-label="Areas of interest">
+          <div class="marquee-track">
+            <span>Design systems</span><i>✳</i><span>Digital products</span><i>✳</i><span>Creative technology</span><i>✳</i><span>Good ideas</span><i>✳</i>
+            <span>Design systems</span><i>✳</i><span>Digital products</span><i>✳</i><span>Creative technology</span><i>✳</i><span>Good ideas</span><i>✳</i>
+          </div>
+        </section>
+
+        <section id="work" class="section work-section" aria-labelledby="work-title">
+          <div class="section-heading">
+            <p class="eyebrow">01 / Selected work</p>
+            <h2 id="work-title">A few things I’ve helped bring to life.</h2>
+          </div>
+          <div class="project-grid">
+            <a class="project-card project-large" href="#" aria-label="View Northstar project">
+              <div class="project-visual visual-northstar">
+                <span class="visual-caption">01 — Northstar</span>
+                <div class="star-shape">✦</div>
+                <span class="visual-note">finding direction<br />in complexity</span>
+              </div>
+              <div class="project-meta"><span>Product direction</span><span>↗</span></div>
+            </a>
+            <a class="project-card" href="#" aria-label="View Field Notes project">
+              <div class="project-visual visual-field">
+                <span class="visual-caption">02 — Field Notes</span>
+                <div class="field-lines"></div>
+                <span class="visual-note">observations<br />from the edge</span>
+              </div>
+              <div class="project-meta"><span>Editorial experience</span><span>↗</span></div>
+            </a>
+            <a class="project-card" href="#" aria-label="View Small Signals project">
+              <div class="project-visual visual-signals">
+                <span class="visual-caption">03 — Small Signals</span>
+                <div class="signal-bars"><b></b><b></b><b></b><b></b><b></b></div>
+                <span class="visual-note">tiny details,<br />loud impact</span>
+              </div>
+              <div class="project-meta"><span>Interactive identity</span><span>↗</span></div>
+            </a>
+          </div>
+        </section>
+
+        <section id="about" class="section about-section" aria-labelledby="about-title">
+          <div class="section-heading">
+            <p class="eyebrow">02 / A little about me</p>
+          </div>
+          <div class="about-content">
+            <h2 id="about-title">I like the space between a rough idea and a <em>real thing.</em></h2>
+            <div class="about-details">
+              <p>
+                I’m a multidisciplinary maker interested in the overlap of strategy, design, and technology. I care about clear thinking, warm interfaces, and the small moments that make useful things memorable.
+              </p>
+              <p class="mono-note">Currently exploring<br /><strong>how curiosity becomes craft.</strong></p>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" class="contact-section" aria-labelledby="contact-title">
+          <p class="eyebrow">03 / Start a conversation</p>
+          <h2 id="contact-title">Have a good idea?<br /><em>Let’s make it real.</em></h2>
+          <a class="contact-email" href="mailto:hello@creastro.dev">hello@creastro.dev <span>↗</span></a>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>© <span id="year"></span> creastro</span>
+        <span>Built with curiosity.</span>
+        <div class="footer-links">
+          <a href="https://github.com/creastro" target="_blank" rel="noreferrer">GitHub ↗</a>
+          <a href="#hero-title">Back to top ↑</a>
+        </div>
+      </footer>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
