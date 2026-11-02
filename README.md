@@ -10,4 +10,4 @@ Open `index.html` in a browser, or serve the folder with any static file server:
 python3 -m http.server
 ```
 
-Update the research, publication, CV, and contact links in `index.html` to personalize the page.
+The site is split into `research.html`, `publications.html`, and `contact.html`, with `index.html` as the home page. Update the research, publication, CV, and contact links in those files to personalize the page.
