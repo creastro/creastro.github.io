@@ -3,6 +3,7 @@ name: Deploy webpage
 on:
   push:
     branches:
+      - main
       - create-personal-webpage
   workflow_dispatch:
 
