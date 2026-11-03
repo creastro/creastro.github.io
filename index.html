@@ -15,7 +15,7 @@
     .hero{display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:60px;min-height:570px;padding:65px 0}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}
     h1{font-size:clamp(2.5rem,6vw,4.8rem);line-height:1.08;letter-spacing:-.05em;margin:16px 0 24px}h2{font-size:clamp(1.7rem,3vw,2.4rem);line-height:1.2;margin:0 0 18px}h3{margin:0 0 8px}p{color:var(--muted)}
     .hero-copy{max-width:680px}.hero-copy>p{font-size:1.08rem;max-width:600px}.buttons{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.button{display:inline-block;padding:11px 20px;border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-3px);background:#25405b;color:#fff}
-    .profile-area{display:grid;gap:15px;justify-items:center}.profile-frame{width:min(310px,100%);aspect-ratio:1;border:1px solid var(--accent);border-radius:24px;background:linear-gradient(145deg,#172b4c,#0d1428);display:grid;place-items:center;text-align:center;padding:30px;box-shadow:0 0 70px #478dd633}.profile-placeholder{color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase}.profile-placeholder span{display:block;margin-top:10px;color:var(--muted);font:11px ui-monospace,monospace;font-weight:400;text-transform:none}.profile-note{margin:0;text-align:center;font-size:.8rem}
+    .profile-area{display:grid;gap:15px;justify-items:center}.profile-frame{width:min(310px,100%);aspect-ratio:1;overflow:hidden;border:1px solid var(--accent);border-radius:24px;background:#172b4c;box-shadow:0 0 70px #478dd633}.profile-frame img{width:100%;height:100%;display:block;object-fit:cover;object-position:center 42%}.profile-note{margin:0;text-align:center;font-size:.8rem}
     section{padding:65px 0}.section-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:28px}.section-heading p{margin:0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{padding:26px;background:var(--panel);border:1px solid var(--border);border-radius:14px;transition:transform .2s,border-color .2s}.card:hover{transform:translateY(-5px);border-color:var(--accent)}.tag{color:var(--accent);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}.card p:last-child{margin-bottom:0}
     .education{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.education .card{min-height:190px}.institution{color:var(--text);font-weight:650}.period{font:12px ui-monospace,monospace;color:var(--accent)}
     .highlight-list{display:grid;grid-template-columns:1fr 1fr;gap:18px}.highlight-list .card ul{margin:0;padding-left:20px;color:var(--muted)}.highlight-list li{margin:6px 0}
@@ -27,17 +27,17 @@
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
-  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="#">TIN MAI ✦</a><div class="nav-links"><a href="research.html">Research</a><a href="#education">Education</a><a href="#outreach">Outreach</a><a href="contact.html">Contact</a></div></nav></header>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="#">TIN MAI ✦</a><div class="nav-links"><a href="research">Research</a><a href="#education">Education</a><a href="#outreach">Outreach</a><a href="contact">Contact</a></div></nav></header>
   <main class="container">
     <section class="hero">
       <div class="hero-copy">
         <span class="eyebrow">Astronomer · Researcher · Explorer</span>
         <h1>Exploring our<br>cosmic neighborhood.</h1>
         <p>I'm Tin Mai (Mai Như Tín), an astronomer working across exoplanet atmospheres, adaptive optics, weak lensing, and astronomical data analysis.</p>
-        <div class="buttons"><a class="button primary" href="research.html">View my experiences</a><a class="button" href="cv.pdf">Download my CV</a></div>
+        <div class="buttons"><a class="button primary" href="research">View my experiences</a><a class="button" href="cv.pdf" download>Download my CV</a></div>
       </div>
       <div class="profile-area">
-        <div class="profile-frame" role="img" aria-label="Personal image placeholder"><div class="profile-placeholder">Your image here<span>Replace this space with<br>profile-image.jpg</span></div></div>
+        <div class="profile-frame"><img src="ava.jpg" alt="Tin Mai in the mountains"></div>
         <p class="profile-note">Nice · Paris · Rome · Hanoi</p>
       </div>
     </section>
@@ -52,7 +52,7 @@
     </section>
 
     <section aria-labelledby="research-title">
-      <div class="section-heading"><div><span class="eyebrow">Questions that drive my work</span><h2 id="research-title">Research focus</h2></div><a href="research.html">Full experience timeline →</a></div>
+      <div class="section-heading"><div><span class="eyebrow">Questions that drive my work</span><h2 id="research-title">Research focus</h2></div><a href="research">Full experience timeline →</a></div>
       <div class="grid">
         <article class="card"><p class="tag">01 / Exoplanets</p><h3>Atmospheres of distant worlds</h3><p>Modelling high-resolution spectra of VHS 1256 b to investigate time-variable atmospheric dynamics.</p></article>
         <article class="card"><p class="tag">02 / Instrumentation</p><h3>Adaptive optics</h3><p>Developing Python tools to assess the real-time performance of the adaptive optics system at Calern Observatory.</p></article>
@@ -76,7 +76,7 @@
       </div>
     </section>
 
-    <section aria-labelledby="contact-title"><span class="eyebrow">Get in touch</span><h2 id="contact-title">Let's connect.</h2><p>Interested in a collaboration, a research discussion, or an astronomy event?</p><div class="buttons"><a class="button primary" href="contact.html">Contact me</a><a class="button" href="https://github.com/creastro">GitHub</a><a class="button" href="https://orcid.org/0000-0001-6517-2338">ORCID</a></div></section>
+    <section aria-labelledby="contact-title"><span class="eyebrow">Get in touch</span><h2 id="contact-title">Let's connect.</h2><p>Interested in a collaboration, a research discussion, or an astronomy event?</p><div class="buttons"><a class="button primary" href="contact">Contact me</a><a class="button" href="https://github.com/creastro">GitHub</a><a class="button" href="https://orcid.org/0000-0001-6517-2338">ORCID</a></div></section>
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · Looking up, asking questions.</footer>
 </body>
