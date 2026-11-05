@@ -13,21 +13,18 @@
     .sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 80% 20%,#18345a55,transparent 55%),radial-gradient(ellipse at 20% 70%,#41266344,transparent 50%)}
     .sky:before,.sky:after{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20px 30px,#fff 99%,transparent),radial-gradient(2px 2px at 90px 110px,#b5d9ff 99%,transparent),radial-gradient(1px 1px at 160px 60px,#fff 99%,transparent),radial-gradient(1px 1px at 220px 170px,#fff 99%,transparent);background-size:260px 220px;animation:twinkle 5s ease-in-out infinite alternate}.sky:after{transform:translate(65px,85px);opacity:.4;animation-delay:-3s;animation-duration:7s}@keyframes twinkle{from{opacity:.25}to{opacity:.85}}
     nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}.brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:12px}.nav-links a{padding:5px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;transition:background .2s,color .2s}.nav-links a:hover,.nav-links a:focus-visible,.nav-links .active{background:var(--accent);color:var(--bg)!important}.home-link{color:var(--accent)!important}
-    main{padding:90px 0 120px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}h1{max-width:760px;font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.04;letter-spacing:-.05em;margin:16px 0 28px}p{color:var(--muted);font-size:1.1rem}.contact-layout{display:grid;grid-template-columns:minmax(0,760px) minmax(260px,1fr);gap:80px;align-items:end;min-height:500px}.contact-copy>p{max-width:650px}.contact-links{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}.contact-link{display:inline-block;padding:14px 22px;border:1px solid var(--accent);border-radius:8px;text-decoration:none;font-weight:700}.contact-link:hover{background:var(--accent);color:var(--bg)}.contact-note{padding:28px;border:1px solid var(--border);border-radius:14px;background:#111b3066;color:var(--muted)}.contact-note strong{display:block;color:var(--accent);margin-bottom:8px}footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}@media(max-width:760px){main{padding:65px 0 90px}.nav-links{gap:12px;font-size:.9rem}.contact-layout{display:block;min-height:0}.contact-note{margin-top:42px}}
+    main{padding:90px 0 120px;max-width:820px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}h1{max-width:760px;font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.04;letter-spacing:-.05em;margin:16px 0 28px}p{color:var(--muted);font-size:1.1rem}.contact-copy>p{max-width:650px}.contact-links{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}.contact-link{display:inline-block;padding:14px 22px;border:1px solid var(--accent);border-radius:8px;text-decoration:none;font-weight:700}.contact-link:hover{background:var(--accent);color:var(--bg)}footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}@media(max-width:760px){main{padding:65px 0 90px}.nav-links{gap:12px;font-size:.9rem}}
   </style>
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
-  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../">Home</a><a href="../research">Research</a><a href="../#education">Education</a><a href="../story">My story</a><a class="active" href="../contact">Contact</a></div></nav></header>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../">Home</a><a href="../#education">Education</a><a href="../research">Research</a><a href="../story">My story</a><a class="active" href="../contact">Contact</a></div></nav></header>
   <main class="container">
-    <div class="contact-layout">
-      <div class="contact-copy">
-        <span class="eyebrow">Get in touch</span>
-        <h1>Let's connect.</h1>
-        <p>Interested in a collaboration, a research discussion, or an astronomy event? I'd love to hear from you.</p>
-        <div class="contact-links"><a class="contact-link" href="mailto:nhutin123@gmail.com">nhutin123@gmail.com ↗</a><a class="contact-link" href="https://www.linkedin.com/in/creastro/" target="_blank" rel="noreferrer">LinkedIn profile ↗</a><a class="contact-link" href="../cv.pdf" download>Download my CV ↓</a></div>
-      </div>
-      <aside class="contact-note"><strong>Open to conversations</strong>Research ideas, observing experiences, astronomy outreach, and opportunities to learn together.</aside>
+    <div class="contact-copy">
+      <span class="eyebrow">Get in touch</span>
+      <h1>Let's connect.</h1>
+      <p>Interested in a collaboration, a research discussion, or an astronomy event? I'd love to hear from you.</p>
+      <div class="contact-links"><a class="contact-link" href="mailto:nhutin123@gmail.com">nhutin123@gmail.com ↗</a><a class="contact-link" href="https://www.linkedin.com/in/creastro/" target="_blank" rel="noreferrer">LinkedIn profile ↗</a><a class="contact-link" href="../cv.pdf" download>Download my CV ↓</a></div>
     </div>
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../">Return home</a> · <a href="../cv.pdf">CV</a></footer>
