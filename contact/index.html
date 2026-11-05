@@ -9,20 +9,23 @@
     :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--border:rgba(255,255,255,.14)}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 system-ui,sans-serif}
     body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 80% 20%,#18345a55,transparent 55%),radial-gradient(ellipse at 20% 70%,#41266344,transparent 50%),radial-gradient(1px 1px at 20px 30px,#fff 99%);background-size:auto,auto,260px 220px;opacity:.65}
-    a{color:var(--accent)}a:focus-visible{outline:3px solid var(--accent);outline-offset:5px}.container{width:min(1240px,92%);margin:auto}
+    a{color:var(--accent)}a:focus-visible{outline:3px solid var(--accent);outline-offset:5px}.container{width:min(1440px,94%);margin:auto}
     nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}.brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:20px}.nav-links a{color:var(--muted);text-decoration:none}.nav-links a:hover,.active{color:var(--accent)!important}
-    main{padding:90px 0 160px;max-width:760px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}h1{font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.04;letter-spacing:-.05em;margin:16px 0 28px}p{color:var(--muted);font-size:1.1rem}.contact-link{display:inline-block;margin-top:30px;padding:14px 22px;border:1px solid var(--accent);border-radius:8px;text-decoration:none;font-weight:700}.contact-link:hover{background:var(--accent);color:var(--bg)}footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}@media(max-width:760px){main{padding:65px 0 110px}.nav-links{gap:12px;font-size:.9rem}}
+    main{padding:90px 0 120px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}h1{max-width:760px;font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.04;letter-spacing:-.05em;margin:16px 0 28px}p{color:var(--muted);font-size:1.1rem}.contact-layout{display:grid;grid-template-columns:minmax(0,760px) minmax(260px,1fr);gap:80px;align-items:end;min-height:500px}.contact-copy>p{max-width:650px}.contact-links{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}.contact-link{display:inline-block;padding:14px 22px;border:1px solid var(--accent);border-radius:8px;text-decoration:none;font-weight:700}.contact-link:hover{background:var(--accent);color:var(--bg)}.contact-note{padding:28px;border:1px solid var(--border);border-radius:14px;background:#111b3066;color:var(--muted)}.contact-note strong{display:block;color:var(--accent);margin-bottom:8px}footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}@media(max-width:760px){main{padding:65px 0 90px}.nav-links{gap:12px;font-size:.9rem}.contact-layout{display:block;min-height:0}.contact-note{margin-top:42px}}
   </style>
 </head>
 <body>
-  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../">TIN MAI ✦</a><div class="nav-links"><a href="../research">Research</a><a href="../#education">Education</a><a href="../story">My story</a><a class="active" href="../contact">Contact</a></div></nav></header>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../">TIN MAI ✦</a><div class="nav-links"><a href="../">Home</a><a href="../research">Research</a><a href="../#education">Education</a><a href="../story">My story</a><a class="active" href="../contact">Contact</a></div></nav></header>
   <main class="container">
-    <span class="eyebrow">Get in touch</span>
-    <h1>Let's connect.</h1>
-    <p>Interested in a collaboration, a research discussion, or an astronomy event? I'd love to hear from you.</p>
-    <a class="contact-link" href="mailto:nhutin123@gmail.com">nhutin123@gmail.com ↗</a>
-    <a class="contact-link" href="https://www.linkedin.com/in/creastro/" target="_blank" rel="noreferrer">LinkedIn profile ↗</a>
-    <a class="contact-link" href="../cv.pdf" download>Download my CV ↓</a>
+    <div class="contact-layout">
+      <div class="contact-copy">
+        <span class="eyebrow">Get in touch</span>
+        <h1>Let's connect.</h1>
+        <p>Interested in a collaboration, a research discussion, or an astronomy event? I'd love to hear from you.</p>
+        <div class="contact-links"><a class="contact-link" href="mailto:nhutin123@gmail.com">nhutin123@gmail.com ↗</a><a class="contact-link" href="https://www.linkedin.com/in/creastro/" target="_blank" rel="noreferrer">LinkedIn profile ↗</a><a class="contact-link" href="../cv.pdf" download>Download my CV ↓</a></div>
+      </div>
+      <aside class="contact-note"><strong>Open to conversations</strong>Research ideas, observing experiences, astronomy outreach, and opportunities to learn together.</aside>
+    </div>
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../">Return home</a> · <a href="../cv.pdf">CV</a></footer>
 </body>
