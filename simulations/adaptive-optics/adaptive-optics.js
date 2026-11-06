@@ -182,6 +182,9 @@
 
   const screen = new Float32Array(NS * NS);       // full phase screen (reference r0 and wavelength)
   const screenLow = new Float32Array(NS * NS);    // part the mirror can reproduce
+  let shModes = [];                               // subharmonic modes {fx, fy, a, b}, evaluated analytically (not periodic)
+  const shBuf = new Float32Array(NPIX);
+  const shCx = new Float64Array(NP), shSx = new Float64Array(NP), shCy = new Float64Array(NP), shSy = new Float64Array(NP);
   const coefRe = new Float32Array(NS * NS), coefIm = new Float32Array(NS * NS);
   const tmpRe = new Float64Array(NS * NS), tmpIm = new Float64Array(NS * NS);
   const atm = new Float32Array(NPIX);
@@ -193,13 +196,13 @@
   const noiseCoarse = new Float32Array(24 * 24);
   let pipe = [], head = 0;
   let ox = 96, oy = 96, simT = 0;
+  let uox = 96, uoy = 96;                         // same position without wrapping, for the subharmonics
 
   const PR = new Float64Array(NF * NF), PI = new Float64Array(NF * NF);
   const psf = new Float32Array(NF * NF);
   const le = new Float32Array(NF * NF);
   const ideal = new Float32Array(NF * NF);
   let nLE = 0;
-  let idealProfile = new Float32Array(40);
 
   /* ---------- turbulence ---------- */
 
@@ -218,6 +221,21 @@
         const amp = Math.sqrt(k0 * Math.pow(fx * fx + fy * fy + inv, -11 / 6)) * df;
         coefRe[idx] = a * amp;
         coefIm[idx] = b * amp;
+      }
+    }
+    // Subharmonics (Lane et al. 1992): three levels of 3 × 3 frequencies below the screen's lowest frequency,
+    // so that tilt and the other large scales are not limited by the finite screen. They are not periodic with
+    // the screen, so they are kept as a list of modes and evaluated where the pupil is (see addSubharmonics).
+    shModes = [];
+    for (let lev = 1; lev <= 3; lev++) {
+      const dfl = df / Math.pow(3, lev);
+      for (let iy = -1; iy <= 1; iy++) {
+        for (let ix = -1; ix <= 1; ix++) {
+          if (!ix && !iy) continue;
+          const fx = ix * dfl, fy = iy * dfl;
+          const amp = Math.sqrt(k0 * Math.pow(fx * fx + fy * fy + inv, -11 / 6)) * dfl;
+          shModes.push({ fx, fy, a: gauss() * amp, b: gauss() * amp });
+        }
       }
     }
     for (let i = 0; i < N * N; i++) { tmpRe[i] = coefRe[i]; tmpIm[i] = coefIm[i]; }
@@ -258,6 +276,26 @@
     }
   }
 
+  // Adds the subharmonic modes (already in rad at the imaging wavelength) over the pupil window whose lower-left
+  // corner is at (offX, offY) pupil samples. cos and sin factorise in x and y, so this costs about 24 · 64² operations.
+  function subharmonicsAt(out, offX, offY) {
+    out.fill(0);
+    const pm = P.pix, amp = P.amp;
+    for (let m = 0; m < shModes.length; m++) {
+      const md = shModes[m];
+      for (let q = 0; q < NP; q++) {
+        const tx = TAU * md.fx * (offX + q) * pm, ty = TAU * md.fy * (offY + q) * pm;
+        shCx[q] = Math.cos(tx); shSx[q] = Math.sin(tx);
+        shCy[q] = Math.cos(ty); shSy[q] = Math.sin(ty);
+      }
+      for (let j = 0; j < NP; j++) {
+        const u = amp * (md.a * shCy[j] - md.b * shSy[j]), v = amp * (md.a * shSy[j] + md.b * shCy[j]);
+        const row = j * NP;
+        for (let i = 0; i < NP; i++) out[row + i] += u * shCx[i] - v * shSx[i];
+      }
+    }
+  }
+
   function rms(arr) {
     let s = 0, s2 = 0;
     for (let k = 0; k < NPIX; k++) if (mask[k]) { s += arr[k]; s2 += arr[k] * arr[k]; }
@@ -294,16 +332,20 @@
 
   function step() {
     ox += P.shiftX; oy += P.shiftY;
+    uox += P.shiftX; uoy += P.shiftY;
     if (ox >= NS) ox -= NS; else if (ox < 0) ox += NS;
     if (oy >= NS) oy -= NS; else if (oy < 0) oy += NS;
     simT += P.dt;
     sampleScreen(screen, ox, oy, atm, P.amp);
+    subharmonicsAt(shBuf, uox, uoy);
+    for (let k = 0; k < NPIX; k++) atm[k] += shBuf[k];
 
     if (!P.closed) {
       for (let k = 0; k < NPIX; k++) { res[k] = atm[k]; dmShown[k] = 0; }
       return;
     }
     sampleScreen(screenLow, ox, oy, atmLow, P.amp);
+    for (let k = 0; k < NPIX; k++) atmLow[k] += shBuf[k];
 
     // correction applied now was computed `delay` frames ago
     const applied = pipe[head];
@@ -347,21 +389,320 @@
     return m;
   }
 
-  function radialProfile(arr, out) {
-    const cnt = new Float32Array(out.length);
-    out.fill(0);
+  function resetLE() { le.fill(0); nLE = 0; fitInit = true; }
+
+  /* ---------- profile fit and FWHM ---------- */
+
+  // Radial profile of a PSF about the central pixel, in bins of 0.25 PSF pixel (1 pixel = λ/2D), up to 16 λ/D.
+  const NB = 128, BW = 0.25;
+  const prR = new Float64Array(NB), prV = new Float64Array(NB);
+  const idR = new Float64Array(NB), idV = new Float64Array(NB);
+  let prN = 0, idN = 0;
+  const binSumR = new Float64Array(NB), binSumV = new Float64Array(NB), binCnt = new Int32Array(NB);
+
+  function fineProfile(arr, outR, outV) {
+    binSumR.fill(0); binSumV.fill(0); binCnt.fill(0);
     for (let v = -NF / 2; v < NF / 2; v++) {
       for (let u = -NF / 2; u < NF / 2; u++) {
-        const r = Math.round(Math.sqrt(u * u + v * v));
-        if (r >= out.length) continue;
-        out[r] += arr[((v + NF) % NF) * NF + ((u + NF) % NF)];
-        cnt[r]++;
+        const r = Math.sqrt(u * u + v * v);
+        if (r >= NB * BW) continue;
+        const b = (r / BW) | 0;
+        binSumR[b] += r;
+        binSumV[b] += arr[((v + NF) % NF) * NF + ((u + NF) % NF)];
+        binCnt[b]++;
       }
     }
-    for (let r = 0; r < out.length; r++) out[r] = cnt[r] ? out[r] / cnt[r] / IDEAL_PEAK : 0;
+    let n = 0;
+    for (let b = 0; b < NB; b++) {
+      if (!binCnt[b]) continue;
+      outR[n] = binSumR[b] / binCnt[b];
+      outV[n] = binSumV[b] / binCnt[b] / IDEAL_PEAK;
+      n++;
+    }
+    return n;
   }
 
-  function resetLE() { le.fill(0); nLE = 0; }
+  // Bessel function J1 (Abramowitz & Stegun 9.4.4 and 9.4.6)
+  function j1(x) {
+    const ax = Math.abs(x);
+    let v;
+    if (ax < 3) {
+      const t = (x / 3) * (x / 3);
+      v = x * (0.5 + t * (-0.56249985 + t * (0.21093573 + t * (-0.03954289 + t * (0.00443319 + t * (-0.00031761 + t * 0.00001109))))));
+    } else {
+      const u = 3 / ax;
+      const f1 = 0.79788456 + u * (0.00000156 + u * (0.01659667 + u * (0.00017105 + u * (-0.00249511 + u * (0.00113653 + u * -0.00020033)))));
+      const th = ax - 2.35619449 + u * (0.12499612 + u * (0.00005650 + u * (-0.00637879 + u * (0.00074348 + u * (0.00079824 + u * -0.00029166)))));
+      v = Math.cos(th) * f1 / Math.sqrt(ax);
+      if (x < 0) v = -v;
+    }
+    return v;
+  }
+
+  // Components, parameterised by logarithms so that amplitudes, widths and β stay positive.
+  //   Gaussian  A exp(−r² / 2σ²)                [lnA, lnσ]
+  //   Moffat    A (1 + r²/α²)^(−β)              [lnA, lnα, ln(β−1)]
+  //   Airy      A [2 J1(x) / x]², x = π r / w   [lnA, ln w]    (w = 2 pixels = λ/D for a perfect telescope)
+  const NPAR = { gauss: 2, moffat: 3, airy: 2 };
+  const NAMES = { gauss: 'Gaussian', moffat: 'Moffat', airy: 'Airy' };
+  const FIT_COLOR = '#7bd88f';
+
+  function compAt(type, p, o, r) {
+    const A = Math.exp(p[o]);
+    if (type === 'gauss') {
+      const s = Math.exp(p[o + 1]);
+      return A * Math.exp(-0.5 * r * r / (s * s));
+    }
+    if (type === 'moffat') {
+      const al = Math.exp(p[o + 1]), be = 1 + Math.exp(p[o + 2]);
+      return A * Math.pow(1 + r * r / (al * al), -be);
+    }
+    const x = Math.PI * r / Math.exp(p[o + 1]);
+    if (x < 1e-6) return A;
+    const t = 2 * j1(x) / x;
+    return A * t * t;
+  }
+
+  function modelAt(types, p, r) {
+    let s = 0, o = 0;
+    for (let i = 0; i < types.length; i++) { s += compAt(types[i], p, o, r); o += NPAR[types[i]]; }
+    return s;
+  }
+
+  function clampParams(types, p) {
+    let o = 0;
+    types.forEach((t) => {
+      p[o] = Math.max(Math.log(1e-6), Math.min(Math.log(5), p[o]));
+      p[o + 1] = Math.max(Math.log(0.05), Math.min(Math.log(80), p[o + 1]));
+      if (t === 'moffat') p[o + 2] = Math.max(Math.log(0.02), Math.min(Math.log(30), p[o + 2]));
+      o += NPAR[t];
+    });
+  }
+
+  // Residuals are relative: (model − data) / (10 % of the data + 0.002), so the core and the halo both count.
+  function cost(types, p, out) {
+    let c = 0;
+    for (let i = 0; i < prN; i++) {
+      const d = prV[i];
+      const e = (modelAt(types, p, prR[i]) - d) / (0.1 * d + 0.002);
+      out[i] = e;
+      c += e * e;
+    }
+    return c;
+  }
+
+  function solveLinear(A, b, n) {
+    for (let c = 0; c < n; c++) {
+      let piv = c;
+      for (let r = c + 1; r < n; r++) if (Math.abs(A[r * n + c]) > Math.abs(A[piv * n + c])) piv = r;
+      if (Math.abs(A[piv * n + c]) < 1e-14) return null;
+      if (piv !== c) {
+        for (let k = 0; k < n; k++) { const t = A[c * n + k]; A[c * n + k] = A[piv * n + k]; A[piv * n + k] = t; }
+        const t = b[c]; b[c] = b[piv]; b[piv] = t;
+      }
+      for (let r = c + 1; r < n; r++) {
+        const f = A[r * n + c] / A[c * n + c];
+        for (let k = c; k < n; k++) A[r * n + k] -= f * A[c * n + k];
+        b[r] -= f * b[c];
+      }
+    }
+    const x = new Array(n);
+    for (let r = n - 1; r >= 0; r--) {
+      let s = b[r];
+      for (let k = r + 1; k < n; k++) s -= A[r * n + k] * x[k];
+      x[r] = s / A[r * n + r];
+    }
+    return x;
+  }
+
+  const JAC = new Float64Array(NB * 8), RES0 = new Float64Array(NB), RES1 = new Float64Array(NB);
+
+  // Levenberg–Marquardt, starting from p (updated in place). Returns the final cost.
+  function levenbergMarquardt(types, p, iters) {
+    const n = p.length;
+    let c = cost(types, p, RES0);
+    let lam = 1e-2;
+    const A = new Float64Array(n * n), g = new Float64Array(n);
+    for (let it = 0; it < iters; it++) {
+      for (let j = 0; j < n; j++) {
+        const pj = p[j];
+        p[j] = pj + 1e-4;
+        cost(types, p, RES1);
+        p[j] = pj;
+        for (let i = 0; i < prN; i++) JAC[i * n + j] = (RES1[i] - RES0[i]) / 1e-4;
+      }
+      A.fill(0); g.fill(0);
+      for (let i = 0; i < prN; i++) {
+        for (let a = 0; a < n; a++) {
+          const ja = JAC[i * n + a];
+          g[a] += ja * RES0[i];
+          for (let b = a; b < n; b++) A[a * n + b] += ja * JAC[i * n + b];
+        }
+      }
+      for (let a = 0; a < n; a++) for (let b = 0; b < a; b++) A[a * n + b] = A[b * n + a];
+      let improved = false;
+      for (let t = 0; t < 8 && !improved; t++) {
+        const M = Float64Array.from(A);
+        for (let a = 0; a < n; a++) M[a * n + a] += lam * (A[a * n + a] + 1e-9);
+        const d = solveLinear(M, Array.from(g, (v) => -v), n);
+        if (d) {
+          const q = p.map((v, i) => v + Math.max(-1, Math.min(1, d[i])));
+          clampParams(types, q);
+          const c2 = cost(types, q, RES1);
+          if (c2 < c) {
+            for (let i = 0; i < n; i++) p[i] = q[i];
+            c = c2;
+            lam = Math.max(lam / 3, 1e-9);
+            improved = true;
+            cost(types, p, RES0);
+            continue;
+          }
+        }
+        lam *= 4;
+      }
+      if (!improved) break;
+    }
+    return c;
+  }
+
+  // First radius where a profile falls to half of its value at the centre (linear interpolation).
+  function halfRadiusOf(f0, f) {
+    const target = 0.5 * f0;
+    let prev = f0;
+    for (let r = 0.02; r <= 32; r += 0.02) {
+      const v = f(r);
+      if (v <= target) return r - 0.02 + 0.02 * (prev - target) / Math.max(prev - v, 1e-12);
+      prev = v;
+    }
+    return NaN;
+  }
+
+  const fitSt = { key: '', types: [], p: [], cost: Infinity, ok: false, fwhm: NaN, hw: NaN, dataFwhm: NaN, misfit: NaN };
+  let fitInit = true;
+
+  // With two functions, either one can be the sharp core and the other the broad halo (swap picks which).
+  function initialGuess(types, swap) {
+    const A0 = Math.max(1e-3, Math.max(prV[0], prN > 1 ? prV[1] : 0));
+    let h = 1;
+    for (let i = 1; i < prN; i++) {
+      if (prV[i] < 0.5 * A0) {
+        h = prR[i - 1] + (prR[i] - prR[i - 1]) * (0.5 * A0 - prV[i - 1]) / (prV[i] - prV[i - 1] || -1e-9);
+        break;
+      }
+    }
+    h = Math.max(0.7, h);
+    const p = [];
+    const core = swap ? 1 : 0;
+    types.forEach((t, i) => {
+      const amp = types.length === 1 ? A0 : (i === core ? 0.65 * A0 : 0.3 * A0);
+      const hw = i === core ? h : 4 * h;
+      if (t === 'gauss') p.push(Math.log(amp), Math.log(hw / 1.1774));
+      else if (t === 'moffat') { const be = 2.5; p.push(Math.log(amp), Math.log(hw / Math.sqrt(Math.pow(2, 1 / be) - 1)), Math.log(be - 1)); }
+      else p.push(Math.log(amp), Math.log(2 * hw / 1.0287));
+    });
+    clampParams(types, p);
+    return p;
+  }
+
+  function runFit() {
+    const t1 = $('fit1').value, t2 = $('fit2').value;
+    const types = t2 === 'none' ? [t1] : [t1, t2];
+    const key = types.join('+');
+    fitSt.ok = false;
+    if (prN < 10 || prV[0] <= 0) return;
+
+    const freshStarts = (iters) => {
+      let best = null, bestCost = Infinity;
+      for (let s = 0; s < (types.length > 1 ? 2 : 1); s++) {
+        const q = initialGuess(types, s === 1);
+        const c = levenbergMarquardt(types, q, iters);
+        if (c < bestCost) { best = q; bestCost = c; }
+      }
+      return [best, bestCost];
+    };
+    if (fitInit || key !== fitSt.key || !fitSt.p.length) {
+      const [q, c] = freshStarts(60);
+      fitSt.p = q; fitSt.cost = c;
+      fitSt.key = key; fitSt.types = types; fitInit = false;
+    } else {
+      fitSt.cost = levenbergMarquardt(types, fitSt.p, 8);
+      if (frameCount % 40 === 0) {     // now and then, try fresh starts and keep the better fit
+        const [q, c] = freshStarts(40);
+        if (c < fitSt.cost) { fitSt.p = q; fitSt.cost = c; }
+      }
+    }
+    if (!isFinite(fitSt.cost)) { fitInit = true; return; }
+
+    const f = (r) => modelAt(fitSt.types, fitSt.p, r);
+    fitSt.hw = halfRadiusOf(f(0), f);                      // in PSF pixels
+    fitSt.fwhm = fitSt.hw;                                 // one pixel is λ/2D, so FWHM in λ/D equals the half radius in pixels
+    let m2 = 0;
+    for (let i = 0; i < prN; i++) { const e = (f(prR[i]) - prV[i]) / (prV[i] + 0.002); m2 += e * e; }
+    fitSt.misfit = Math.sqrt(m2 / prN);
+    // model-independent FWHM straight from the data
+    fitSt.dataFwhm = NaN;
+    for (let i = 1; i < prN; i++) {
+      if (prV[i] < 0.5 * prV[0]) { fitSt.dataFwhm = prR[i - 1] + (prR[i] - prR[i - 1]) * (0.5 * prV[0] - prV[i - 1]) / (prV[i] - prV[i - 1]); break; }
+    }
+    fitSt.ok = isFinite(fitSt.fwhm);
+  }
+
+  // Theoretical widths, all as FWHM in units of λ/D at the imaging wavelength.
+  function theory() {
+    const lamDarc = P.lam * 1e-6 / P.D * 206264.806;
+    const diff = 1.0287;                                       // Airy pattern of a circular aperture
+    const kolm = 0.98 * P.D / P.r0lam;                         // 0.98 λ / r0
+    const vk = kolm * Math.sqrt(Math.max(0.05, 1 - 2.183 * Math.pow(P.r0lam / P.L0, 0.356)));   // von Kármán outer-scale correction (Tokovinin 2002)
+    const eps0 = (0.98 * 0.5e-6 / P.r0 * 206264.806) / lamDarc;   // conventional seeing, at 500 nm
+    return { lamDarc, diff, kolm, vk, eps0, quad: Math.sqrt(diff * diff + vk * vk) };
+  }
+
+  function fmtArc(a) { return a < 0.1 ? a.toFixed(3) : a < 10 ? a.toFixed(2) : a.toFixed(1); }
+  function fmtLD(v) { return isFinite(v) ? v.toFixed(2) : '–'; }
+
+  function describeFit() {
+    if (!fitSt.ok) return 'no fit';
+    let o = 0;
+    const parts = fitSt.types.map((t) => {
+      const q = fitSt.p, s = [];
+      if (t === 'gauss') s.push('σ = ' + (Math.exp(q[o + 1]) / 2).toFixed(2) + ' λ/D');
+      else if (t === 'moffat') s.push('α = ' + (Math.exp(q[o + 1]) / 2).toFixed(2) + ' λ/D, β = ' + (1 + Math.exp(q[o + 2])).toFixed(2));
+      else s.push('scale = ' + (Math.exp(q[o + 1]) / 2).toFixed(2) + ' λ/D');
+      const out = NAMES[t] + ' (' + s[0] + ')';
+      o += NPAR[t];
+      return out;
+    });
+    return parts.join(' + ');
+  }
+
+  function updateFitTable() {
+    const th = theory();
+    const f = fitSt.ok ? fitSt.fwhm : NaN;
+    const label = fitSt.types.map((t) => NAMES[t]).join(' + ') || '–';
+    const rows = [
+      ['fit', 'Fit: ' + label, f, false],
+      ['', 'Measured on the data (no model)', fitSt.dataFwhm, true],
+      ['', 'Diffraction limit, 1.03 λ/D', th.diff, true],
+      ['', 'Seeing limit at λ: 0.98 λ/r₀ (von Kármán)', th.vk, true],
+      ['', 'Seeing ε₀ at 500 nm: 0.98 λ/r₀', th.eps0, true],
+      ['', 'Diffraction and seeing in quadrature', th.quad, true]
+    ];
+    let html = '<tr><th scope="col">Full width at half maximum</th><th scope="col">in λ/D</th><th scope="col">in arcsec</th><th scope="col">fit ÷ value</th></tr>';
+    rows.forEach((r) => {
+      html += '<tr class="' + r[0] + '"><td>' + r[1] + '</td><td>' + fmtLD(r[2]) + '</td><td>' + (isFinite(r[2]) ? fmtArc(r[2] * th.lamDarc) : '–') + '</td><td>' +
+        (r[3] && isFinite(f) && isFinite(r[2]) ? (f / r[2]).toFixed(2) : '') + '</td></tr>';
+    });
+    $('fwhm').innerHTML = html.replace('<tr', '<thead><tr').replace('</tr>', '</tr></thead><tbody>') + '</tbody>';
+
+    let note = 'Fit: ' + describeFit() + ' · typical misfit ' + (isFinite(fitSt.misfit) ? Math.round(fitSt.misfit * 100) + ' %' : '–') + '<br>';
+    if (th.vk <= 1.05 * th.diff) {
+      note += 'D / r₀ is small: this telescope is close to diffraction-limited even without AO.';
+    } else if (fitSt.ok) {
+      const pos = (f - th.diff) / (th.vk - th.diff);
+      note += 'Position between the limits: <b>' + Math.round(100 * Math.max(0, Math.min(2, pos))) + ' %</b> (0 % diffraction-limited, 100 % seeing-limited)';
+    }
+    $('fit-note').innerHTML = note;
+  }
 
   /* ---------- time series ---------- */
 
@@ -578,7 +919,7 @@
     ], 0, 1, (v) => v.toFixed(1), 'Strehl ratio', timeLabels());
   }
 
-  function drawCut(profile) {
+  function drawCut() {
     const { ctx, w, h } = fit($('cut'));
     if (!w) return;
     ctx.clearRect(0, 0, w, h);
@@ -624,28 +965,61 @@
       ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, h - m.b); ctx.stroke();
       ctx.setLineDash([]);
     }
-    const trace = (arr, color, dash, width) => {
+    const clampY = (v) => Math.max(m.t, Math.min(h - m.b, Y(Math.log10(Math.max(v, 1e-7)))));
+    const trace = (rs, vs, n, color, dash, width) => {
       ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash);
       ctx.beginPath();
-      let pen = false;
-      for (let r = 0; r < arr.length; r++) {
-        const lam = r / 2;
+      for (let i = 0; i < n; i++) {
+        const lam = rs[i] / 2;
         if (lam > rmax) break;
-        const lv = Math.log10(Math.max(arr[r], 1e-7));
-        const y = Math.max(m.t, Math.min(h - m.b, Y(lv)));
-        if (!pen) { ctx.moveTo(X(lam), y); pen = true; } else ctx.lineTo(X(lam), y);
+        if (i === 0) ctx.moveTo(X(lam), clampY(vs[i])); else ctx.lineTo(X(lam), clampY(vs[i]));
       }
       ctx.stroke();
       ctx.setLineDash([]);
     };
-    trace(idealProfile, COLOR.grey, [6, 4], 1.5);
-    trace(profile, COLOR.warm, [], 2.2);
+    const curve = (f, color, width, dash) => {
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash);
+      ctx.beginPath();
+      for (let r = 0; r <= 32.001; r += 0.25) {
+        if (r === 0) ctx.moveTo(X(r / 2), clampY(f(r))); else ctx.lineTo(X(r / 2), clampY(f(r)));
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    };
+    trace(idR, idV, idN, COLOR.grey, [6, 4], 1.5);
+    trace(prR, prV, prN, COLOR.warm, [], 2.2);
+
+    const showFit = $('showfit').checked && fitSt.ok;
+    if (showFit) {
+      if (fitSt.types.length > 1) {
+        let o = 0;
+        fitSt.types.forEach((t) => {
+          const oo = o;
+          curve((r) => compAt(t, fitSt.p, oo, r), 'rgba(123,216,143,.55)', 1.2, [2, 3]);
+          o += NPAR[t];
+        });
+      }
+      curve((r) => modelAt(fitSt.types, fitSt.p, r), FIT_COLOR, 2, []);
+      if (isFinite(fitSt.hw) && fitSt.hw / 2 <= rmax) {
+        const x = X(fitSt.hw / 2), y = clampY(modelAt(fitSt.types, fitSt.p, fitSt.hw));
+        ctx.fillStyle = FIT_COLOR;
+        ctx.beginPath(); ctx.arc(x, y, 4, 0, TAU); ctx.fill();
+        ctx.strokeStyle = 'rgba(123,216,143,.5)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, h - m.b); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
     ctx.textAlign = 'right';
     ctx.textBaseline = 'top';
     ctx.fillStyle = COLOR.warm;
     ctx.fillText('long exposure', w - m.r - 10, m.t + 6);
     ctx.fillStyle = COLOR.grey;
     ctx.fillText('perfect telescope', w - m.r - 10, m.t + 22);
+    if (showFit) {
+      ctx.fillStyle = FIT_COLOR;
+      ctx.fillText('fit: ' + fitSt.types.map((t) => NAMES[t]).join(' + ') + (isFinite(fitSt.hw) ? ' (dot: half maximum)' : ''), w - m.r - 10, m.t + 38);
+    }
   }
 
   /* ---------- deformable mirror view ---------- */
@@ -929,7 +1303,7 @@
     resetLoop();
     resetLE();
     clearSeries();
-    ox = 96; oy = 96; simT = 0;
+    ox = 96; oy = 96; uox = 96; uoy = 96; simT = 0;
     emaAtm = emaRes = 0;
     emaStroke = 0;
     warmup(P.closed ? 120 : 1);
@@ -956,8 +1330,7 @@
     // diffraction-limited reference (independent of the parameters, computed once)
     if (idealProfileUpdate.done) return;
     computePSF(null, ideal);
-    idealProfile = new Float32Array(40);
-    radialProfile(ideal, idealProfile);
+    idN = fineProfile(ideal, idR, idV);
     idealProfileUpdate.done = true;
   }
 
@@ -976,21 +1349,24 @@
     pushSeries({ t: simT, atm: rAtm, res: rRes, sInst: sInst, sLE: sLE });
 
     const scale = Math.max(1, 2.6 * emaAtm);
+    $('cb-min').textContent = '−' + scale.toFixed(1) + ' rad';
+    $('cb-max').textContent = '+' + scale.toFixed(1) + ' rad';
     drawWF($('wf-atm'), atm, scale);
     drawWF($('wf-dm'), dmShown, scale);
     drawWF($('wf-res'), res, scale);
     drawDM();
 
     drawPSF(P.mode === 'long' ? le : psf);
-    const prof = new Float32Array(40);
-    radialProfile(le, prof);
-    drawCut(prof);
+    prN = fineProfile(le, prR, prV);
+    runFit();
+    drawCut();
     drawRMS();
     drawStrehl();
 
     if (frameCount % 4 === 0) {
       $('stats').innerHTML = 'Strehl <b>' + sInst.toFixed(2) + '</b> (short) · <b>' + sLE.toFixed(2) + '</b> (long exposure)<br>' +
         'RMS phase: atmosphere <b>' + rAtm.toFixed(2) + '</b> rad → residual <b>' + rRes.toFixed(2) + '</b> rad · t = ' + (simT * 1000).toFixed(0) + ' ms';
+      updateFitTable();
     }
     $('warn').classList.toggle('on', P.closed && emaRes > 1.5 * emaAtm && emaRes > 0.8);
     frameCount++;
@@ -1022,6 +1398,8 @@
   $('controls').addEventListener('reset', () => setTimeout(onInput, 0));
   $('closed').addEventListener('change', onInput);
   $('speed').addEventListener('change', onInput);
+  ['fit1', 'fit2'].forEach((id) => $(id).addEventListener('change', () => { fitInit = true; frameCount = 0; schedule(); }));
+  $('showfit').addEventListener('change', schedule);
   document.querySelectorAll('input[name="expo"]').forEach((r) => r.addEventListener('change', onInput));
   playBtn.addEventListener('click', () => { playing = !playing; syncPlay(); schedule(); });
   function syncRowOut() {
@@ -1048,9 +1426,12 @@
   // Test hook: only exposed when a page sets window.__AO_DEBUG before this script runs.
   if (window.__AO_DEBUG) {
     window.__AO_DEBUG.api = {
-      P, screen, screenLow, atm, res, mask, nPup, step, applyParams, readParams, generateScreen, fullReset, rms,
+      P, screen, screenLow, atm, res, mask, nPup, step, subharmonicsAt, sampleScreen, applyParams, readParams, generateScreen, fullReset, rms,
       computePSF, peakOf, psf, IDEAL_PEAK, setPlaying: (v) => { playing = v; },
-      setSeed: (v) => { seed = v; }
+      setSeed: (v) => { seed = v; },
+      fitSt, theory, runFit, fineProfile, prR, prV, get prN() { return prN; }, le, NF,
+      runFrames: (n) => { for (let k = 0; k < n; k++) { for (let s = 0; s < P.steps; s++) step(); render(); } },
+      resetLE
     };
   }
 
