@@ -95,3 +95,14 @@ export function buildWavefront(n: number, pupilDiameterPx: number, a: Aberration
   }
   return wave
 }
+
+/**
+ * Nhân mọi hệ số với `factor`. Sai số đường quang hình học (mất nét, loạn thị, coma, cầu sai của gương)
+ * không phụ thuộc bước sóng, nên tính theo bước sóng nó tỉ lệ 1/λ: tại bước sóng λ, hệ số bằng
+ * c₀ · (λ₀ / λ) với c₀ là hệ số tại bước sóng tham chiếu λ₀.
+ */
+export function scaleAberrations(a: Aberrations, factor: number): Aberrations {
+  const out = { ...ZERO_ABERRATIONS }
+  for (const name of ZERNIKE_NAMES) out[name] = a[name] * factor
+  return out
+}

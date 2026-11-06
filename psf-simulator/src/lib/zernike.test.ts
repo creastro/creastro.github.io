@@ -92,3 +92,15 @@ describe('buildWavefront', () => {
     for (let i = 0; i < plus.length; i++) expect(minus[i]).toBeCloseTo(-plus[i], 14)
   })
 })
+
+describe('scaleAberrations', () => {
+  it('nhân mọi hệ số và không sửa đối tượng gốc', async () => {
+    const { scaleAberrations } = await import('./zernike')
+    const a = { ...ZERO_ABERRATIONS, defocus: 0.1, comaX: -0.2 }
+    const b = scaleAberrations(a, 0.5)
+    expect(b.defocus).toBeCloseTo(0.05, 14)
+    expect(b.comaX).toBeCloseTo(-0.1, 14)
+    expect(b.spherical).toBe(0)
+    expect(a.defocus).toBe(0.1)
+  })
+})
