@@ -115,10 +115,14 @@ export function sampleBicubic(intensity: Float64Array, n: number, px: number, py
 
   const tx = px - x0
   const ty = py - y0
-  const col = [0, 0, 0, 0]
-  for (let j = 0; j < 4; j++) {
-    const row = (y0 - 1 + j) * n + x0
-    col[j] = catmullRom(intensity[row - 1], intensity[row], intensity[row + 1], intensity[row + 2], tx)
-  }
-  return Math.max(0, catmullRom(col[0], col[1], col[2], col[3], ty))
+  // Bốn hàng lân cận, mỗi hàng nội suy theo x; viết tường minh để tránh cấp phát mảng cho từng pixel.
+  const base = (y0 - 1) * n + x0
+  const c0 = catmullRom(intensity[base - 1], intensity[base], intensity[base + 1], intensity[base + 2], tx)
+  const r1 = base + n
+  const c1 = catmullRom(intensity[r1 - 1], intensity[r1], intensity[r1 + 1], intensity[r1 + 2], tx)
+  const r2 = r1 + n
+  const c2 = catmullRom(intensity[r2 - 1], intensity[r2], intensity[r2 + 1], intensity[r2 + 2], tx)
+  const r3 = r2 + n
+  const c3 = catmullRom(intensity[r3 - 1], intensity[r3], intensity[r3 + 1], intensity[r3 + 2], tx)
+  return Math.max(0, catmullRom(c0, c1, c2, c3, ty))
 }
