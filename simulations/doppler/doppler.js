@@ -690,11 +690,17 @@ let profMin = 0.9;
   });
   playBtn.addEventListener('click', () => { playing = !playing; syncPlay(); schedule(); });
 
+  const CANVAS_IDS = ['planet', 'profile', 'residual', 'waterfall'];
+  // The simulation runs while any of its canvases is on screen, so that it keeps going when you scroll to a
+  // lower panel, and it only pauses when none of them can be seen.
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver((entries) => {
-      onScreen = entries[0].isIntersecting;
+    const visible = new Set();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) visible.add(en.target); else visible.delete(en.target); });
+      onScreen = visible.size > 0;
       if (onScreen) schedule();
-    }).observe(planetCanvas);
+    });
+    CANVAS_IDS.forEach((id) => io.observe($(id)));
   }
   if ('ResizeObserver' in window) {
     const ro = new ResizeObserver(schedule);
