@@ -648,6 +648,255 @@
     ctx.fillText('perfect telescope', w - m.r - 10, m.t + 22);
   }
 
+  /* ---------- deformable mirror view ---------- */
+
+  const dmTop = $('dm-top'), dmSide = $('dm-side');
+  let emaStroke = 0;
+
+  function pistonOf(arr) {
+    let s = 0;
+    for (let k = 0; k < NPIX; k++) if (mask[k]) s += arr[k];
+    return s / nPup;
+  }
+
+  // Bilinear sample of a pupil-grid field at (xn, yn), in units of D from the centre, y pointing up.
+  function fieldAt(arr, xn, yn, piston) {
+    const fx = (xn + 0.5) * NP - 0.5, fy = (0.5 - yn) * NP - 0.5;
+    const x0 = Math.max(0, Math.min(NP - 2, Math.floor(fx)));
+    const y0 = Math.max(0, Math.min(NP - 2, Math.floor(fy)));
+    const tx = Math.min(1, Math.max(0, fx - x0)), ty = Math.min(1, Math.max(0, fy - y0));
+    const i = y0 * NP + x0;
+    return (1 - ty) * ((1 - tx) * arr[i] + tx * arr[i + 1]) + ty * ((1 - tx) * arr[i + NP] + tx * arr[i + NP + 1]) - piston;
+  }
+
+  function stepTicks(range, n) { return niceStep(range, n); }
+
+  function drawDM() {
+    const toUm = P.lam / (4 * Math.PI);            // surface stroke (µm) from phase (rad): OPD = 2 · stroke
+    const pD = pistonOf(dmShown), pA = pistonOf(atm);
+    const n = P.nAct, pitch = 1 / n;
+
+    const acts = [];
+    let maxAbs = 0;
+    for (let ja = 0; ja < n; ja++) {
+      for (let ia = 0; ia < n; ia++) {
+        const xn = (ia + 0.5) / n - 0.5, yn = 0.5 - (ja + 0.5) / n;
+        if (Math.hypot(xn, yn) > 0.5 + 0.5 * pitch) continue;
+        const z = fieldAt(dmShown, xn, yn, pD) * toUm;
+        acts.push({ ia, ja, xn, yn, z });
+        if (Math.abs(z) > maxAbs) maxAbs = Math.abs(z);
+      }
+    }
+
+    // selected row of actuators
+    const ys = +$('dm-row').value;
+    const ja = Math.max(0, Math.min(n - 1, Math.round((0.5 - ys) * n - 0.5)));
+    const yRow = 0.5 - (ja + 0.5) / n;
+    const row = acts.filter((a) => a.ja === ja);
+
+    // shared vertical scale (µm), smoothed so that it does not jitter
+    let peak = maxAbs;
+    if (row.length) {
+      const x0 = row[0].xn - pitch / 2, x1 = row[row.length - 1].xn + pitch / 2;
+      for (let q = 0; q <= 40; q++) {
+        const v = Math.abs(fieldAt(atm, x0 + (x1 - x0) * q / 40, yRow, pA) * toUm);
+        if (v > peak) peak = v;
+      }
+    }
+    emaStroke = emaStroke ? emaStroke * 0.97 + peak * 0.03 : peak;
+    const S = Math.max(0.1, 1.25 * Math.max(emaStroke, peak * 0.8));
+
+    /* ----- top view ----- */
+    {
+      const { ctx, w, h } = fit(dmTop);
+      if (w) {
+        ctx.clearRect(0, 0, w, h);
+        const cx = w / 2, cy = h / 2 - 8, Rp = Math.min(w, h) * 0.40;
+        ctx.strokeStyle = 'rgba(143,227,255,.45)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(cx, cy, Rp, 0, TAU); ctx.stroke();
+        const rad = Math.max(2, 0.4 * pitch * 2 * Rp);
+        acts.forEach((a) => {
+          const x = cx + a.xn * 2 * Rp, y = cy - a.yn * 2 * Rp;
+          const s = Math.max(-1, Math.min(1, a.z / S));
+          const k = Math.pow(Math.abs(s), 0.8), c = s > 0 ? WARM : COOL;
+          ctx.fillStyle = 'rgb(' + Math.round(BG[0] + (c[0] - BG[0]) * k) + ',' + Math.round(BG[1] + (c[1] - BG[1]) * k) + ',' + Math.round(BG[2] + (c[2] - BG[2]) * k) + ')';
+          ctx.beginPath(); ctx.arc(x, y, rad, 0, TAU); ctx.fill();
+          ctx.strokeStyle = a.ja === ja ? COLOR.accent : 'rgba(255,255,255,.22)';
+          ctx.lineWidth = a.ja === ja ? 1.8 : 1;
+          ctx.stroke();
+        });
+        // selected row
+        ctx.strokeStyle = 'rgba(143,227,255,.55)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        const ry = cy - yRow * 2 * Rp;
+        ctx.beginPath(); ctx.moveTo(cx - Rp * 1.12, ry); ctx.lineTo(cx + Rp * 1.12, ry); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = COLOR.text;
+        ctx.font = FONT;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText('dashed line: row of the side view', 8, 6);
+        // colour bar
+        const bw = Math.min(180, w * 0.6), bx = (w - bw) / 2, by = h - 26;
+        const g = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+        g.addColorStop(0, 'rgb(' + COOL.join(',') + ')');
+        g.addColorStop(0.5, 'rgb(' + BG.join(',') + ')');
+        g.addColorStop(1, 'rgb(' + WARM.join(',') + ')');
+        ctx.fillStyle = g;
+        ctx.fillRect(bx, by, bw, 8);
+        ctx.strokeStyle = 'rgba(255,255,255,.3)';
+        ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, 7);
+        ctx.fillStyle = COLOR.text;
+        ctx.textBaseline = 'top';
+        ctx.textAlign = 'left';
+        ctx.fillText('−' + S.toFixed(2) + ' µm', bx, by + 11);
+        ctx.textAlign = 'right';
+        ctx.fillText('+' + S.toFixed(2) + ' µm', bx + bw, by + 11);
+        if (!P.closed) {
+          ctx.fillStyle = COLOR.warm;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('AO loop open: the mirror stays flat', cx, cy + Rp + 14);
+        }
+      }
+    }
+
+    /* ----- side view ----- */
+    {
+      const { ctx, w, h } = fit(dmSide);
+      if (w) {
+        ctx.clearRect(0, 0, w, h);
+        const m = { l: 56, r: 14, t: 26, b: 64 };
+        const pw = w - m.l - m.r, ph = h - m.t - m.b;
+        const half = 0.5 + 0.5 * pitch;
+        const X = (xn) => m.l + (xn + half) / (2 * half) * pw;
+        const Y = (z) => m.t + (1 - (z + S) / (2 * S)) * ph;
+
+        ctx.font = FONT;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        const ys2 = stepTicks(2 * S, 4);
+        for (let v = Math.ceil(-S / ys2) * ys2; v <= S + 1e-9; v += ys2) {
+          const y = Math.round(Y(v)) + 0.5;
+          ctx.strokeStyle = COLOR.grid;
+          ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(w - m.r, y); ctx.stroke();
+          ctx.fillStyle = COLOR.text;
+          ctx.fillText((Math.abs(v) < 1e-9 ? 0 : v).toFixed(ys2 < 0.1 ? 2 : 1), m.l - 8, y);
+        }
+        ctx.save();
+        ctx.translate(12, m.t + ph / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = COLOR.text;
+        ctx.fillText(h < 260 ? 'stroke (µm)' : 'mirror surface stroke (µm)', 0, 0);
+        ctx.restore();
+
+        // horizontal axis in cm (small telescopes) or m
+        const unit = P.D < 2 ? 100 : 1, uname = P.D < 2 ? 'cm' : 'm';
+        const xs = stepTicks(2 * half * P.D * unit, 6);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        for (let v = Math.ceil(-half * P.D * unit / xs) * xs; v <= half * P.D * unit + 1e-9; v += xs) {
+          const x = Math.round(X(v / (P.D * unit))) + 0.5;
+          ctx.strokeStyle = COLOR.grid;
+          ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, m.t + ph); ctx.stroke();
+          ctx.fillStyle = COLOR.text;
+          ctx.fillText(String(Math.round(v * 100) / 100), x, m.t + ph + 20);
+        }
+        ctx.fillText('position across the mirror (' + uname + ')', m.l + pw / 2, m.t + ph + 38);
+
+        // pupil chord
+        const chord = Math.sqrt(Math.max(0, 0.25 - yRow * yRow));
+        if (chord > 0) {
+          ctx.fillStyle = 'rgba(143,227,255,.06)';
+          ctx.fillRect(X(-chord), m.t, X(chord) - X(-chord), ph);
+          ctx.fillStyle = 'rgba(143,227,255,.7)';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText('telescope pupil', (X(-chord) + X(chord)) / 2, m.t + 5);
+        }
+
+        // back plate
+        const plateY = m.t + ph + 3;
+        ctx.fillStyle = 'rgba(255,255,255,.16)';
+        ctx.fillRect(m.l, plateY, pw, 12);
+        ctx.fillStyle = 'rgba(237,242,255,.75)';
+        ctx.font = '10px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('back plate (actuators are fixed here)', m.l + pw / 2, plateY + 6.5);
+        ctx.font = FONT;
+
+        // rest position
+        ctx.strokeStyle = 'rgba(255,255,255,.45)';
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath(); ctx.moveTo(m.l, Y(0)); ctx.lineTo(w - m.r, Y(0)); ctx.stroke();
+        ctx.setLineDash([]);
+
+        if (!row.length) {
+          ctx.fillStyle = COLOR.text;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('No actuator in this row', m.l + pw / 2, m.t + ph / 2);
+        } else {
+          const x0 = row[0].xn - pitch / 2, x1 = row[row.length - 1].xn + pitch / 2;
+          const curve = (arr, piston, color, width, dash) => {
+            ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash);
+            ctx.beginPath();
+            for (let q = 0; q <= 120; q++) {
+              const xn = x0 + (x1 - x0) * q / 120;
+              const z = Math.max(-S, Math.min(S, fieldAt(arr, xn, yRow, piston) * toUm));
+              if (q === 0) ctx.moveTo(X(xn), Y(z)); else ctx.lineTo(X(xn), Y(z));
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+          };
+          // pins from the back plate to the faceplate
+          ctx.strokeStyle = 'rgba(237,242,255,.4)';
+          ctx.lineWidth = 3;
+          row.forEach((a) => {
+            const x = X(a.xn);
+            ctx.beginPath(); ctx.moveTo(x, plateY); ctx.lineTo(x, Y(Math.max(-S, Math.min(S, a.z)))); ctx.stroke();
+          });
+          curve(atm, pA, COLOR.grey, 1.6, [6, 4]);
+          curve(dmShown, pD, COLOR.accent, 2.6, []);
+          ctx.fillStyle = COLOR.accent;
+          row.forEach((a) => {
+            ctx.beginPath(); ctx.arc(X(a.xn), Y(Math.max(-S, Math.min(S, a.z))), 4, 0, TAU); ctx.fill();
+          });
+        }
+        // legend
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        let lx = m.l + 8;
+        [['mirror surface', COLOR.accent, []], [w < 480 ? 'turbulence' : 'shape asked by the turbulence', COLOR.grey, [6, 4]]].forEach((e) => {
+          ctx.strokeStyle = e[1]; ctx.lineWidth = 2; ctx.setLineDash(e[2]);
+          ctx.beginPath(); ctx.moveTo(lx, 12); ctx.lineTo(lx + 18, 12); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = COLOR.text;
+          ctx.fillText(e[0], lx + 24, 12);
+          lx += 24 + ctx.measureText(e[0]).width + 16;
+        });
+      }
+    }
+
+    // numbers
+    let mn = Infinity, mx = -Infinity;
+    for (let k = 0; k < NPIX; k++) {
+      if (!mask[k]) continue;
+      const v = (dmShown[k] - pD) * toUm;
+      if (v < mn) mn = v;
+      if (v > mx) mx = v;
+    }
+    $('dm-stats').innerHTML = P.closed
+      ? 'Stroke over the pupil: peak-to-valley <b>' + (mx - mn).toFixed(2) + ' µm</b> · RMS <b>' + (rms(dmShown) * toUm).toFixed(2) + ' µm</b><br>' +
+        'Actuators: <b>' + acts.length + '</b> in the pupil (' + n + ' × ' + n + ' grid, pitch ' + (P.pitch * 100).toFixed(1) + ' cm)'
+      : 'AO loop open: the mirror is flat. Actuators: <b>' + acts.length + '</b> in the pupil (' + n + ' × ' + n + ' grid).';
+  }
+
   /* ---------- derived readouts ---------- */
 
   function updateReadouts() {
@@ -682,6 +931,7 @@
     clearSeries();
     ox = 96; oy = 96; simT = 0;
     emaAtm = emaRes = 0;
+    emaStroke = 0;
     warmup(P.closed ? 120 : 1);
     emaAtm = emaRes = 0;
   }
@@ -729,6 +979,7 @@
     drawWF($('wf-atm'), atm, scale);
     drawWF($('wf-dm'), dmShown, scale);
     drawWF($('wf-res'), res, scale);
+    drawDM();
 
     drawPSF(P.mode === 'long' ? le : psf);
     const prof = new Float32Array(40);
@@ -773,6 +1024,12 @@
   $('speed').addEventListener('change', onInput);
   document.querySelectorAll('input[name="expo"]').forEach((r) => r.addEventListener('change', onInput));
   playBtn.addEventListener('click', () => { playing = !playing; syncPlay(); schedule(); });
+  function syncRowOut() {
+    const v = +$('dm-row').value;
+    $('dm-row-out').textContent = (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + ' D';
+  }
+  $('dm-row').addEventListener('input', () => { syncRowOut(); schedule(); });
+  $('controls').addEventListener('reset', () => { $('dm-row').value = 0; syncRowOut(); });
   $('restart').addEventListener('click', () => { readParams(); fullReset(true); schedule(); });
 
   if ('IntersectionObserver' in window) {
@@ -783,7 +1040,7 @@
   }
   if ('ResizeObserver' in window) {
     const ro = new ResizeObserver(schedule);
-    ['wf-atm', 'wf-dm', 'wf-res', 'psf', 'cut', 'rms', 'strehl'].forEach((id) => ro.observe($(id)));
+    ['wf-atm', 'wf-dm', 'wf-res', 'psf', 'cut', 'rms', 'strehl', 'dm-top', 'dm-side'].forEach((id) => ro.observe($(id)));
   } else {
     window.addEventListener('resize', schedule);
   }
@@ -798,6 +1055,7 @@
   }
 
   syncOutputs();
+  syncRowOut();
   syncPlay();
   applyParams(true);
   dirty = false;
