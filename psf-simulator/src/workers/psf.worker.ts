@@ -26,5 +26,8 @@ scope.onmessage = (event) => {
   const { id, params } = event.data
   const start = performance.now()
   const frame = computeFrame(params)
-  scope.postMessage({ id, ms: performance.now() - start, ...frame }, [frame.rgba.buffer as ArrayBuffer])
+  scope.postMessage({ id, ms: performance.now() - start, ...frame }, [
+    frame.rgba.buffer as ArrayBuffer,
+    frame.pupilRgba.buffer as ArrayBuffer,
+  ])
 }

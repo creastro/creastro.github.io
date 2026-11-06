@@ -1,52 +1,22 @@
 import { useState } from 'react'
+import { AberrationPanel } from './components/AberrationPanel'
+import { Panel } from './components/Panel'
 import { PsfCanvas } from './components/PsfCanvas'
+import { PupilCanvas } from './components/PupilCanvas'
+import { Readouts } from './components/Readouts'
 import { Slider } from './components/Slider'
 import { COLORMAP_LABELS, type ColormapName } from './lib/colormap'
-import { DEFAULT_PARAMS, type FrameStats, type SimParams } from './lib/frame'
+import { DEFAULT_PARAMS, type SimParams } from './lib/frame'
+import { ZERO_ABERRATIONS, type ZernikeName } from './lib/zernike'
 import { usePsfFrame } from './usePsfFrame'
-
-const arcsec = (v: number) => `${v.toFixed(v < 0.1 ? 4 : 3)}″`
-
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-4 rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-      <h2 className="text-xs font-semibold tracking-wider text-slate-400 uppercase">{title}</h2>
-      {children}
-    </section>
-  )
-}
-
-function Readouts({ stats, ms }: { stats: FrameStats | null; ms: number | null }) {
-  if (!stats) return null
-  const rows: [string, string][] = [
-    ['λ/D', arcsec(stats.lambdaOverDArcsec)],
-    ['Bán kính Airy (1,22 λ/D)', arcsec(stats.airyRadiusArcsec)],
-    ['Diện tích thu sáng', `${(stats.throughput * 100).toFixed(1)}%`],
-    ['Đỉnh so với gương không che', `${(stats.relativePeak * 100).toFixed(1)}%`],
-  ]
-  return (
-    <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm" aria-live="polite">
-      {rows.map(([k, v]) => (
-        <div key={k} className="contents">
-          <dt className="text-slate-400">{k}</dt>
-          <dd className="text-right font-mono tabular-nums text-slate-100">{v}</dd>
-        </div>
-      ))}
-      {ms !== null ? (
-        <div className="contents">
-          <dt className="text-slate-500">Thời gian tính</dt>
-          <dd className="text-right font-mono tabular-nums text-slate-500">{ms.toFixed(0)} ms</dd>
-        </div>
-      ) : null}
-    </dl>
-  )
-}
 
 export default function App() {
   const [params, setParams] = useState<SimParams>(DEFAULT_PARAMS)
   const frame = usePsfFrame(params)
   const set = <K extends keyof SimParams>(key: K) => (value: SimParams[K]) =>
     setParams((p) => ({ ...p, [key]: value }))
+  const setAberration = (name: ZernikeName, value: number) =>
+    setParams((p) => ({ ...p, aberrations: { ...p.aberrations, [name]: value } }))
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -67,7 +37,10 @@ export default function App() {
               tăng bước sóng.
             </p>
           ) : null}
-          <Readouts stats={frame?.stats ?? null} ms={frame?.ms ?? null} />
+          <div className="grid gap-4 sm:grid-cols-[auto_1fr]">
+            <PupilCanvas rgba={frame?.pupilRgba ?? null} size={frame?.pupilSize ?? 132} />
+            <Readouts stats={frame?.stats ?? null} ms={frame?.ms ?? null} />
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -134,6 +107,12 @@ export default function App() {
               onChange={set('vaneAngleDeg')}
             />
           </Panel>
+
+          <AberrationPanel
+            value={params.aberrations}
+            onChange={setAberration}
+            onReset={() => set('aberrations')(ZERO_ABERRATIONS)}
+          />
 
           <Panel title="Hiển thị">
             <Slider
