@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive simulation of an adaptive optics loop: a turbulent atmosphere, a deformable mirror, a wavefront sensor, and the resulting image of a star.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23080d1c'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%238fe3ff'/%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Adaptive optics loop | Tin Mai (Mai Như Tín)">
+  <meta property="og:description" content="Interactive simulation of an adaptive optics loop: a turbulent atmosphere, a deformable mirror, a wavefront sensor, and the resulting image of a star.">
+  <meta property="og:url" content="https://creastro.github.io/simulations/adaptive-optics/">
+  <meta property="og:image" content="https://creastro.github.io/simulations/adaptive-optics/preview.jpg">
+  <title>Adaptive Optics Loop | Tin Mai (Mai Như Tín)</title>
+  <style>
+    :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--warm:#ffcf6b;--border:rgba(255,255,255,.14);--panel:#111b30e0}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 system-ui,sans-serif}
+    .sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 80% 20%,#18345a55,transparent 55%),radial-gradient(ellipse at 20% 70%,#41266344,transparent 50%)}
+    .sky:before,.sky:after{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20px 30px,#fff 99%,transparent),radial-gradient(2px 2px at 90px 110px,#b5d9ff 99%,transparent),radial-gradient(1px 1px at 160px 60px,#fff 99%,transparent),radial-gradient(1px 1px at 220px 170px,#fff 99%,transparent);background-size:260px 220px;animation:twinkle 5s ease-in-out infinite alternate}.sky:after{transform:translate(65px,85px);opacity:.4;animation-delay:-3s;animation-duration:7s}@keyframes twinkle{from{opacity:.25}to{opacity:.85}}
+    a{color:var(--accent)}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.container{width:min(1240px,92%);margin:auto}
+    nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}.brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:12px}.nav-links a{padding:5px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;transition:background .2s,color .2s}.nav-links a:hover,.nav-links a:focus-visible,.nav-links .active{background:var(--accent);color:var(--bg)!important}.home-link{color:var(--accent)!important}
+    main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}.back{display:inline-block;margin-bottom:26px;font-size:.92rem;text-decoration:none}.back:hover,.back:focus-visible{text-decoration:underline}
+    h1{max-width:900px;font-size:clamp(2.2rem,5.5vw,4.4rem);line-height:1.06;letter-spacing:-.05em;margin:16px 0 22px}p{color:var(--muted)}.intro{max-width:860px;font-size:1.1rem}
+    .button{display:inline-block;padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-2px);background:#25405b;color:#fff}.button.primary:hover{background:#b6efff;color:var(--bg)}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"wave psf" "ts psf" "controls notes";gap:18px;margin-top:40px;align-items:stretch}
+    .panel{padding:18px 20px 20px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
+    .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
+    #p-wave{grid-area:wave}#p-psf{grid-area:psf}#p-ts{grid-area:ts}#p-notes{grid-area:notes}#p-controls{grid-area:controls}
+    canvas{display:block;width:100%}.wf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.wf figure{margin:0}.wf canvas{aspect-ratio:1/1}.wf figcaption{margin-top:6px;font-size:.8rem;line-height:1.35;color:var(--muted);text-align:center}.wf figcaption strong{display:block;color:var(--text);font-size:.85rem}
+    #psf{aspect-ratio:1/1}#cut{aspect-ratio:16/8;margin-top:10px}#rms{aspect-ratio:16/6}#strehl{aspect-ratio:16/6;margin-top:6px}
+    .bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:14px}.bar label{font-size:.88rem;color:var(--muted)}
+    .switch{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--text)!important;font-weight:650}.switch input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+    .stats{margin:10px 0 0;font:13px/1.6 ui-monospace,monospace;color:var(--text)}.stats b{color:var(--accent);font-weight:600}
+    .warn{display:none;margin:10px 0 0;padding:8px 12px;border:1px solid #ff7468;border-radius:8px;color:#ffb3ab;font-size:.88rem}.warn.on{display:block}
+    .seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}.seg label{display:block;position:relative;padding:5px 12px;cursor:pointer;font-size:.85rem;color:var(--muted)}.seg input{position:absolute;opacity:0;inset:0;cursor:pointer}.seg label:has(input:checked){background:var(--accent);color:var(--bg);font-weight:700}.seg label:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:-3px}
+    .field{display:grid;grid-template-columns:minmax(130px,190px) 1fr 74px;align-items:center;gap:10px;margin:7px 0}.field label{font-size:.88rem;color:var(--muted)}.field output{font:12px ui-monospace,monospace;color:var(--accent);text-align:right}
+    input[type=range]{width:100%;accent-color:var(--accent);margin:0}select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#0d1730;color:var(--text);font:inherit;font-size:.9rem}
+    fieldset{margin:0 0 14px;padding:4px 14px 8px;border:1px solid var(--border);border-radius:10px}legend{padding:0 8px;color:var(--text);font-weight:650;font-size:.92rem}
+    dl.read{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:4px 16px;margin:0 0 14px;font-size:.88rem}dl.read dt{color:var(--muted)}dl.read dd{margin:0;text-align:right;font:12.5px ui-monospace,monospace;color:var(--accent)}
+    #p-notes ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}#p-notes li{margin:7px 0}#p-notes strong{color:var(--text)}.formula{font-family:ui-monospace,monospace;color:var(--accent);font-size:.9em}
+    noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
+    footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"wave" "psf" "ts" "controls" "notes"}}
+    @media(max-width:560px){main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 70px}.field label{grid-column:1/-1}.wf{gap:6px}.wf figcaption{font-size:.72rem}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../../">Home</a><a href="../../#education">Education</a><a href="../../research">Research</a><a class="active" href="../../simulations">Simulations</a><a href="../../story">My story</a><a href="../../contact">Contact</a></div></nav></header>
+  <main class="container">
+    <a class="back" href="../">← All simulations</a><br>
+    <span class="eyebrow">Simulation · Instrumentation</span>
+    <h1>Adaptive optics loop</h1>
+    <p class="intro">The atmosphere distorts the wavefront of starlight, blurring the image of a star into a flickering halo of speckles. An adaptive optics system measures this distortion many times per second and cancels it with a deformable mirror. Switch the loop on and off, then see what limits the correction: the number of actuators, the speed of the loop, the wind, and the brightness of the guide star.</p>
+
+    <noscript><p>This simulation needs JavaScript. Please enable it to run the adaptive optics loop.</p></noscript>
+
+    <div class="layout">
+      <section class="panel" id="p-wave" aria-labelledby="t-wave">
+        <h2 id="t-wave">Wavefront in the telescope pupil</h2>
+        <p class="sub">Phase in radians at the imaging wavelength, same colour scale for the three maps. Orange: advanced, blue: delayed.</p>
+        <div class="wf">
+          <figure><canvas id="wf-atm" role="img" aria-label="Phase map of the turbulent atmosphere across the telescope pupil."></canvas><figcaption><strong>Atmosphere</strong>turbulent phase</figcaption></figure>
+          <figure><canvas id="wf-dm" role="img" aria-label="Phase map of the correction applied by the deformable mirror."></canvas><figcaption><strong>Deformable mirror</strong>correction</figcaption></figure>
+          <figure><canvas id="wf-res" role="img" aria-label="Phase map of the residual wavefront error after correction."></canvas><figcaption><strong>Residual</strong>atmosphere − mirror</figcaption></figure>
+        </div>
+        <div class="bar">
+          <label class="switch"><input type="checkbox" id="closed" checked> AO loop closed</label>
+          <button class="button primary" type="button" id="play" aria-label="Pause simulation">Pause</button>
+          <button class="button" type="button" id="restart">Restart</button>
+          <label for="speed">Speed</label>
+          <select id="speed" aria-label="Simulation speed"><option value="1">×1</option><option value="2" selected>×2</option><option value="5">×5</option><option value="10">×10</option></select>
+        </div>
+        <p class="warn" id="warn" role="status">The loop is unstable: the residual is larger than the turbulence itself. Lower the gain or the delay.</p>
+      </section>
+
+      <section class="panel" id="p-psf" aria-labelledby="t-psf">
+        <h2 id="t-psf">Image of the star</h2>
+        <p class="sub">Point-spread function (PSF) on a log scale, normalised to the peak of a perfect telescope. Square: region the mirror controls.</p>
+        <canvas id="psf" role="img" aria-label="Image of a point-like star formed by the telescope. With the loop open it is a blurred cloud of speckles. With the loop closed it shows a sharp core surrounded by Airy rings."></canvas>
+        <div class="bar">
+          <span class="seg" role="radiogroup" aria-label="Exposure type">
+            <label><input type="radio" name="expo" value="short"> Short exposure</label>
+            <label><input type="radio" name="expo" value="long" checked> Long exposure</label>
+          </span>
+        </div>
+        <p class="stats" id="stats" aria-live="off">…</p>
+        <canvas id="cut" role="img" aria-label="Radially averaged intensity of the long-exposure image versus angular distance from the star, compared with a perfect telescope, on a log scale."></canvas>
+      </section>
+
+      <section class="panel" id="p-ts" aria-labelledby="t-ts">
+        <h2 id="t-ts">Loop performance over time</h2>
+        <p class="sub">Residual wavefront error and Strehl ratio, once per displayed frame.</p>
+        <canvas id="rms" role="img" aria-label="Wavefront error in radians over simulated time, with and without correction."></canvas>
+        <canvas id="strehl" role="img" aria-label="Strehl ratio over simulated time, instantaneous and long exposure."></canvas>
+      </section>
+
+      <section class="panel" id="p-controls" aria-labelledby="t-controls">
+        <h2 id="t-controls">Parameters</h2>
+        <form id="controls" autocomplete="off">
+          <fieldset>
+            <legend>Atmosphere</legend>
+            <div id="g-atm"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Telescope and imaging</legend>
+            <div id="g-tel"></div>
+          </fieldset>
+          <fieldset>
+            <legend>AO system</legend>
+            <div id="g-ao"></div>
+          </fieldset>
+          <dl class="read" id="read" aria-label="Derived quantities"></dl>
+          <button class="button" type="reset">Reset parameters</button>
+        </form>
+      </section>
+
+      <section class="panel" id="p-notes" aria-labelledby="t-notes">
+        <h2 id="t-notes">What to look for</h2>
+        <ul>
+          <li><strong>Loop open vs closed.</strong> Without correction the image is a seeing-limited cloud of speckles about <span class="formula">λ / r₀</span> wide. With the loop closed, light collapses into a sharp core with Airy rings, and the Strehl ratio rises.</li>
+          <li><strong>Number of actuators.</strong> The mirror only corrects spatial scales larger than twice the actuator pitch, so it controls the image out to <span class="formula">N<sub>act</sub> / 2 · λ/D</span> (the square). Outside it, the halo stays. The leftover is the fitting error, about <span class="formula">0.22 (d / r₀)<sup>5/3</sup></span> rad² for this ideal mirror (about 0.28 for a real one).</li>
+          <li><strong>Loop speed and wind.</strong> The mirror always corrects the turbulence of a few milliseconds ago. A slower loop, a longer delay or a stronger wind increases this temporal error and leaves a halo stretched along the wind direction.</li>
+          <li><strong>Gain and noise.</strong> A faint guide star gives few photons per subaperture, so the measurement is noisy. Lowering the gain filters the noise but slows the correction. A high gain with a long delay makes the loop unstable.</li>
+          <li><strong>Limits of the model.</strong> Single frozen turbulent layer moving at constant speed, on a screen four pupil diameters wide (the very largest scales are slightly under-represented). An ideal wavefront sensor and mirror (no aliasing, no non-linearity), no chromatic effects, and a simplified photon-noise estimate.</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+  <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../../">Return home</a> · <a href="../">All simulations</a> · <a href="../../research">Research</a></footer>
+  <script src="adaptive-optics.js"></script>
+</body>
+</html>
