@@ -92,3 +92,33 @@ export function encircledEnergy(psf: PsfResult, radiusLD: number): number {
   }
   return inside / total
 }
+
+/** Nội suy Catmull–Rom một chiều giữa p1 và p2 (t ∈ [0, 1]) với hai điểm lân cận p0, p3. */
+function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  return (
+    p1 +
+    0.5 *
+      t *
+      (p2 - p0 + t * (2 * p0 - 5 * p1 + 4 * p2 - p3 + t * (3 * (p1 - p2) + p3 - p0)))
+  )
+}
+
+/**
+ * Nội suy bicubic (Catmull–Rom) cường độ. Chính xác hơn song tuyến ở lân cận các vòng tối, nơi hàm lồi
+ * và nội suy tuyến tính luôn cho giá trị cao hơn thực. Kết quả âm do dao động được cắt về 0.
+ * Sát biên lưới (không đủ 4 × 4 lân cận) dùng nội suy song tuyến.
+ */
+export function sampleBicubic(intensity: Float64Array, n: number, px: number, py: number): number {
+  const x0 = Math.floor(px)
+  const y0 = Math.floor(py)
+  if (x0 < 1 || y0 < 1 || x0 > n - 3 || y0 > n - 3) return sampleBilinear(intensity, n, px, py)
+
+  const tx = px - x0
+  const ty = py - y0
+  const col = [0, 0, 0, 0]
+  for (let j = 0; j < 4; j++) {
+    const row = (y0 - 1 + j) * n + x0
+    col[j] = catmullRom(intensity[row - 1], intensity[row], intensity[row + 1], intensity[row + 2], tx)
+  }
+  return Math.max(0, catmullRom(col[0], col[1], col[2], col[3], ty))
+}
