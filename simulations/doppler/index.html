@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive simulation of the Doppler-shifted spectral line of a rotating planet, and how dark or bright spots on its surface distort the line profile.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23080d1c'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%238fe3ff'/%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Doppler shifts of a rotating planet | Tin Mai (Mai Như Tín)">
+  <meta property="og:description" content="Interactive simulation of the Doppler-shifted spectral line of a rotating planet, and how dark or bright spots on its surface distort the line profile.">
+  <meta property="og:url" content="https://creastro.github.io/simulations/doppler/">
+  <meta property="og:image" content="https://creastro.github.io/images/ava.jpg">
+  <title>Doppler Shifts of a Rotating Planet | Tin Mai (Mai Như Tín)</title>
+  <style>
+    :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--warm:#ffcf6b;--border:rgba(255,255,255,.14);--panel:#111b30e0}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 system-ui,sans-serif}
+    .sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 80% 20%,#18345a55,transparent 55%),radial-gradient(ellipse at 20% 70%,#41266344,transparent 50%)}
+    .sky:before,.sky:after{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20px 30px,#fff 99%,transparent),radial-gradient(2px 2px at 90px 110px,#b5d9ff 99%,transparent),radial-gradient(1px 1px at 160px 60px,#fff 99%,transparent),radial-gradient(1px 1px at 220px 170px,#fff 99%,transparent);background-size:260px 220px;animation:twinkle 5s ease-in-out infinite alternate}.sky:after{transform:translate(65px,85px);opacity:.4;animation-delay:-3s;animation-duration:7s}@keyframes twinkle{from{opacity:.25}to{opacity:.85}}
+    a{color:var(--accent)}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.container{width:min(1240px,92%);margin:auto}
+    nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}.brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:12px}.nav-links a{padding:5px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;transition:background .2s,color .2s}.nav-links a:hover,.nav-links a:focus-visible,.nav-links .active{background:var(--accent);color:var(--bg)!important}.home-link{color:var(--accent)!important}
+    main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}
+    h1{max-width:900px;font-size:clamp(2.2rem,5.5vw,4.4rem);line-height:1.06;letter-spacing:-.05em;margin:16px 0 22px}p{color:var(--muted)}.intro{max-width:860px;font-size:1.1rem}
+    .button{display:inline-block;padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-2px);background:#25405b;color:#fff}.button.primary:hover{background:#b6efff;color:var(--bg)}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"planet profile" "wf controls" "notes controls";gap:18px;margin-top:40px;align-items:stretch}
+    .panel{padding:18px 20px 20px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
+    .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
+    #p-planet{grid-area:planet}#p-profile{grid-area:profile}#p-wf{grid-area:wf}#p-notes{grid-area:notes}#p-controls{grid-area:controls}
+    canvas{display:block;width:100%}#planet{aspect-ratio:1/.84}#profile{aspect-ratio:16/9.5}#residual{aspect-ratio:16/6.5;margin-top:6px}#waterfall{aspect-ratio:16/9}
+    .transport{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-top:12px}.transport label{font-size:.85rem;color:var(--muted)}
+    .field{display:grid;grid-template-columns:minmax(120px,170px) 1fr 62px;align-items:center;gap:10px;margin:7px 0}.field label{font-size:.88rem;color:var(--muted)}.field output{font:12px ui-monospace,monospace;color:var(--accent);text-align:right}
+    input[type=range]{width:100%;accent-color:var(--accent);margin:0}select{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#0d1730;color:var(--text);font:inherit;font-size:.9rem}
+    fieldset{margin:0 0 14px;padding:4px 14px 8px;border:1px solid var(--border);border-radius:10px}legend{padding:0 8px;color:var(--text);font-weight:650;font-size:.92rem}.dot{display:inline-block;width:10px;height:10px;margin-right:8px;border-radius:50%;vertical-align:baseline}
+    .checks{display:flex;flex-wrap:wrap;gap:8px 22px;margin:4px 0 14px}.checks label{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:8px}.checks input{accent-color:var(--accent);width:16px;height:16px}
+    .legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin:10px 0 0;font-size:.8rem;color:var(--muted)}.legend span:before{content:"";display:inline-block;width:12px;height:12px;margin-right:7px;border-radius:3px;vertical-align:-2px;background:var(--c)}
+    #p-notes ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}#p-notes li{margin:7px 0}#p-notes strong{color:var(--text)}.formula{font-family:ui-monospace,monospace;color:var(--accent);font-size:.9em}
+    noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
+    footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"planet" "profile" "controls" "wf" "notes"}}
+    @media(max-width:560px){main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 58px}.field label{grid-column:1/-1}.transport{grid-template-columns:auto 1fr}.transport output{grid-column:1/-1;justify-self:end}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../../">Home</a><a href="../../#education">Education</a><a href="../../research">Research</a><a class="active" href="../../simulations">Simulations</a><a href="../../story">My story</a><a href="../../contact">Contact</a></div></nav></header>
+  <main class="container">
+    <span class="eyebrow">Simulation · Exoplanets</span>
+    <h1>Doppler shifts of a rotating planet</h1>
+    <p class="intro">A rotating planet broadens its spectral lines: the approaching limb is blueshifted and the receding limb is redshifted. When a dark or bright spot rotates across the disk, it leaves a bump or a dip that drifts through the line profile. This is the principle behind Doppler imaging of directly-imaged planets and brown dwarfs, like the work I did on VHS 1256 b.</p>
+
+    <noscript><p>This simulation needs JavaScript. Please enable it to explore the Doppler shifts.</p></noscript>
+
+    <div class="layout">
+      <section class="panel" id="p-planet" aria-labelledby="t-planet">
+        <h2 id="t-planet">The planet</h2>
+        <p class="sub">Left limb approaches (blueshift), right limb recedes (redshift). Coloured ring: spot outline.</p>
+        <canvas id="planet" role="img" aria-label="Rotating planet disk seen from Earth, with the grid of latitudes and longitudes, the spin axis, and any dark or bright spots drawn on its surface."></canvas>
+        <div class="transport">
+          <button class="button primary" type="button" id="play" aria-label="Pause rotation">Pause</button>
+          <input id="phase" type="range" min="0" max="1" step="0.001" value="0" aria-label="Rotation phase">
+          <output id="phase-out" for="phase">0.00</output>
+        </div>
+        <div class="field" style="margin-top:10px"><label for="period">Animation: seconds per rotation</label><input id="period" type="range" min="4" max="30" step="1" value="12"><output for="period" data-unit=" s"></output></div>
+      </section>
+
+      <section class="panel" id="p-profile" aria-labelledby="t-profile">
+        <h2 id="t-profile">Disk-integrated line profile</h2>
+        <p class="sub">One absorption line, normalised to the continuum. Dashed: planet without spots.</p>
+        <canvas id="profile" role="img" aria-label="Spectral line profile versus velocity, with and without the spots. The line is broadened by rotation. A dark spot raises a bump on the line, a bright spot digs a dip."></canvas>
+        <canvas id="residual" role="img" aria-label="Difference between the spotted and the spotless line profile versus velocity."></canvas>
+      </section>
+
+      <section class="panel" id="p-wf" aria-labelledby="t-wf">
+        <h2 id="t-wf">Dynamic spectrum</h2>
+        <p class="sub">Difference from the spotless line for one full rotation. The line shows the current phase.</p>
+        <canvas id="waterfall" role="img" aria-label="Map of the line-profile difference as a function of velocity and rotation phase. A spot appears as a streak that drifts from negative to positive velocity as it crosses the disk."></canvas>
+        <p class="legend"><span style="--c:#ffaa46">Shallower line than without spots (dark spot)</span><span style="--c:#5ab9ff">Deeper line (bright spot)</span></p>
+      </section>
+
+      <section class="panel" id="p-notes" aria-labelledby="t-notes">
+        <h2 id="t-notes">What to look for</h2>
+        <ul>
+          <li><strong>Dark spot → bump, bright spot → dip.</strong> A dark spot hides some of the absorbing area at its velocity, so the line gets shallower there. A bright spot adds weight, so the line gets deeper. The faint opposite-sign halo around a bump is the continuum normalisation: when a dark spot hides light, the rest of the line looks relatively deeper.</li>
+          <li><strong>Position sets the shift.</strong> A feature at horizontal position <span class="formula">x</span> on the disk (in units of the radius) has <span class="formula">v = v<sub>eq</sub> sin i · x</span>, so its velocity follows the sinusoidal path of the spot across the disk.</li>
+          <li><strong>North–south ambiguity.</strong> At <span class="formula">i = 90°</span>, spots at latitudes +φ and −φ give identical signals. Lowering the inclination breaks the symmetry and keeps low-latitude spots from reaching the far limb.</li>
+          <li><strong>Limits of the model.</strong> Uniform limb-darkened disk, a spot changes the continuum only (the intrinsic line depth is unchanged), no noise, no differential rotation.</li>
+        </ul>
+      </section>
+
+      <section class="panel" id="p-controls" aria-labelledby="t-controls">
+        <h2 id="t-controls">Parameters</h2>
+        <form id="controls" autocomplete="off">
+          <fieldset>
+            <legend>Planet and line</legend>
+            <div class="field"><label for="inc">Inclination i</label><input id="inc" type="range" min="0" max="90" step="1" value="75"><output for="inc" data-unit="°"></output></div>
+            <div class="field"><label for="veq">Equatorial speed v<sub>eq</sub></label><input id="veq" type="range" min="2" max="50" step="1" value="20"><output for="veq" data-unit=" km/s"></output></div>
+            <div class="field"><label for="sigma">Intrinsic line width σ</label><input id="sigma" type="range" min="1" max="8" step="0.5" value="2"><output for="sigma" data-unit=" km/s"></output></div>
+            <div class="field"><label for="depth">Line depth</label><input id="depth" type="range" min="0.1" max="0.9" step="0.05" value="0.5"><output for="depth"></output></div>
+            <div class="field"><label for="ld">Limb darkening u</label><input id="ld" type="range" min="0" max="1" step="0.05" value="0.6"><output for="ld"></output></div>
+          </fieldset>
+          <div id="spots"></div>
+          <div class="checks">
+            <label><input type="checkbox" id="showVel"> Colour by velocity</label>
+            <label><input type="checkbox" id="showGrid" checked> Show grid</label>
+          </div>
+          <button class="button" type="reset">Reset parameters</button>
+        </form>
+      </section>
+    </div>
+  </main>
+  <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../../">Return home</a> · <a href="../">All simulations</a> · <a href="../../research">Research</a></footer>
+  <script src="doppler.js"></script>
+</body>
+</html>
