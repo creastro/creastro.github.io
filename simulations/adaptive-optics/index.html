@@ -21,11 +21,13 @@
     main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}.back{display:inline-block;margin-bottom:26px;font-size:.92rem;text-decoration:none}.back:hover,.back:focus-visible{text-decoration:underline}
     h1{max-width:900px;font-size:clamp(2.2rem,5.5vw,4.4rem);line-height:1.06;letter-spacing:-.05em;margin:16px 0 22px}p{color:var(--muted)}.intro{max-width:860px;font-size:1.1rem}
     .button{display:inline-block;padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-2px);background:#25405b;color:#fff}.button.primary:hover{background:#b6efff;color:var(--bg)}
-    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"wave psf" "ts psf" "controls notes";gap:18px;margin-top:40px;align-items:stretch}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"wave psf" "ts psf" "dm dm" "controls notes";gap:18px;margin-top:40px;align-items:stretch}
     .panel{padding:18px 20px 20px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
     .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
-    #p-wave{grid-area:wave}#p-psf{grid-area:psf}#p-ts{grid-area:ts}#p-notes{grid-area:notes}#p-controls{grid-area:controls}
+    #p-wave{grid-area:wave}#p-psf{grid-area:psf}#p-ts{grid-area:ts}#p-dm{grid-area:dm}#p-notes{grid-area:notes}#p-controls{grid-area:controls}
     canvas{display:block;width:100%}.wf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.wf figure{margin:0}.wf canvas{aspect-ratio:1/1}.wf figcaption{margin-top:6px;font-size:.8rem;line-height:1.35;color:var(--muted);text-align:center}.wf figcaption strong{display:block;color:var(--text);font-size:.85rem}
+    .dmgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}.dmgrid figure{margin:0}#dm-top{aspect-ratio:1/1}#dm-side{aspect-ratio:16/9}.dmgrid .field{margin-top:10px}
+    @media(max-width:900px){#dm-side{aspect-ratio:16/11}}@media(max-width:560px){#dm-side{aspect-ratio:1/1}}
     #psf{aspect-ratio:1/1}#cut{aspect-ratio:16/8;margin-top:10px}#rms{aspect-ratio:16/6}#strehl{aspect-ratio:16/6;margin-top:6px}
     .bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:14px}.bar label{font-size:.88rem;color:var(--muted)}
     .switch{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--text)!important;font-weight:650}.switch input{accent-color:var(--accent);width:16px;height:16px;margin:0}
@@ -39,7 +41,7 @@
     #p-notes ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}#p-notes li{margin:7px 0}#p-notes strong{color:var(--text)}.formula{font-family:ui-monospace,monospace;color:var(--accent);font-size:.9em}
     noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
     footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
-    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"wave" "psf" "ts" "controls" "notes"}}
+    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"wave" "psf" "ts" "dm" "controls" "notes"}.dmgrid{grid-template-columns:minmax(0,1fr)}}
     @media(max-width:560px){main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 70px}.field label{grid-column:1/-1}.wf{gap:6px}.wf figcaption{font-size:.72rem}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
   </style>
@@ -95,6 +97,19 @@
         <canvas id="strehl" role="img" aria-label="Strehl ratio over simulated time, instantaneous and long exposure."></canvas>
       </section>
 
+      <section class="panel" id="p-dm" aria-labelledby="t-dm">
+        <h2 id="t-dm">Deformable mirror in motion</h2>
+        <p class="sub">Each pin is an actuator pushing a thin faceplate. Left: stroke of every actuator, seen from above. Right: side view of one row of actuators, compared with the shape the turbulence asks the mirror to take.</p>
+        <div class="dmgrid">
+          <figure><canvas id="dm-top" role="img" aria-label="Top view of the deformable mirror: a grid of actuators inside the telescope pupil, coloured by how far each one pushes or pulls the faceplate."></canvas></figure>
+          <div>
+            <canvas id="dm-side" role="img" aria-label="Side view of one row of actuators. The faceplate follows the shape of the turbulence, but more smoothly and a little late."></canvas>
+            <div class="field"><label for="dm-row">Row shown in the side view</label><input id="dm-row" type="range" min="-0.5" max="0.5" step="0.01" value="0"><output id="dm-row-out" for="dm-row"></output></div>
+            <p class="stats" id="dm-stats">…</p>
+          </div>
+        </div>
+      </section>
+
       <section class="panel" id="p-controls" aria-labelledby="t-controls">
         <h2 id="t-controls">Parameters</h2>
         <form id="controls" autocomplete="off">
@@ -118,6 +133,7 @@
       <section class="panel" id="p-notes" aria-labelledby="t-notes">
         <h2 id="t-notes">What to look for</h2>
         <ul>
+          <li><strong>Mirror motion.</strong> The faceplate follows the turbulence (dashed) but more smoothly, because the actuators can only reproduce scales larger than their spacing, and a little late, because of the loop delay. With the loop open the mirror stays flat.</li>
           <li><strong>Loop open vs closed.</strong> Without correction the image is a seeing-limited cloud of speckles about <span class="formula">λ / r₀</span> wide. With the loop closed, light collapses into a sharp core with Airy rings, and the Strehl ratio rises.</li>
           <li><strong>Number of actuators.</strong> The mirror only corrects spatial scales larger than twice the actuator pitch, so it controls the image out to <span class="formula">N<sub>act</sub> / 2 · λ/D</span> (the square). Outside it, the halo stays. The leftover is the fitting error, about <span class="formula">0.22 (d / r₀)<sup>5/3</sup></span> rad² for this ideal mirror (about 0.28 for a real one).</li>
           <li><strong>Loop speed and wind.</strong> The mirror always corrects the turbulence of a few milliseconds ago. A slower loop, a longer delay or a stronger wind increases this temporal error and leaves a halo stretched along the wind direction.</li>
