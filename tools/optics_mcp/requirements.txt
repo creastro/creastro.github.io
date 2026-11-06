@@ -1,0 +1,5 @@
+# Python MCP server for optics math.
+# mcp is pinned to the 1.x API (FastMCP). Version 2.x renamed FastMCP to MCPServer.
+mcp[cli]>=1.2,<2
+numpy>=1.26
+scipy>=1.11
