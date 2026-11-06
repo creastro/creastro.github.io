@@ -91,8 +91,12 @@ src/
 ├── math/            # Vector 3D, phản xạ, các hàm toán học thuần
 tools/
 └── optics_mcp/      # Python MCP server: numpy/scipy cho ABCD và nhiễu xạ
+psf-simulator/       # Ứng dụng độc lập (Vite + React + Tailwind): mô phỏng PSF bằng FFT 2D
 mcp_optics_guide.md  # Hướng dẫn kết nối MCP
 ```
+
+`psf-simulator/` có `package.json` riêng và không dùng Three.js: nó vẽ PSF lên Canvas 2D sau khi tính bằng FFT
+trong Web Worker. Chạy `npm test`, `npm run lint`, `npm run build` trong thư mục đó trước khi commit.
 
 Quy tắc phụ thuộc: `optics/` được import `math/`. `math/` **không** được import `optics/`.
 
