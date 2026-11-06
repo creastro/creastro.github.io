@@ -14,6 +14,7 @@
 
 import { createAperture, nonZeroRowRange, openArea, type ApertureParams } from './aperture'
 import { fft2d } from './fft'
+import { ZERO_ABERRATIONS, buildWavefront, hasAberration, type Aberrations } from './zernike'
 
 export const ARCSEC_PER_RAD = (180 / Math.PI) * 3600
 
@@ -27,15 +28,49 @@ export interface PsfResult {
   readonly strehl: number
   /** Diện tích mở của khẩu độ, tính theo pixel². */
   readonly openArea: number
+  /** Hàm khẩu độ A (n × n). */
+  readonly aperture: Float64Array
+  /** Mặt sóng theo bước sóng (n × n), hoặc null khi không có quang sai. */
+  readonly wavefrontWaves: Float64Array | null
+  /** Sai số mặt sóng RMS trên phần khẩu độ mở, sau khi trừ piston, đơn vị bước sóng. */
+  readonly wavefrontRmsWaves: number
 }
 
-export function computePsf(params: ApertureParams): PsfResult {
+/** Gần đúng Maréchal cho quang sai nhỏ: S ≈ exp(−σ²) với σ = 2π · RMS (rad). */
+export function marechalStrehl(rmsWaves: number): number {
+  return Math.exp(-((2 * Math.PI * rmsWaves) ** 2))
+}
+
+export function computePsf(
+  params: ApertureParams,
+  aberrations: Aberrations = ZERO_ABERRATIONS,
+): PsfResult {
   const n = params.gridSize
   const mask = createAperture(params)
   const area = openArea(mask)
 
+  // Trường pupil U = A · exp(i · 2π · W). Phép nhân với pha không đổi |U| nên không thay đổi
+  // tổng năng lượng (định lý Parseval), chỉ phân bố lại năng lượng trong ảnh.
+  const wavefront = hasAberration(aberrations)
+    ? buildWavefront(n, params.pupilDiameterPx, aberrations)
+    : null
   const re = mask.slice()
   const im = new Float64Array(n * n)
+  let rms = 0
+  if (wavefront) {
+    let sumW = 0
+    for (let i = 0; i < mask.length; i++) {
+      if (mask[i] === 0) continue
+      const phase = 2 * Math.PI * wavefront[i]
+      re[i] = mask[i] * Math.cos(phase)
+      im[i] = mask[i] * Math.sin(phase)
+      sumW += mask[i] * wavefront[i]
+    }
+    const mean = sumW / area
+    let sumVar = 0
+    for (let i = 0; i < mask.length; i++) sumVar += mask[i] * (wavefront[i] - mean) ** 2
+    rms = Math.sqrt(sumVar / area)
+  }
   fft2d(re, im, n, { nonZeroRows: nonZeroRowRange(mask, n) })
 
   // Cường độ rồi dịch tâm (fftshift): tần số 0 chuyển về chỉ số (n/2, n/2).
@@ -59,6 +94,9 @@ export function computePsf(params: ApertureParams): PsfResult {
     intensity,
     strehl: peak,
     openArea: area,
+    aperture: mask,
+    wavefrontWaves: wavefront,
+    wavefrontRmsWaves: rms,
   }
 }
 
