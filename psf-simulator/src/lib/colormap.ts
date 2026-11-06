@@ -1,6 +1,9 @@
 /** Thang màu cho PSF: bảng tra 256 mức RGB nội suy tuyến tính giữa các điểm dừng. */
 
-/** Thang màu dựng từ bảng tra, và 'spectrum': tô màu theo bước sóng thật của từng kênh. */
+/**
+ * Thang màu dựng từ bảng tra, và 'spectrum': tô màu theo bước sóng của từng kênh.
+ * 'spectrum' chỉ minh hoạ sắc độ (không mô hình hoá phổ nguồn hay đáp ứng của mắt), nên không cho màu trắng đúng.
+ */
 export type MapName = 'gray' | 'hot' | 'inferno' | 'viridis' | 'ice'
 export type ColormapName = MapName | 'spectrum'
 
@@ -51,7 +54,7 @@ export const COLORMAP_LABELS: Record<ColormapName, string> = {
   inferno: 'Inferno (màu giả)',
   viridis: 'Viridis (màu giả)',
   ice: 'Băng (đen–xanh–lam nhạt–trắng)',
-  spectrum: 'Màu thật theo bước sóng',
+  spectrum: 'Màu theo bước sóng (minh hoạ)',
 }
 
 const cache = new Map<MapName, Uint8ClampedArray>()
