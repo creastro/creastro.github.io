@@ -21,11 +21,16 @@
     main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}.back{display:inline-block;margin-bottom:26px;font-size:.92rem;text-decoration:none}.back:hover,.back:focus-visible{text-decoration:underline}
     h1{max-width:900px;font-size:clamp(2.2rem,5.5vw,4.4rem);line-height:1.06;letter-spacing:-.05em;margin:16px 0 22px}p{color:var(--muted)}.intro{max-width:860px;font-size:1.1rem}
     .button{display:inline-block;padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-2px);background:#25405b;color:#fff}.button.primary:hover{background:#b6efff;color:var(--bg)}
-    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"wave psf" "ts psf" "dm dm" "controls notes";gap:18px;margin-top:40px;align-items:stretch}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"controls psf" "ts psf" "wave wave" "dm dm" "notes notes";gap:18px;margin-top:40px;align-items:stretch}
     .panel{padding:18px 20px 20px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
     .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
     #p-wave{grid-area:wave}#p-psf{grid-area:psf}#p-ts{grid-area:ts}#p-dm{grid-area:dm}#p-notes{grid-area:notes}#p-controls{grid-area:controls}
-    canvas{display:block;width:100%}.wf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.wf figure{margin:0}.wf canvas{aspect-ratio:1/1}.wf figcaption{margin-top:6px;font-size:.8rem;line-height:1.35;color:var(--muted);text-align:center}.wf figcaption strong{display:block;color:var(--text);font-size:.85rem}
+    canvas{display:block;width:100%}.wf{display:grid;grid-template-columns:repeat(3,minmax(0,360px));justify-content:center;gap:18px}.wf figure{margin:0}.wf canvas{aspect-ratio:1/1}.wf figcaption{margin-top:6px;font-size:.8rem;line-height:1.35;color:var(--muted);text-align:center}.wf figcaption strong{display:block;color:var(--text);font-size:.85rem}
+    .cbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;font:12px ui-monospace,monospace;color:var(--muted)}.cbar i{display:block;width:min(260px,50%);height:10px;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:linear-gradient(90deg,#5ab9ff,#0d1426,#ffaa46)}
+    .fitbox{margin:14px 0 0}.fitrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:6px 0 4px}.fitrow label{font-size:.88rem;color:var(--muted)}.fitrow .chk{display:flex;align-items:center;gap:8px}.fitrow .chk input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+    .fwhm{width:100%;border-collapse:collapse;margin-top:12px;font-size:.84rem}.fwhm th{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;text-align:right}.fwhm td{padding:5px 8px;border-bottom:1px solid var(--border);text-align:right;font:12.5px ui-monospace,monospace;color:var(--accent)}.fwhm th:first-child,.fwhm td:first-child{text-align:left}.fwhm td:first-child{font:.84rem system-ui,sans-serif;color:var(--muted)}.fwhm tr.fit td{color:#7bd88f}.fwhm tr.fit td:first-child{color:var(--text);font-weight:650}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+    @media(min-width:901px){#p-notes ul{columns:2;column-gap:40px}#p-notes li{break-inside:avoid}}
     .dmgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}.dmgrid figure{margin:0}#dm-top{aspect-ratio:1/1}#dm-side{aspect-ratio:16/9}.dmgrid .field{margin-top:10px}
     @media(max-width:900px){#dm-side{aspect-ratio:16/11}}@media(max-width:560px){#dm-side{aspect-ratio:1/1}}
     #psf{aspect-ratio:1/1}#cut{aspect-ratio:16/8;margin-top:10px}#rms{aspect-ratio:16/6}#strehl{aspect-ratio:16/6;margin-top:6px}
@@ -41,7 +46,7 @@
     #p-notes ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}#p-notes li{margin:7px 0}#p-notes strong{color:var(--text)}.formula{font-family:ui-monospace,monospace;color:var(--accent);font-size:.9em}
     noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
     footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
-    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"wave" "psf" "ts" "dm" "controls" "notes"}.dmgrid{grid-template-columns:minmax(0,1fr)}}
+    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"psf" "controls" "ts" "wave" "dm" "notes"}.dmgrid{grid-template-columns:minmax(0,1fr)}}
     @media(max-width:560px){main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 70px}.field label{grid-column:1/-1}.wf{gap:6px}.wf figcaption{font-size:.72rem}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
   </style>
@@ -66,6 +71,12 @@
           <figure><canvas id="wf-dm" role="img" aria-label="Phase map of the correction applied by the deformable mirror."></canvas><figcaption><strong>Deformable mirror</strong>correction</figcaption></figure>
           <figure><canvas id="wf-res" role="img" aria-label="Phase map of the residual wavefront error after correction."></canvas><figcaption><strong>Residual</strong>atmosphere − mirror</figcaption></figure>
         </div>
+        <div class="cbar"><span id="cb-min">−</span><i></i><span id="cb-max">+</span></div>
+      </section>
+
+      <section class="panel" id="p-psf" aria-labelledby="t-psf">
+        <h2 id="t-psf">Image of the star</h2>
+        <p class="sub">Point-spread function (PSF) on a log scale, normalised to the peak of a perfect telescope. Square: region the mirror controls.</p>
         <div class="bar">
           <label class="switch"><input type="checkbox" id="closed" checked> AO loop closed</label>
           <button class="button primary" type="button" id="play" aria-label="Pause simulation">Pause</button>
@@ -74,12 +85,7 @@
           <select id="speed" aria-label="Simulation speed"><option value="1">×1</option><option value="2" selected>×2</option><option value="5">×5</option><option value="10">×10</option></select>
         </div>
         <p class="warn" id="warn" role="status">The loop is unstable: the residual is larger than the turbulence itself. Lower the gain or the delay.</p>
-      </section>
-
-      <section class="panel" id="p-psf" aria-labelledby="t-psf">
-        <h2 id="t-psf">Image of the star</h2>
-        <p class="sub">Point-spread function (PSF) on a log scale, normalised to the peak of a perfect telescope. Square: region the mirror controls.</p>
-        <canvas id="psf" role="img" aria-label="Image of a point-like star formed by the telescope. With the loop open it is a blurred cloud of speckles. With the loop closed it shows a sharp core surrounded by Airy rings."></canvas>
+        <canvas id="psf" style="margin-top:14px" role="img" aria-label="Image of a point-like star formed by the telescope. With the loop open it is a blurred cloud of speckles. With the loop closed it shows a sharp core surrounded by Airy rings."></canvas>
         <div class="bar">
           <span class="seg" role="radiogroup" aria-label="Exposure type">
             <label><input type="radio" name="expo" value="short"> Short exposure</label>
@@ -87,7 +93,19 @@
           </span>
         </div>
         <p class="stats" id="stats" aria-live="off">…</p>
-        <canvas id="cut" role="img" aria-label="Radially averaged intensity of the long-exposure image versus angular distance from the star, compared with a perfect telescope, on a log scale."></canvas>
+        <canvas id="cut" role="img" aria-label="Radially averaged intensity of the long-exposure image versus angular distance from the star, compared with a perfect telescope and with the fitted function, on a log scale."></canvas>
+        <fieldset class="fitbox">
+          <legend>Fit the radial profile of the long exposure</legend>
+          <div class="fitrow">
+            <label for="fit1">Function 1</label>
+            <select id="fit1"><option value="gauss">Gaussian</option><option value="moffat">Moffat</option><option value="airy" selected>Airy</option></select>
+            <label for="fit2">+ Function 2</label>
+            <select id="fit2"><option value="none">None</option><option value="gauss">Gaussian</option><option value="moffat" selected>Moffat</option><option value="airy">Airy</option></select>
+            <label class="chk"><input type="checkbox" id="showfit" checked> Show fit</label>
+          </div>
+        </fieldset>
+        <table class="fwhm" id="fwhm"><caption class="sr-only">Full width at half maximum of the fit compared with the diffraction limit and the seeing</caption></table>
+        <p class="stats" id="fit-note">…</p>
       </section>
 
       <section class="panel" id="p-ts" aria-labelledby="t-ts">
@@ -133,12 +151,13 @@
       <section class="panel" id="p-notes" aria-labelledby="t-notes">
         <h2 id="t-notes">What to look for</h2>
         <ul>
+          <li><strong>Fitting the profile.</strong> A Gaussian describes a smooth core, a Moffat adds the broad wings of the seeing halo, and an Airy function is the diffraction pattern of a circular telescope. Choose one function or the sum of two, for example Airy + Moffat for a sharp core inside a halo, and watch the FWHM move between the diffraction limit (1.03 λ/D) and the seeing limit (0.98 λ/r₀).</li>
           <li><strong>Mirror motion.</strong> The faceplate follows the turbulence (dashed) but more smoothly, because the actuators can only reproduce scales larger than their spacing, and a little late, because of the loop delay. With the loop open the mirror stays flat.</li>
           <li><strong>Loop open vs closed.</strong> Without correction the image is a seeing-limited cloud of speckles about <span class="formula">λ / r₀</span> wide. With the loop closed, light collapses into a sharp core with Airy rings, and the Strehl ratio rises.</li>
           <li><strong>Number of actuators.</strong> The mirror only corrects spatial scales larger than twice the actuator pitch, so it controls the image out to <span class="formula">N<sub>act</sub> / 2 · λ/D</span> (the square). Outside it, the halo stays. The leftover is the fitting error, about <span class="formula">0.22 (d / r₀)<sup>5/3</sup></span> rad² for this ideal mirror (about 0.28 for a real one).</li>
           <li><strong>Loop speed and wind.</strong> The mirror always corrects the turbulence of a few milliseconds ago. A slower loop, a longer delay or a stronger wind increases this temporal error and leaves a halo stretched along the wind direction.</li>
           <li><strong>Gain and noise.</strong> A faint guide star gives few photons per subaperture, so the measurement is noisy. Lowering the gain filters the noise but slows the correction. A high gain with a long delay makes the loop unstable.</li>
-          <li><strong>Limits of the model.</strong> Single frozen turbulent layer moving at constant speed, on a screen four pupil diameters wide (the very largest scales are slightly under-represented). An ideal wavefront sensor and mirror (no aliasing, no non-linearity), no chromatic effects, and a simplified photon-noise estimate.</li>
+          <li><strong>Limits of the model.</strong> The PSF has two pixels per λ/D, so FWHM values near the diffraction limit are only good to a few per cent. With the loop open, a few seconds of long exposure hold few independent samples of the large-scale tilt, so the measured FWHM changes by about ±20 % from one run to the next (use Restart) and, averaged over runs, lies within about 10 % of the von Kármán estimate. Single frozen turbulent layer moving at constant speed, on a periodic screen four pupil diameters wide completed with subharmonics for the large scales. An ideal wavefront sensor and mirror (no aliasing, no non-linearity), no chromatic effects, and a simplified photon-noise estimate.</li>
         </ul>
       </section>
     </div>
