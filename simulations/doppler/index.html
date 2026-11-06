@@ -9,7 +9,7 @@
   <meta property="og:title" content="Doppler shifts of a rotating planet | Tin Mai (Mai Như Tín)">
   <meta property="og:description" content="Interactive simulation of the Doppler-shifted spectral line of a rotating planet, and how dark or bright spots on its surface distort the line profile.">
   <meta property="og:url" content="https://creastro.github.io/simulations/doppler/">
-  <meta property="og:image" content="https://creastro.github.io/images/ava.jpg">
+  <meta property="og:image" content="https://creastro.github.io/simulations/doppler/preview.jpg">
   <title>Doppler Shifts of a Rotating Planet | Tin Mai (Mai Như Tín)</title>
   <style>
     :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--warm:#ffcf6b;--border:rgba(255,255,255,.14);--panel:#111b30e0}
@@ -18,7 +18,7 @@
     .sky:before,.sky:after{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20px 30px,#fff 99%,transparent),radial-gradient(2px 2px at 90px 110px,#b5d9ff 99%,transparent),radial-gradient(1px 1px at 160px 60px,#fff 99%,transparent),radial-gradient(1px 1px at 220px 170px,#fff 99%,transparent);background-size:260px 220px;animation:twinkle 5s ease-in-out infinite alternate}.sky:after{transform:translate(65px,85px);opacity:.4;animation-delay:-3s;animation-duration:7s}@keyframes twinkle{from{opacity:.25}to{opacity:.85}}
     a{color:var(--accent)}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.container{width:min(1240px,92%);margin:auto}
     nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}.brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:12px}.nav-links a{padding:5px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;transition:background .2s,color .2s}.nav-links a:hover,.nav-links a:focus-visible,.nav-links .active{background:var(--accent);color:var(--bg)!important}.home-link{color:var(--accent)!important}
-    main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}
+    main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}.back{display:inline-block;margin-bottom:26px;font-size:.92rem;text-decoration:none}.back:hover,.back:focus-visible{text-decoration:underline}
     h1{max-width:900px;font-size:clamp(2.2rem,5.5vw,4.4rem);line-height:1.06;letter-spacing:-.05em;margin:16px 0 22px}p{color:var(--muted)}.intro{max-width:860px;font-size:1.1rem}
     .button{display:inline-block;padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-2px);background:#25405b;color:#fff}.button.primary:hover{background:#b6efff;color:var(--bg)}
     .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"planet profile" "wf controls" "notes controls";gap:18px;margin-top:40px;align-items:stretch}
@@ -44,6 +44,7 @@
   <div class="sky" aria-hidden="true"></div>
   <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../../">Home</a><a href="../../#education">Education</a><a href="../../research">Research</a><a class="active" href="../../simulations">Simulations</a><a href="../../story">My story</a><a href="../../contact">Contact</a></div></nav></header>
   <main class="container">
+    <a class="back" href="../">← All simulations</a><br>
     <span class="eyebrow">Simulation · Exoplanets</span>
     <h1>Doppler shifts of a rotating planet</h1>
     <p class="intro">A rotating planet broadens its spectral lines: the approaching limb is blueshifted and the receding limb is redshifted. When a dark or bright spot rotates across the disk, it leaves a bump or a dip that drifts through the line profile. This is the principle behind Doppler imaging of directly-imaged planets and brown dwarfs, like the work I did on VHS 1256 b.</p>
