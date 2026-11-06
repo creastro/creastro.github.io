@@ -675,24 +675,60 @@
     return parts.join(' + ');
   }
 
+  // The table is built once, so that its clickable names keep the focus and their tooltips while the numbers change.
+  const FWHM_ROWS = [
+    ['fit', 'fwhm-fit', 'row-fit', 'Fit'],
+    ['', 'fwhm-data', 'row-data', 'Measured on the data (no model)'],
+    ['', 'fwhm-diff', 'row-diff', 'Diffraction limit, 1.03 λ/D'],
+    ['', 'fwhm-seeing', 'row-seeing', 'Seeing limit at λ: 0.98 λ/r₀ (von Kármán)'],
+    ['', 'fwhm-eps0', 'row-eps0', 'Seeing ε₀ at 500 nm: 0.98 λ/r₀'],
+    ['', 'fwhm-quad', 'row-quad', 'Diffraction and seeing in quadrature']
+  ];
+  let fwhmCells = null;
+
+  function buildFitTable() {
+    const table = $('fwhm');
+    const head = document.createElement('thead');
+    const hr = document.createElement('tr');
+    ['Full width at half maximum', 'in λ/D', 'in arcsec', 'fit ÷ value'].forEach((t) => {
+      const th = document.createElement('th');
+      th.scope = 'col';
+      th.textContent = t;
+      hr.appendChild(th);
+    });
+    head.appendChild(hr);
+    const body = document.createElement('tbody');
+    fwhmCells = FWHM_ROWS.map((r) => {
+      const tr = document.createElement('tr');
+      tr.className = r[0];
+      tr.dataset.tipKey = r[2];
+      const td0 = document.createElement('td');
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'term'; b.dataset.topic = r[1]; b.textContent = r[3];
+      b.setAttribute('aria-haspopup', 'dialog');
+      td0.appendChild(b);
+      tr.appendChild(td0);
+      const cells = [document.createElement('td'), document.createElement('td'), document.createElement('td')];
+      cells.forEach((c) => tr.appendChild(c));
+      body.appendChild(tr);
+      return { label: b, ld: cells[0], arc: cells[1], ratio: cells[2] };
+    });
+    table.appendChild(head);
+    table.appendChild(body);
+  }
+
   function updateFitTable() {
+    if (!fwhmCells) buildFitTable();
     const th = theory();
     const f = fitSt.ok ? fitSt.fwhm : NaN;
     const label = fitSt.types.map((t) => NAMES[t]).join(' + ') || '–';
-    const rows = [
-      ['fit', 'Fit: ' + label, f, false],
-      ['', 'Measured on the data (no model)', fitSt.dataFwhm, true],
-      ['', 'Diffraction limit, 1.03 λ/D', th.diff, true],
-      ['', 'Seeing limit at λ: 0.98 λ/r₀ (von Kármán)', th.vk, true],
-      ['', 'Seeing ε₀ at 500 nm: 0.98 λ/r₀', th.eps0, true],
-      ['', 'Diffraction and seeing in quadrature', th.quad, true]
-    ];
-    let html = '<tr><th scope="col">Full width at half maximum</th><th scope="col">in λ/D</th><th scope="col">in arcsec</th><th scope="col">fit ÷ value</th></tr>';
-    rows.forEach((r) => {
-      html += '<tr class="' + r[0] + '"><td>' + r[1] + '</td><td>' + fmtLD(r[2]) + '</td><td>' + (isFinite(r[2]) ? fmtArc(r[2] * th.lamDarc) : '–') + '</td><td>' +
-        (r[3] && isFinite(f) && isFinite(r[2]) ? (f / r[2]).toFixed(2) : '') + '</td></tr>';
+    const vals = [f, fitSt.dataFwhm, th.diff, th.vk, th.eps0, th.quad];
+    fwhmCells.forEach((c, i) => {
+      if (i === 0) c.label.textContent = 'Fit: ' + label;
+      c.ld.textContent = fmtLD(vals[i]);
+      c.arc.textContent = isFinite(vals[i]) ? fmtArc(vals[i] * th.lamDarc) : '–';
+      c.ratio.textContent = i > 0 && isFinite(f) && isFinite(vals[i]) ? (f / vals[i]).toFixed(2) : '';
     });
-    $('fwhm').innerHTML = html.replace('<tr', '<thead><tr').replace('</tr>', '</tr></thead><tbody>') + '</tbody>';
 
     let note = 'Fit: ' + describeFit() + ' · typical misfit ' + (isFinite(fitSt.misfit) ? Math.round(fitSt.misfit * 100) + ' %' : '–') + '<br>';
     if (th.vk <= 1.05 * th.diff) {
@@ -1273,20 +1309,44 @@
 
   /* ---------- derived readouts ---------- */
 
+  const READ_ROWS = [
+    ['dr0', 'D / r₀ at the imaging wavelength'],
+    ['pitch', 'Actuator pitch d'],
+    ['fitstrehl', 'Strehl limit from fitting error alone (ideal mirror)'],
+    ['photons', 'Photons per subaperture per frame'],
+    ['noise', 'Sensor noise per actuator (wavefront)']
+  ];
+  let readCells = null;
+
   function updateReadouts() {
-    const rows = [
-      ['D / r₀ at the imaging wavelength', (P.D / P.r0lam).toFixed(1)],
-      ['Actuator pitch d', (P.pitch * 100).toFixed(1) + ' cm  (d / r₀ = ' + (P.pitch / P.r0lam).toFixed(2) + ')'],
-      ['Strehl limit from fitting error alone (ideal mirror)', P.fitStrehl.toFixed(2)],
-      ['Photons per subaperture per frame', P.photons < 10 ? P.photons.toFixed(1) : Math.round(P.photons).toLocaleString('en-US')],
-      ['Sensor noise per actuator (wavefront)', P.noiseOPD.toFixed(0) + ' nm']
-    ];
-    $('read').innerHTML = rows.map((r) => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
+    if (!readCells) {
+      const dl = $('read');
+      readCells = {};
+      READ_ROWS.forEach(([key, text]) => {
+        const dt = document.createElement('dt');
+        dt.dataset.tipKey = 'read-' + key;
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'term'; b.dataset.topic = key; b.textContent = text;
+        b.setAttribute('aria-haspopup', 'dialog');
+        dt.appendChild(b);
+        const dd = document.createElement('dd');
+        dl.appendChild(dt);
+        dl.appendChild(dd);
+        readCells[key] = dd;
+      });
+    }
+    readCells.dr0.textContent = (P.D / P.r0lam).toFixed(1);
+    readCells.pitch.textContent = (P.pitch * 100).toFixed(1) + ' cm  (d / r₀ = ' + (P.pitch / P.r0lam).toFixed(2) + ')';
+    readCells.fitstrehl.textContent = P.fitStrehl.toFixed(2);
+    readCells.photons.textContent = P.photons < 10 ? P.photons.toFixed(1) : Math.round(P.photons).toLocaleString('en-US');
+    readCells.noise.textContent = P.noiseOPD.toFixed(0) + ' nm';
   }
 
   /* ---------- main loop ---------- */
 
   let playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let dialogOpen = false;                       // the simulation pauses while an explanation is open
+  window.addEventListener('sim-dialog', (e) => { dialogOpen = e.detail.open; if (!dialogOpen) schedule(); });
   let onScreen = true;
   let dirty = true;
   let raf = 0;
@@ -1380,7 +1440,7 @@
       for (let k = 0; k < n; k++) step();
     }
     render();
-    if (playing && onScreen) { last = ts; schedule(); } else last = 0;
+    if (playing && onScreen && !dialogOpen) { last = ts; schedule(); } else last = 0;
   }
 
   function schedule() {

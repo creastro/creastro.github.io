@@ -11,6 +11,8 @@
   <meta property="og:url" content="https://creastro.github.io/simulations/adaptive-optics/">
   <meta property="og:image" content="https://creastro.github.io/simulations/adaptive-optics/preview.jpg">
   <title>Adaptive Optics Loop | Tin Mai (Mai Như Tín)</title>
+  <link rel="stylesheet" href="../shared/katex/katex.min.css">
+  <link rel="stylesheet" href="../shared/explain.css">
   <style>
     :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--warm:#ffcf6b;--border:rgba(255,255,255,.14);--panel:#111b30e0}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 system-ui,sans-serif}
@@ -87,7 +89,7 @@
         <p class="warn" id="warn" role="status">The loop is unstable: the residual is larger than the turbulence itself. Lower the gain or the delay.</p>
         <canvas id="psf" style="margin-top:14px" role="img" aria-label="Image of a point-like star formed by the telescope. With the loop open it is a blurred cloud of speckles. With the loop closed it shows a sharp core surrounded by Airy rings."></canvas>
         <div class="bar">
-          <span class="seg" role="radiogroup" aria-label="Exposure type">
+          <span class="seg" id="expo-group" role="radiogroup" aria-label="Exposure type">
             <label><input type="radio" name="expo" value="short"> Short exposure</label>
             <label><input type="radio" name="expo" value="long" checked> Long exposure</label>
           </span>
@@ -144,7 +146,7 @@
             <div id="g-ao"></div>
           </fieldset>
           <dl class="read" id="read" aria-label="Derived quantities"></dl>
-          <button class="button" type="reset">Reset parameters</button>
+          <button class="button" type="reset" id="reset">Reset parameters</button>
         </form>
       </section>
 
@@ -164,5 +166,8 @@
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../../">Return home</a> · <a href="../">All simulations</a> · <a href="../../research">Research</a></footer>
   <script src="adaptive-optics.js"></script>
+  <script src="help.js"></script>
+  <script src="../shared/katex/katex.min.js"></script>
+  <script src="../shared/explain.js"></script>
 </body>
 </html>

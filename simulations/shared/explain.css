@@ -1,0 +1,49 @@
+/* Tooltips, clickable terms and the explanation dialog, shared by the simulations.
+   The pages define --bg, --text, --muted, --accent, --border. */
+
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* short tooltip on hover or keyboard focus */
+.sim-tip{position:fixed;z-index:1000;left:0;top:0;max-width:min(320px,calc(100vw - 24px));padding:7px 11px;border:1px solid var(--accent);border-radius:8px;background:#0d1730;color:var(--text);font:.82rem/1.45 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.45);pointer-events:none;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .12s,transform .12s,visibility .12s}
+.sim-tip.on{opacity:1;visibility:visible;transform:none}
+.sim-tip .more{display:block;margin-top:3px;color:var(--accent);font-size:.74rem}
+
+/* a parameter name you can click for the theory */
+.term{padding:0;border:0;border-bottom:1px dotted var(--accent);background:none;color:inherit;font:inherit;line-height:inherit;text-align:left;cursor:help}
+.term:hover,.term:focus-visible{color:var(--accent)}
+.i-btn{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:8px;padding:0;border:1px solid var(--accent);border-radius:50%;background:transparent;color:var(--accent);font:700 12px/1 system-ui,sans-serif;vertical-align:middle;cursor:help}
+.i-btn:hover,.i-btn:focus-visible{background:var(--accent);color:var(--bg)}
+
+/* explanation dialog */
+html.dlg-open{overflow:hidden}
+dialog.sim-dialog{width:min(780px,calc(100vw - 24px));max-height:calc(100vh - 24px);margin:auto;padding:0;overflow:hidden;border:1px solid var(--accent);border-radius:14px;background:#0f182c;color:var(--text);font:16px/1.65 system-ui,sans-serif;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+dialog.sim-dialog[open]{display:flex;flex-direction:column}
+dialog.sim-dialog::backdrop{background:rgba(4,8,18,.74);backdrop-filter:blur(2px)}
+.dlg-head{display:flex;align-items:center;gap:12px;padding:14px 18px 12px 24px;border-bottom:1px solid var(--border);background:#0f182c}
+.dlg-head h2{flex:1;margin:0;font-size:1.2rem;line-height:1.3}
+.dlg-head button{flex:none;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.88rem;cursor:pointer}
+.dlg-head button:hover,.dlg-head button:focus-visible{border-color:var(--accent);color:var(--accent)}
+.dlg-back{padding:4px 10px;order:-1}.dlg-close{width:34px;height:34px;font-size:1.3rem!important;line-height:1}
+.dlg-body{flex:1;overflow:auto;padding:6px 24px 24px;overscroll-behavior:contain}
+.dlg-body:focus{outline:none}
+.dlg-body h3{margin:22px 0 6px;color:var(--accent);font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.dlg-body p{margin:8px 0;color:var(--muted);font-size:.97rem}
+.dlg-body p.what{margin-top:14px;color:var(--text);font-size:1.02rem}
+.formula-box{margin:10px 0;padding:8px 14px 6px;border:1px solid var(--border);border-radius:10px;background:rgba(143,227,255,.05)}
+.formula-box .f-note{display:block;margin-bottom:2px;color:var(--muted);font-size:.8rem}
+.formula-box .katex{color:var(--text);font-size:1.08em}
+.formula-box .katex-display{margin:.4em 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.dlg-body p .katex{color:var(--text)}
+.dlg-body code{color:var(--accent)}
+.refs{margin:6px 0 0;padding-left:22px;color:var(--muted);font-size:.88rem}
+.refs li{margin:5px 0}
+.refs a{word-break:break-word}
+.xref{padding:0;border:0;border-bottom:1px dotted var(--accent);background:none;color:var(--accent);font:inherit;cursor:pointer}
+.related{margin-top:18px;font-size:.88rem;color:var(--muted)}
+.related .xref{margin-right:12px}
+
+@media(max-width:560px){
+  .dlg-head{padding:12px 12px 10px 16px}.dlg-body{padding:4px 16px 20px}
+  .dlg-head h2{font-size:1.05rem}
+}
+@media(prefers-reduced-motion:reduce){.sim-tip{transition:none}}

@@ -637,6 +637,8 @@ let profMin = 0.9;
   let phase = 0;
   let playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let onScreen = true;
+  let dialogOpen = false;                       // the simulation pauses while an explanation is open
+  window.addEventListener('sim-dialog', (e) => { dialogOpen = e.detail.open; if (!dialogOpen) schedule(); });
   let dirty = true;
   let raf = 0;
   let last = 0;
@@ -667,7 +669,7 @@ let profMin = 0.9;
       $('phase-out').textContent = phase.toFixed(2);
     }
     render();
-    if (playing && onScreen) { last = ts; schedule(); } else last = 0;
+    if (playing && onScreen && !dialogOpen) { last = ts; schedule(); } else last = 0;
   }
 
   function schedule() {

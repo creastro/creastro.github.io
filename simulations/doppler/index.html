@@ -11,6 +11,8 @@
   <meta property="og:url" content="https://creastro.github.io/simulations/doppler/">
   <meta property="og:image" content="https://creastro.github.io/simulations/doppler/preview.jpg">
   <title>Doppler Shifts of a Rotating Planet | Tin Mai (Mai Như Tín)</title>
+  <link rel="stylesheet" href="../shared/katex/katex.min.css">
+  <link rel="stylesheet" href="../shared/explain.css">
   <style>
     :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--warm:#ffcf6b;--border:rgba(255,255,255,.14);--panel:#111b30e0}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 system-ui,sans-serif}
@@ -104,12 +106,15 @@
             <label><input type="checkbox" id="showVel"> Colour by velocity</label>
             <label><input type="checkbox" id="showGrid" checked> Show grid</label>
           </div>
-          <button class="button" type="reset">Reset parameters</button>
+          <button class="button" type="reset" id="reset">Reset parameters</button>
         </form>
       </section>
     </div>
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../../">Return home</a> · <a href="../">All simulations</a> · <a href="../../research">Research</a></footer>
   <script src="doppler.js"></script>
+  <script src="help.js"></script>
+  <script src="../shared/katex/katex.min.js"></script>
+  <script src="../shared/explain.js"></script>
 </body>
 </html>
