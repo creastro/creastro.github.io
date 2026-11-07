@@ -1,4 +1,6 @@
+import { READOUT_HELP } from '../help'
 import { IMAGE_SIZE } from '../lib/frame'
+import { Tip } from './Tip'
 import { useImageData } from './useImageData'
 
 interface PsfCanvasProps {
@@ -28,13 +30,14 @@ export function PsfCanvas({ rgba, fovArcsec }: PsfCanvasProps) {
   const bar = niceScaleBar(fovArcsec)
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[640px] overflow-hidden rounded-lg bg-black ring-1 ring-slate-700">
+    <Tip help={READOUT_HELP.psfImage} className="mx-auto w-full max-w-[640px]">
+    <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-black ring-1 ring-slate-700">
       <canvas
         ref={ref}
         width={IMAGE_SIZE}
         height={IMAGE_SIZE}
         role="img"
-        aria-label="Ảnh PSF của kính thiên văn theo thang logarit"
+        aria-label="Telescope point spread function on a logarithmic scale"
         className="h-full w-full"
       />
       <div
@@ -45,5 +48,6 @@ export function PsfCanvas({ rgba, fovArcsec }: PsfCanvasProps) {
         {formatArcsec(bar)}
       </div>
     </div>
+    </Tip>
   )
 }

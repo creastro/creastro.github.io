@@ -1,33 +1,37 @@
 import type { FrameStats } from '../lib/frame'
+import { READOUT_HELP, type ReadoutKey } from '../help'
+import { Tip } from './Tip'
 
 const arcsec = (v: number) => `${v.toFixed(v < 0.1 ? 4 : 3)}″`
 
 export function Readouts({ stats, ms }: { stats: FrameStats | null; ms: number | null }) {
   if (!stats) return null
-  const rows: [string, string][] = [
-    ['λ/D', arcsec(stats.lambdaOverDArcsec)],
-    ['Bán kính Airy (1,22 λ/D)', arcsec(stats.airyRadiusArcsec)],
-    ['Diện tích thu sáng', `${(stats.throughput * 100).toFixed(1)}%`],
-    ['Tỉ số Strehl', stats.strehl.toFixed(3)],
-    ['Mặt sóng RMS', `${stats.wavefrontRmsWaves.toFixed(3)} λ`],
-    ['Strehl theo Maréchal', stats.marechalStrehl.toFixed(3)],
-    ['Đỉnh so với gương không che', `${(stats.relativePeak * 100).toFixed(1)}%`],
+  const rows: [ReadoutKey, string, string][] = [
+    ['lambdaOverD', 'λ/D', arcsec(stats.lambdaOverDArcsec)],
+    ['airyRadius', 'Airy radius (1.22 λ/D)', arcsec(stats.airyRadiusArcsec)],
+    ['throughput', 'Light-collecting area', `${(stats.throughput * 100).toFixed(1)}%`],
+    ['strehl', 'Strehl ratio', stats.strehl.toFixed(3)],
+    ['wavefrontRms', 'Wavefront error (RMS)', `${stats.wavefrontRmsWaves.toFixed(3)} λ`],
+    ['marechal', 'Strehl from Maréchal', stats.marechalStrehl.toFixed(3)],
+    ['relativePeak', 'Peak vs. clear circle', `${(stats.relativePeak * 100).toFixed(1)}%`],
   ]
-  if (stats.bandSamples > 1) rows.push(['Số mẫu bước sóng', String(stats.bandSamples)])
+  if (stats.bandSamples > 1) rows.push(['bandSamples', 'Wavelength samples', String(stats.bandSamples)])
+  if (ms !== null) rows.push(['computeTime', 'Compute time', `${ms.toFixed(0)} ms`])
+
   return (
-    <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm" aria-live="polite">
-      {rows.map(([k, v]) => (
-        <div key={k} className="contents">
-          <dt className="text-slate-400">{k}</dt>
-          <dd className="text-right font-mono tabular-nums text-slate-100">{v}</dd>
-        </div>
+    <dl className="space-y-0.5 text-sm" aria-live="polite">
+      {rows.map(([key, label, value]) => (
+        <Tip
+          key={key}
+          help={READOUT_HELP[key]}
+          className="flex justify-between gap-4 rounded px-1 py-0.5 hover:bg-slate-900"
+        >
+          <dt className={key === 'computeTime' ? 'text-slate-500' : 'text-slate-400'}>{label}</dt>
+          <dd className={`text-right font-mono tabular-nums ${key === 'computeTime' ? 'text-slate-500' : 'text-slate-100'}`}>
+            {value}
+          </dd>
+        </Tip>
       ))}
-      {ms !== null ? (
-        <div className="contents">
-          <dt className="text-slate-500">Thời gian tính</dt>
-          <dd className="text-right font-mono tabular-nums text-slate-500">{ms.toFixed(0)} ms</dd>
-        </div>
-      ) : null}
     </dl>
   )
 }

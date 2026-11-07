@@ -1,4 +1,6 @@
+import { READOUT_HELP } from '../help'
 import type { RadialProfile } from '../lib/profile'
+import { Tip } from './Tip'
 
 interface ProfilePlotProps {
   profile: RadialProfile | null
@@ -41,11 +43,12 @@ export function ProfilePlot({ profile, dynamicRangeDecades: R }: ProfilePlotProp
   for (let d = 0; d <= Math.floor(R); d++) yTicks.push(-d)
 
   return (
+    <Tip help={READOUT_HELP.profilePlot}>
     <figure className="space-y-2">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label="Profile xuyên tâm của PSF theo thang logarit, so với mẫu Airy lý tưởng"
+        aria-label="Radial profile of the point spread function on a log scale, compared with the ideal Airy pattern"
         className="w-full rounded-lg bg-slate-900/60 ring-1 ring-slate-800"
       >
         {yTicks.map((d) => (
@@ -65,7 +68,7 @@ export function ProfilePlot({ profile, dynamicRangeDecades: R }: ProfilePlotProp
           </g>
         ))}
         <text x={(M.left + W - M.right) / 2} y={H - 4} textAnchor="middle" fontSize={11} fill="#cbd5e1">
-          Khoảng cách góc từ tâm (giây cung)
+          Angular distance from center (arcsec)
         </text>
         <path d={path(profile.airy)} fill="none" stroke="#94a3b8" strokeWidth={1.2} strokeDasharray="4 3" />
         <path d={path(profile.intensity)} fill="none" stroke="#fbbf24" strokeWidth={1.8} />
@@ -73,13 +76,14 @@ export function ProfilePlot({ profile, dynamicRangeDecades: R }: ProfilePlotProp
       <figcaption className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
         <span>
           <span className="mr-1 inline-block h-0.5 w-5 bg-amber-400 align-middle" />
-          Mô phỏng (trung bình theo góc phương vị)
+          Simulation (averaged around the star)
         </span>
         <span>
           <span className="mr-1 inline-block h-0.5 w-5 border-t border-dashed border-slate-400 align-middle" />
-          Airy lý tưởng, cùng D và dải sóng
+          Ideal Airy pattern, same D and band
         </span>
       </figcaption>
     </figure>
+    </Tip>
   )
 }

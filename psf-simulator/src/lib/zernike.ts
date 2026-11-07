@@ -38,12 +38,12 @@ export const ZERO_ABERRATIONS: Aberrations = {
 }
 
 export const ZERNIKE_LABELS: Record<ZernikeName, { label: string; noll: string }> = {
-  defocus: { label: 'Mất nét (defocus)', noll: 'Z4' },
-  astigmatism0: { label: 'Loạn thị 0°/90°', noll: 'Z6' },
-  astigmatism45: { label: 'Loạn thị 45°', noll: 'Z5' },
-  comaX: { label: 'Coma theo x', noll: 'Z8' },
-  comaY: { label: 'Coma theo y', noll: 'Z7' },
-  spherical: { label: 'Cầu sai (spherical)', noll: 'Z11' },
+  defocus: { label: 'Defocus', noll: 'Z4' },
+  astigmatism0: { label: 'Astigmatism 0°/90°', noll: 'Z6' },
+  astigmatism45: { label: 'Astigmatism 45°', noll: 'Z5' },
+  comaX: { label: 'Coma x', noll: 'Z8' },
+  comaY: { label: 'Coma y', noll: 'Z7' },
+  spherical: { label: 'Spherical', noll: 'Z11' },
 }
 
 /** Giá trị Z_k(ρ, θ) chuẩn hoá Noll. */
