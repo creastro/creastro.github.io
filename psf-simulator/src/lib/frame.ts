@@ -10,14 +10,40 @@ import type { ApertureParams } from './aperture'
 import type { ColormapName } from './colormap'
 import { ARCSEC_PER_RAD, computePsf, marechalStrehl, type PsfResult } from './psf'
 import { radialProfile, type RadialProfile } from './profile'
-import { pupilViewSize, renderPupil } from './pupilView'
+import { chooseWavefrontRange, pupilViewSize, renderPupil } from './pupilView'
 import { renderChannels, type RenderChannel } from './render'
+import { hasSegmentErrors, scaleSegmentErrors, type SegmentErrors } from './segmentErrors'
+import { segmentCount } from './segments'
 import { sampleBand, wavelengthToRgb } from './spectrum'
 import { ZERO_ABERRATIONS, hasAberration, scaleAberrations, type Aberrations } from './zernike'
 
 export const GRID_SIZE = 512
 export const PUPIL_PX = 128
 export const IMAGE_SIZE = 512
+
+/** Gương chính phân đoạn lục giác (xem segments.ts, segmentErrors.ts). */
+export interface SegmentedSettings {
+  /** Bật thì gương chính là mảng phân đoạn thay cho đĩa liền. */
+  enabled: boolean
+  rings: number
+  /** Bề rộng khe theo bề rộng phân đoạn. */
+  gapRatio: number
+  removeCenter: boolean
+  /** Sai số piston và tip/tilt (RMS, bước sóng tại λ trung tâm) và seed của lần rút ngẫu nhiên. */
+  pistonRms: number
+  tiltRms: number
+  seed: number
+}
+
+export const DEFAULT_SEGMENTED: SegmentedSettings = {
+  enabled: false,
+  rings: 2,
+  gapRatio: 0.02,
+  removeCenter: true,
+  pistonRms: 0,
+  tiltRms: 0,
+  seed: 1,
+}
 
 export interface SimParams {
   /** Đường kính gương chính, mét. */
@@ -34,6 +60,7 @@ export interface SimParams {
   vaneAngleDeg: number
   /** Quang sai Zernike tại bước sóng trung tâm, bước sóng RMS. */
   aberrations: Aberrations
+  segmented: SegmentedSettings
   /** Bề rộng toàn phần của trường nhìn, giây cung. */
   fovArcsec: number
   dynamicRangeDecades: number
@@ -49,6 +76,7 @@ export const DEFAULT_PARAMS: SimParams = {
   vaneThicknessRatio: 0.015,
   vaneAngleDeg: 0,
   aberrations: ZERO_ABERRATIONS,
+  segmented: DEFAULT_SEGMENTED,
   fovArcsec: 3,
   dynamicRangeDecades: 5,
   colormap: 'hot',
@@ -75,6 +103,8 @@ export interface FrameStats {
   marechalStrehl: number
   /** Số mẫu bước sóng đã cộng. */
   bandSamples: number
+  /** Số phân đoạn gương, 0 nếu gương là đĩa liền. */
+  segmentCount: number
 }
 
 export interface FrameResult {
@@ -83,6 +113,8 @@ export interface FrameResult {
   /** Ảnh RGBA xem trước pupil, cạnh pupilSize. */
   pupilRgba: Uint8ClampedArray
   pupilSize: number
+  /** Thang màu của ảnh pupil: màu bão hoà ở ±pupilRangeWaves. */
+  pupilRangeWaves: number
   profile: RadialProfile
   stats: FrameStats
 }
@@ -99,14 +131,25 @@ export function computeFrame(p: SimParams): FrameResult {
     vaneCount: p.vaneCount,
     vaneThicknessRatio: p.vaneThicknessRatio,
     vaneAngleDeg: p.vaneAngleDeg,
+    segments: p.segmented.enabled
+      ? { rings: p.segmented.rings, gapRatio: p.segmented.gapRatio, removeCenter: p.segmented.removeCenter }
+      : undefined,
   }
+  const baseErrors: SegmentErrors = {
+    pistonRms: p.segmented.pistonRms,
+    tiltRms: p.segmented.tiltRms,
+    seed: p.segmented.seed,
+  }
+  const hasErrors = p.segmented.enabled && hasSegmentErrors(baseErrors)
   const samples = sampleBand(p.wavelengthNm, p.bandwidthNm)
 
   // Không quang sai: PSF theo λ/D giống nhau ở mọi bước sóng, chỉ tính một lần.
+  // Cả quang sai Zernike và sai pha phân đoạn là độ dài đường quang hình học nên tỉ lệ 1/λ.
   let shared: PsfResult | null = null
   const psfs = samples.map((s) => {
-    if (!hasAberration(p.aberrations)) return (shared ??= computePsf(aperture))
-    return computePsf(aperture, scaleAberrations(p.aberrations, p.wavelengthNm / s.wavelengthNm))
+    if (!hasAberration(p.aberrations) && !hasErrors) return (shared ??= computePsf(aperture))
+    const factor = p.wavelengthNm / s.wavelengthNm
+    return computePsf(aperture, scaleAberrations(p.aberrations, factor), scaleSegmentErrors(baseErrors, factor))
   })
 
   // Mẫu gần bước sóng trung tâm nhất cung cấp Strehl, mặt sóng và ảnh pupil.
@@ -137,10 +180,12 @@ export function computeFrame(p: SimParams): FrameResult {
 
   const throughput = centrePsf.openArea / (Math.PI * (PUPIL_PX / 2) ** 2)
   const centreLd = lambdaOverDArcsec(p.diameterM, p.wavelengthNm)
+  const pupilRangeWaves = chooseWavefrontRange(centrePsf)
   return {
     rgba,
-    pupilRgba: renderPupil(centrePsf, PUPIL_PX),
+    pupilRgba: renderPupil(centrePsf, PUPIL_PX, pupilRangeWaves),
     pupilSize: pupilViewSize(PUPIL_PX),
+    pupilRangeWaves,
     profile,
     stats: {
       lambdaOverDArcsec: centreLd,
@@ -153,6 +198,7 @@ export function computeFrame(p: SimParams): FrameResult {
       wavefrontRmsWaves: centrePsf.wavefrontRmsWaves,
       marechalStrehl: marechalStrehl(centrePsf.wavefrontRmsWaves),
       bandSamples: samples.length,
+      segmentCount: p.segmented.enabled ? segmentCount(p.segmented.rings, p.segmented.removeCenter) : 0,
     },
   }
 }

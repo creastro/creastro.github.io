@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { computePsf } from './psf'
-import { divergingColor, pupilViewSize, renderPupil } from './pupilView'
+import { chooseWavefrontRange, divergingColor, pupilViewSize, renderPupil } from './pupilView'
 import { ZERO_ABERRATIONS } from './zernike'
 
 const base = {
@@ -44,5 +44,31 @@ describe('renderPupil', () => {
     const edge = px(img, size / 2 + 30, size / 2)
     expect(centre[2]).toBeGreaterThan(centre[0])
     expect(edge[0]).toBeGreaterThan(edge[2])
+  })
+})
+
+describe('chooseWavefrontRange', () => {
+  const pupil = { ...base, obstructionRatio: 0 }
+
+  it('không có quang sai thì dùng ±1 λ', () => {
+    expect(chooseWavefrontRange(computePsf(pupil))).toBe(1)
+  })
+
+  it('chọn mức nhỏ nhất chứa trọn mặt sóng, tối đa ±1', () => {
+    const range = (c: number) => chooseWavefrontRange(computePsf(pupil, { ...ZERO_ABERRATIONS, defocus: c }))
+    // Defocus c waves RMS có biên độ √3·c ở mép: 0.01 → 0.017, 0.05 → 0.087, 0.2 → 0.35, 2 → 3.5.
+    expect(range(0.01)).toBe(0.05)
+    expect(range(0.05)).toBe(0.1)
+    expect(range(0.2)).toBe(0.5)
+    expect(range(2)).toBe(1)
+  })
+
+  it('mức thang nhỏ làm sai số nhỏ hiện màu đậm hơn', () => {
+    const psf = computePsf(pupil, { ...ZERO_ABERRATIONS, defocus: 0.02 })
+    const wide = renderPupil(psf, base.pupilDiameterPx, 1)
+    const fit = renderPupil(psf, base.pupilDiameterPx, chooseWavefrontRange(psf))
+    const k = (size / 2) * size * 4 + (size / 2) * 4
+    // Tâm có Z4 âm nên thiên xanh: kênh đỏ giảm khi thang chặt hơn.
+    expect(fit[k]).toBeLessThan(wide[k])
   })
 })
