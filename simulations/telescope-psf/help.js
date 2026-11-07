@@ -57,6 +57,14 @@ window.SIM_HELP = (() => {
     fov: 'Full width of the picture, in arcseconds.',
     range: 'Number of factors of 10 of brightness shown below the peak.',
     cmap: 'How brightness is turned into colour.',
+    'zoom-in': 'Zoom in: halve the field of view step by step. You can also hold Ctrl (⌘ on a Mac) and scroll over the image.',
+    'zoom-out': 'Zoom out: widen the field of view. The picture stops at ±64 λ/D, the edge of the computed area.',
+    'zoom-reset': 'Fit the picture to the first rings of the pattern.',
+    'save-psf': 'Download the image of the star as a PNG file, with the angular scale and a caption of the settings.',
+    'save-pupil': 'Download the aperture and wavefront picture as a PNG file, with its colour scale.',
+    'save-profile': 'Download the radial profile plot as a PNG file.',
+    'save-settings': 'Download every setting of this page as a small JSON file, to reload later or to share.',
+    'load-settings': 'Load a settings file saved from this page. Values outside the allowed ranges are clamped.',
     showring: 'Draw a circle at the first dark ring of a clear circular telescope, 1.22 λ/D.',
     reset: 'Restore every parameter to its default value.',
     'read-ld': 'The diffraction angle of the telescope: wavelength divided by diameter.',
@@ -95,7 +103,7 @@ window.SIM_HELP = (() => {
       ],
       sim: R`The image is computed on a grid of 512 × 512 points; see {{numerics|the numerical method and its limits}}.`,
       refs: [GOODMAN, BORNWOLF],
-      see: ['psf', 'airy', 'strehl', 'pupil', 'profile', 'numerics']
+      see: ['psf', 'airy', 'strehl', 'pupil', 'profile', 'saving', 'numerics']
     },
 
     psf: {
@@ -137,7 +145,8 @@ window.SIM_HELP = (() => {
       what: 'λ/D is the diffraction angle of the telescope: the wavelength divided by the mirror diameter. Distances in the pattern are usually quoted in this unit because the whole pattern scales with it.',
       theory: [
         R`The ratio $\lambda/D$ is an angle in radians, converted to arcseconds with $1\ {\rm rad}=206\,265''$. For $D=1$ m and $\lambda=550$ nm it is $0.113''$. Doubling the diameter, or halving the wavelength, halves it.`,
-        R`The picture has a fixed width in arcseconds, so its width in units of $\lambda/D$ is the field of view divided by $\lambda/D$. This is how a bigger mirror makes the pattern look smaller on the screen.`
+        R`The picture has a fixed width in arcseconds, so its width in units of $\lambda/D$ is the field of view divided by $\lambda/D$. This is how a bigger mirror makes the pattern look smaller on the screen.`,
+        R`The zoom buttons on the image (and Ctrl or ⌘ with the mouse wheel) simply change this field of view: each step multiplies it by 1.5. The grid is computed once for $\pm 64\,\lambda/D$ and the picture is a cropped, smoothly resampled view of it, so zooming in shows the same data in more detail rather than adding information. The view is limited to between ±1 and ±64 $\lambda/D$; the button with the circular arrow fits ±12 $\lambda/D$, a few rings around the core.`
       ],
       formulas: [
         { tex: R`\frac{\lambda}{D}\,[{\rm arcsec}]=\frac{\lambda\,[{\rm m}]}{D\,[{\rm m}]}\times 206\,265` },
@@ -540,6 +549,18 @@ window.SIM_HELP = (() => {
       ],
       refs: [CHANAN],
       see: ['segpiston', 'seg', 'wavefront']
+    },
+
+    saving: {
+      title: 'Saving images and settings',
+      what: 'Three PNG downloads and one settings file let you keep or share what you see.',
+      theory: [
+        R`The PSF image is saved at twice the screen size with the angular scale, the colour map and a caption that lists the diameter, wavelength, obstruction, vanes and Strehl ratio. The aperture image has its wavefront colour scale in waves. The profile plot includes the Airy curve for comparison. File names carry the main parameters, for example D, wavelength and the number of segments.`,
+        R`The settings file is plain JSON with a format name and a version number. It stores the mirror, the segmented-mirror options and random seed, the vanes (including the angle of each vane), the Zernike coefficients and the display options. Loading is forgiving: missing values keep their defaults, out-of-range values are clamped and listed in a note, and files from another program or from a newer version are refused with a message.`
+      ],
+      formulas: [],
+      refs: [],
+      see: ['fov', 'psf', 'pupil', 'profile']
     },
 
     segpresets: {

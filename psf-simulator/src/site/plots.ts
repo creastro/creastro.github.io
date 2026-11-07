@@ -1,21 +1,20 @@
 /**
  * Vẽ lên canvas theo phong cách của các simulation khác trong repo: cùng màu, phông, lưới và cách co theo mật độ điểm ảnh.
+ * Mỗi hàm `paint…` vẽ lên một `Target` bất kỳ, nên cùng một mã vẽ cho cả canvas trên trang lẫn ảnh lưu ra (xem exportImages.ts).
  */
 
 import type { RadialProfile } from '../lib/profile'
+import { COLOR, FONT, arcsecLabel, niceBar, niceStep, pow10Label } from './plotTools'
 
-export const COLOR = {
-  text: '#b3bfd8',
-  grid: 'rgba(255,255,255,.08)',
-  frame: 'rgba(255,255,255,.25)',
-  accent: '#8fe3ff',
-  white: '#edf2ff',
-  grey: 'rgba(179,191,216,.8)',
+/** Nơi để vẽ: một ngữ cảnh 2D và kích thước logic (đơn vị CSS) của vùng vẽ. */
+export interface Target {
+  ctx: CanvasRenderingContext2D
+  w: number
+  h: number
 }
-const FONT = '12px system-ui, sans-serif'
 
 /** Đặt kích thước điểm ảnh của canvas theo kích thước hiển thị và mật độ màn hình (tối đa 2×). */
-export function fitCanvas(canvas: HTMLCanvasElement): { ctx: CanvasRenderingContext2D; w: number; h: number } | null {
+export function fitCanvas(canvas: HTMLCanvasElement): Target | null {
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
   const w = canvas.clientWidth
   const h = canvas.clientHeight
@@ -32,38 +31,6 @@ export function fitCanvas(canvas: HTMLCanvasElement): { ctx: CanvasRenderingCont
   return { ctx, w, h }
 }
 
-/** Bước chia "tròn" (1, 2, 5 × 10^k) sao cho có khoảng n vạch trên khoảng range. */
-export function niceStep(range: number, n: number): number {
-  const raw = range / n
-  const p = 10 ** Math.floor(Math.log10(raw))
-  const f = raw / p
-  return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p
-}
-
-/** Độ dài thanh tỉ lệ "tròn" (1, 2, 5 × 10^k) gần 22 % bề rộng, không vượt quá 30 %. */
-export function niceBar(range: number): number {
-  const target = range * 0.22
-  const exp = Math.floor(Math.log10(target))
-  let best = 10 ** exp
-  for (const m of [1, 2, 5, 10]) {
-    const c = m * 10 ** exp
-    if (c <= range * 0.3 && Math.abs(c - target) < Math.abs(best - target)) best = c
-  }
-  return best
-}
-
-const SUPERSCRIPT: Record<string, string> = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' }
-
-/** Nhãn lũy thừa của 10 ở trục log: 0 → "1", −3 → "10⁻³". */
-export function pow10Label(exponent: number): string {
-  if (exponent === 0) return '1'
-  return '10' + String(exponent).split('').map((c) => SUPERSCRIPT[c] ?? c).join('')
-}
-
-export function arcsecLabel(v: number): string {
-  return `${Number(v.toPrecision(2))}″`
-}
-
 export interface PsfOverlay {
   fovArcsec: number
   airyRadiusArcsec: number
@@ -74,9 +41,11 @@ export interface PsfOverlay {
 
 /** Vẽ ảnh PSF (đã tô màu) lên canvas, kèm thanh tỉ lệ và vòng tối đầu tiên tuỳ chọn. */
 export function drawPsf(canvas: HTMLCanvasElement, source: CanvasImageSource, o: PsfOverlay): void {
-  const f = fitCanvas(canvas)
-  if (!f) return
-  const { ctx, w, h } = f
+  const t = fitCanvas(canvas)
+  if (t) paintPsf(t, source, o)
+}
+
+export function paintPsf({ ctx, w, h }: Target, source: CanvasImageSource, o: PsfOverlay): void {
   ctx.clearRect(0, 0, w, h)
   ctx.imageSmoothingEnabled = true
   ctx.drawImage(source, 0, 0, w, h)
@@ -119,18 +88,23 @@ export function drawPsf(canvas: HTMLCanvasElement, source: CanvasImageSource, o:
 
 /** Vẽ ảnh pupil lên canvas. */
 export function drawPupil(canvas: HTMLCanvasElement, source: CanvasImageSource): void {
-  const f = fitCanvas(canvas)
-  if (!f) return
-  f.ctx.clearRect(0, 0, f.w, f.h)
-  f.ctx.imageSmoothingEnabled = true
-  f.ctx.drawImage(source, 0, 0, f.w, f.h)
+  const t = fitCanvas(canvas)
+  if (t) paintPupil(t, source)
+}
+
+export function paintPupil({ ctx, w, h }: Target, source: CanvasImageSource): void {
+  ctx.clearRect(0, 0, w, h)
+  ctx.imageSmoothingEnabled = true
+  ctx.drawImage(source, 0, 0, w, h)
 }
 
 /** Profile xuyên tâm trên trục log, so với mẫu Airy lý tưởng. */
 export function drawProfile(canvas: HTMLCanvasElement, profile: RadialProfile, decades: number): void {
-  const f = fitCanvas(canvas)
-  if (!f) return
-  const { ctx, w, h } = f
+  const t = fitCanvas(canvas)
+  if (t) paintProfile(t, profile, decades)
+}
+
+export function paintProfile({ ctx, w, h }: Target, profile: RadialProfile, decades: number): void {
   ctx.clearRect(0, 0, w, h)
   const m = { l: 56, r: 12, t: 10, b: 38 }
   const pw = w - m.l - m.r

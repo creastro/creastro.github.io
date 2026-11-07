@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { arcsecLabel, niceBar, niceStep, pow10Label } from './plots'
+import { arcsecLabel, niceBar, niceStep, pow10Label } from './plotTools'
 
 describe('niceStep', () => {
   it('cho bước 1, 2 hoặc 5 nhân luỹ thừa của 10 với khoảng 3–8 vạch', () => {

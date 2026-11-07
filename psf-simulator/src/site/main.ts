@@ -6,102 +6,39 @@
  * other simulations of the site. Run `npm run build:site` in psf-simulator to regenerate telescope-psf.js from it.
  */
 
-import { COLORMAP_LABELS, type ColormapName } from '../lib/colormap'
 import { computeFrame, type FrameResult } from '../lib/frame'
-import type { SimParams } from '../lib/params'
+import { lambdaOverDArcsec, type SimParams } from '../lib/params'
 import { SEGMENT_PRESETS, type SegmentPresetKey } from '../lib/segmentPresets'
 import { ZERNIKE_NAMES } from '../lib/zernike'
 import type { WorkerRequest, WorkerResponse } from '../workers/psf.worker'
 import {
-  RANGE_SPECS,
-  READ_ROWS,
-  VANE_IDS,
-  ZERNIKE_IDS,
-  LOG_STEPS,
-  fromPosition,
-  specById,
-  toPosition,
-  type RangeSpec,
-} from './controlSpecs'
+  applyUiState,
+  buildControls,
+  getSeed,
+  initVaneAngles,
+  readParams,
+  readUiState,
+  resetDisplayControls,
+  setSeed,
+  setValue,
+  syncOutputs,
+  syncSeg,
+  syncVanes,
+} from './controls'
+import { READ_ROWS, ZERNIKE_IDS, specById } from './controlSpecs'
+
+import { $, input } from './dom'
+import { downloadText, saveAperture, savePsfImage, saveProfileImage } from './exportImages'
+import { SETTINGS_FILE_NAME, wavelengthText } from './files'
 import { drawProfile, drawPsf, drawPupil } from './plots'
+import { MAX_SETTINGS_BYTES, SettingsError, parseSettings, serializeSettings } from './settings'
+import { ZOOM_STEP, fitFov, wheelFactor, zoomFov } from './zoom'
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => {
-  const el = document.getElementById(id)
-  if (!el) throw new Error(`Missing element #${id}`)
-  return el as T
-}
-const input = (id: string) => $<HTMLInputElement>(id)
-
-/* ---------- controls ---------- */
-
-function fieldHtml(s: RangeSpec): string {
-  const min = s.log ? 0 : s.min
-  const max = s.log ? LOG_STEPS : s.max
-  const step = s.log ? 1 : s.step
-  const value = s.log ? Math.round(toPosition(s, s.value)) : s.value
-  return (
-    `<div class="field"><label for="${s.id}">${s.label}</label>` +
-    `<input id="${s.id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}">` +
-    `<output for="${s.id}"></output></div>`
-  )
-}
-
-for (const group of ['mirror', 'seg', 'vanes', 'vaneEach', 'zern', 'display'] as const) {
-  $(`g-${group}`).innerHTML = RANGE_SPECS.filter((s) => s.group === group).map(fieldHtml).join('')
-}
-$('cmap').innerHTML = (Object.keys(COLORMAP_LABELS) as ColormapName[])
-  .map((k) => `<option value="${k}"${k === 'hot' ? ' selected' : ''}>${COLORMAP_LABELS[k]}</option>`)
-  .join('')
-
-/** Giá trị thật của một thanh trượt (đã đổi từ vị trí nếu là thang log). */
-function value(id: string): number {
-  const spec = specById(id)
-  if (!spec) throw new Error(`Unknown control ${id}`)
-  return fromPosition(spec, +input(id).value)
-}
-
-function setValue(id: string, v: number): void {
-  const spec = specById(id)
-  if (spec) input(id).value = String(toPosition(spec, v))
-}
-
-function syncOutputs(): void {
-  document.querySelectorAll<HTMLOutputElement>('#controls output').forEach((o) => {
-    const spec = specById(o.htmlFor.toString())
-    if (spec) o.textContent = spec.format(value(spec.id))
-  })
-}
-
-let seed = 1
-
-function readParams(): SimParams {
-  const aberrations = {} as SimParams['aberrations']
-  for (const name of ZERNIKE_NAMES) aberrations[name] = value(ZERNIKE_IDS[name])
-  return {
-    diameterM: value('D'),
-    wavelengthNm: value('lam'),
-    bandwidthNm: value('band'),
-    obstructionRatio: value('eps'),
-    vaneCount: Math.round(value('nvane')),
-    vaneThicknessRatio: value('tvane'),
-    vaneAngleDeg: value('avane'),
-    vaneAnglesDeg: input('vane-each').checked
-      ? VANE_IDS.slice(0, Math.round(value('nvane'))).map((id) => value(id))
-      : null,
-    aberrations,
-    segmented: {
-      enabled: input('seg-on').checked,
-      rings: Math.round(value('seg-rings')),
-      gapRatio: value('seg-gap'),
-      removeCenter: input('seg-center').checked,
-      pistonRms: value('seg-piston'),
-      tiltRms: value('seg-tilt'),
-      seed,
-    },
-    fovArcsec: value('fov'),
-    dynamicRangeDecades: value('range'),
-    colormap: $<HTMLSelectElement>('cmap').value as ColormapName,
-  }
+buildControls()
+const fovSpec = (): NonNullable<ReturnType<typeof specById>> => {
+  const spec = specById('fov')
+  if (!spec) throw new Error('Missing fov spec')
+  return spec
 }
 
 /* ---------- derived readouts ---------- */
@@ -135,12 +72,6 @@ function setRow(key: string, text: string, visible = true): void {
   c.dd.hidden = !visible
 }
 
-function bandLabel(p: SimParams): string {
-  if (p.bandwidthNm <= 0) return `${p.wavelengthNm.toFixed(0)} nm`
-  const lo = Math.max(200, p.wavelengthNm - p.bandwidthNm / 2)
-  return `${lo.toFixed(0)}–${(p.wavelengthNm + p.bandwidthNm / 2).toFixed(0)} nm`
-}
-
 /* ---------- drawing ---------- */
 
 type Shown = FrameResult & { ms: number }
@@ -165,7 +96,7 @@ function render(): void {
     fovArcsec: params.fovArcsec,
     airyRadiusArcsec: frame.stats.airyRadiusArcsec,
     showRing: input('showring').checked,
-    label: bandLabel(params),
+    label: wavelengthText(params),
   })
   drawPupil($('pupil'), pupOff)
   drawProfile($('profile'), frame.profile, params.dynamicRangeDecades)
@@ -269,35 +200,11 @@ function onInput(): void {
 
 /* ---------- events ---------- */
 
-const segMore = $('seg-more')
-const syncSeg = (): void => {
-  segMore.hidden = !input('seg-on').checked
-}
-
-// Per-vane angles: the sliders only show for the vanes that exist, and only when the option is on.
-const vaneMore = $('vane-more')
-const syncVanes = (): void => {
-  vaneMore.hidden = !input('vane-each').checked
-  const n = Math.round(value('nvane'))
-  VANE_IDS.forEach((id, i) => {
-    const field = input(id).closest<HTMLElement>('.field')
-    if (field) field.hidden = i >= n
-  })
-}
-/** Start from the angles the vanes already have (equal spacing, before the rotation is added), so nothing jumps. */
-const initVaneAngles = (): void => {
-  const n = Math.max(1, Math.round(value('nvane')))
-  VANE_IDS.forEach((id, i) => setValue(id, i < n ? (360 * i) / n : (45 * i) % 360))
-  syncOutputs()
-}
-
 $('controls').addEventListener('input', onInput)
 $('controls').addEventListener('change', onInput)
 $('controls').addEventListener('reset', () => {
-  seed = 1
-  // The color map and the ring marker sit in the image panel, outside the form, so the form does not reset them.
-  $<HTMLSelectElement>('cmap').value = 'hot'
-  input('showring').checked = false
+  setSeed(1)
+  resetDisplayControls()
   setTimeout(() => {
     syncSeg()
     onInput()
@@ -311,7 +218,7 @@ input('vane-each').addEventListener('change', () => {
 })
 
 $('seg-draw').addEventListener('click', () => {
-  seed += 1
+  setSeed(getSeed() + 1)
   onInput()
 })
 $('clear-zern').addEventListener('click', () => {
@@ -334,6 +241,69 @@ for (const [id, key] of Object.entries(presetButtons)) {
     onInput()
   })
 }
+
+/* ---------- zoom: the field of view is the zoom ---------- */
+
+function zoomBy(factor: number): void {
+  const p = readParams()
+  const ld = lambdaOverDArcsec(p.diameterM, p.wavelengthNm)
+  setValue('fov', zoomFov(p.fovArcsec, factor, ld, fovSpec()))
+  onInput()
+}
+$('zoom-in').addEventListener('click', () => zoomBy(1 / ZOOM_STEP))
+$('zoom-out').addEventListener('click', () => zoomBy(ZOOM_STEP))
+$('zoom-reset').addEventListener('click', () => {
+  const p = readParams()
+  const ld = lambdaOverDArcsec(p.diameterM, p.wavelengthNm)
+  setValue('fov', fitFov(ld, fovSpec()))
+  onInput()
+})
+// Ctrl or ⌘ + wheel zooms the image; a plain wheel still scrolls the page.
+$('psf').addEventListener(
+  'wheel',
+  (e) => {
+    if (!e.ctrlKey && !e.metaKey) return
+    e.preventDefault()
+    zoomBy(wheelFactor(e.deltaY, e.deltaMode))
+  },
+  { passive: false },
+)
+
+/* ---------- saving images and settings ---------- */
+
+function withFrame(action: (f: Shown, p: SimParams) => void): void {
+  if (last) action(last.frame, last.params)
+}
+$('save-psf').addEventListener('click', () =>
+  withFrame((f, p) => savePsfImage(f, p, psfOff, input('showring').checked)),
+)
+$('save-pupil').addEventListener('click', () => withFrame((f, p) => saveAperture(f, p, pupOff)))
+$('save-profile').addEventListener('click', () => withFrame((f, p) => saveProfileImage(f, p)))
+
+const settingsNote = $('settings-note')
+function say(text: string, bad = false): void {
+  settingsNote.textContent = text
+  settingsNote.classList.toggle('bad', bad)
+}
+$('save-settings').addEventListener('click', () => {
+  downloadText(serializeSettings(readUiState(), new Date()), SETTINGS_FILE_NAME)
+  say('Settings saved.')
+})
+$('load-settings').addEventListener('click', () => $('settings-file').click())
+$('settings-file').addEventListener('change', async () => {
+  const file = input('settings-file').files?.[0]
+  input('settings-file').value = '' // so that choosing the same file again still triggers a change
+  if (!file) return
+  try {
+    if (file.size > MAX_SETTINGS_BYTES) throw new SettingsError('The file is too large to be a settings file.')
+    const { state, notes } = parseSettings(await file.text())
+    applyUiState(state)
+    onInput()
+    say(notes.length ? `Settings loaded. ${notes.join(' ')}` : 'Settings loaded.')
+  } catch (err) {
+    say(err instanceof SettingsError ? err.message : 'The file could not be read.', true)
+  }
+})
 
 if (typeof ResizeObserver !== 'undefined') {
   const ro = new ResizeObserver(render)

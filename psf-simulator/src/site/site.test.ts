@@ -2,7 +2,7 @@
  * Kiểm tra trang simulations/telescope-psf: nội dung giải thích (help.js), index.html và mã trang khớp nhau.
  * Mọi công thức được biên dịch bằng chính KaTeX đã vendor trong repo, ở chế độ strict, như cách trang sẽ vẽ chúng.
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -38,7 +38,11 @@ const dir = path.resolve(here, '../../../simulations/telescope-psf')
 const read = (name: string) => readFileSync(path.join(dir, name), 'utf8')
 const html = read('index.html')
 const helpSource = read('help.js')
-const mainSource = readFileSync(path.join(here, 'main.ts'), 'utf8')
+// Mã trang giờ nằm ở nhiều file (main, controls, ...): quét mọi file nguồn không phải test.
+const mainSource = readdirSync(here)
+  .filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts'))
+  .map((f) => readFileSync(path.join(here, f), 'utf8'))
+  .join('\n')
 
 const win: { SIM_HELP?: Help } = {}
 new Function('window', helpSource)(win)
@@ -198,7 +202,7 @@ describe('index.html', () => {
     for (const id of OTHER_CONTROL_IDS) expect(staticIds.has(id), `#${id}`).toBe(true)
   })
 
-  it('mọi id mà main.ts tra cứu đều có trong trang hoặc được sinh ra từ đặc tả', () => {
+  it('mọi id mà mã trang tra cứu đều có trong trang hoặc được sinh ra từ đặc tả', () => {
     const used = [...mainSource.matchAll(/(?:\$|input)(?:<[^>]+>)?\('([^']+)'\)/g)].map((m) => m[1])
     expect(used.length).toBeGreaterThan(20)
     const known = new Set([...staticIds, ...rangeIds])

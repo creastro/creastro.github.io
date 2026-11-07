@@ -90,7 +90,7 @@ export const RANGE_SPECS: readonly RangeSpec[] = [
 
   ...zernikeSpecs,
 
-  { id: 'fov', group: 'display', label: 'Field of view', min: 0.2, max: 30, step: 0.1, value: 3, log: true, format: (v) => `${v.toFixed(v < 10 ? 2 : 1)}″` },
+  { id: 'fov', group: 'display', label: 'Field of view', min: 0.02, max: 30, step: 0.1, value: 3, log: true, format: (v) => `${v.toFixed(v < 10 ? 2 : 1)}″` },
   { id: 'range', group: 'display', label: 'Dynamic range', min: 2, max: 8, step: 0.5, value: 5, format: (v) => `${v.toFixed(1)} decades` },
 ]
 
@@ -107,6 +107,14 @@ export const OTHER_CONTROL_IDS = [
   'showring',
   'clear-zern',
   'reset',
+  'zoom-in',
+  'zoom-out',
+  'zoom-reset',
+  'save-psf',
+  'save-pupil',
+  'save-profile',
+  'save-settings',
+  'load-settings',
 ] as const
 
 /** Các dòng số liệu dẫn xuất: khoá, nhãn, và chủ đề giải thích khi bấm vào tên. */
@@ -146,6 +154,8 @@ export const REQUIRED_IDS = [
   't-profile',
   'pb-min',
   'pb-max',
+  'settings-file',
+  'settings-note',
 ] as const
 
 export const specById = (id: string): RangeSpec | undefined => RANGE_SPECS.find((s) => s.id === id)

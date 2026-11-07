@@ -1,133 +1,5 @@
 /* Generated from psf-simulator/src/site/main.ts by "npm run build:site". Do not edit. */
 (function() {
-	// src/lib/colormap.ts
-	/** Dựng các điểm dừng cách đều từ danh sách màu hex (từ tối đến sáng). */
-	function evenStops(hex) {
-		return hex.map((h, i) => [
-			i / (hex.length - 1),
-			parseInt(h.slice(1, 3), 16),
-			parseInt(h.slice(3, 5), 16),
-			parseInt(h.slice(5, 7), 16)
-		]);
-	}
-	var STOPS = {
-		gray: [[
-			0,
-			0,
-			0,
-			0
-		], [
-			1,
-			255,
-			255,
-			255
-		]],
-		hot: [
-			[
-				0,
-				0,
-				0,
-				0
-			],
-			[
-				.36,
-				255,
-				0,
-				0
-			],
-			[
-				.75,
-				255,
-				255,
-				0
-			],
-			[
-				1,
-				255,
-				255,
-				255
-			]
-		],
-		inferno: evenStops([
-			"#000004",
-			"#1b0c42",
-			"#4a0c6b",
-			"#781c6d",
-			"#a52c60",
-			"#cf4446",
-			"#ed6925",
-			"#fb9b06",
-			"#f7d13d",
-			"#fcffa4"
-		]),
-		viridis: evenStops([
-			"#440154",
-			"#482878",
-			"#3e4989",
-			"#31688e",
-			"#26828e",
-			"#1f9e89",
-			"#35b779",
-			"#6ece58",
-			"#b5de2b",
-			"#fde725"
-		]),
-		ice: [
-			[
-				0,
-				0,
-				0,
-				0
-			],
-			[
-				.4,
-				10,
-				40,
-				160
-			],
-			[
-				.75,
-				60,
-				200,
-				255
-			],
-			[
-				1,
-				255,
-				255,
-				255
-			]
-		]
-	};
-	var COLORMAP_LABELS = {
-		gray: "Gray",
-		hot: "Hot (black–red–yellow–white)",
-		inferno: "Inferno (false color)",
-		viridis: "Viridis (false color)",
-		ice: "Ice (black–blue–cyan–white)",
-		spectrum: "Wavelength color (illustrative)"
-	};
-	var cache = /* @__PURE__ */ new Map();
-	/** Trả về bảng 256 × 3 byte (R, G, B liên tiếp). */
-	function getLut(name) {
-		const hit = cache.get(name);
-		if (hit) return hit;
-		const stops = STOPS[name];
-		const lut = /* @__PURE__ */ new Uint8ClampedArray(768);
-		for (let i = 0; i < 256; i++) {
-			const t = i / 255;
-			let k = 0;
-			while (k < stops.length - 2 && t > stops[k + 1][0]) k++;
-			const [t0, r0, g0, b0] = stops[k];
-			const [t1, r1, g1, b1] = stops[k + 1];
-			const f = Math.min(1, Math.max(0, (t - t0) / (t1 - t0)));
-			lut[i * 3] = r0 + (r1 - r0) * f;
-			lut[i * 3 + 1] = g0 + (g1 - g0) * f;
-			lut[i * 3 + 2] = b0 + (b1 - b0) * f;
-		}
-		cache.set(name, lut);
-		return lut;
-	}
 	// src/lib/zernike.ts
 	var ZERNIKE_NAMES = [
 		"defocus",
@@ -885,6 +757,134 @@
 		}
 		return out;
 	}
+	// src/lib/colormap.ts
+	/** Dựng các điểm dừng cách đều từ danh sách màu hex (từ tối đến sáng). */
+	function evenStops(hex) {
+		return hex.map((h, i) => [
+			i / (hex.length - 1),
+			parseInt(h.slice(1, 3), 16),
+			parseInt(h.slice(3, 5), 16),
+			parseInt(h.slice(5, 7), 16)
+		]);
+	}
+	var STOPS = {
+		gray: [[
+			0,
+			0,
+			0,
+			0
+		], [
+			1,
+			255,
+			255,
+			255
+		]],
+		hot: [
+			[
+				0,
+				0,
+				0,
+				0
+			],
+			[
+				.36,
+				255,
+				0,
+				0
+			],
+			[
+				.75,
+				255,
+				255,
+				0
+			],
+			[
+				1,
+				255,
+				255,
+				255
+			]
+		],
+		inferno: evenStops([
+			"#000004",
+			"#1b0c42",
+			"#4a0c6b",
+			"#781c6d",
+			"#a52c60",
+			"#cf4446",
+			"#ed6925",
+			"#fb9b06",
+			"#f7d13d",
+			"#fcffa4"
+		]),
+		viridis: evenStops([
+			"#440154",
+			"#482878",
+			"#3e4989",
+			"#31688e",
+			"#26828e",
+			"#1f9e89",
+			"#35b779",
+			"#6ece58",
+			"#b5de2b",
+			"#fde725"
+		]),
+		ice: [
+			[
+				0,
+				0,
+				0,
+				0
+			],
+			[
+				.4,
+				10,
+				40,
+				160
+			],
+			[
+				.75,
+				60,
+				200,
+				255
+			],
+			[
+				1,
+				255,
+				255,
+				255
+			]
+		]
+	};
+	var COLORMAP_LABELS = {
+		gray: "Gray",
+		hot: "Hot (black–red–yellow–white)",
+		inferno: "Inferno (false color)",
+		viridis: "Viridis (false color)",
+		ice: "Ice (black–blue–cyan–white)",
+		spectrum: "Wavelength color (illustrative)"
+	};
+	var cache = /* @__PURE__ */ new Map();
+	/** Trả về bảng 256 × 3 byte (R, G, B liên tiếp). */
+	function getLut(name) {
+		const hit = cache.get(name);
+		if (hit) return hit;
+		const stops = STOPS[name];
+		const lut = /* @__PURE__ */ new Uint8ClampedArray(768);
+		for (let i = 0; i < 256; i++) {
+			const t = i / 255;
+			let k = 0;
+			while (k < stops.length - 2 && t > stops[k + 1][0]) k++;
+			const [t0, r0, g0, b0] = stops[k];
+			const [t1, r1, g1, b1] = stops[k + 1];
+			const f = Math.min(1, Math.max(0, (t - t0) / (t1 - t0)));
+			lut[i * 3] = r0 + (r1 - r0) * f;
+			lut[i * 3 + 1] = g0 + (g1 - g0) * f;
+			lut[i * 3 + 2] = b0 + (b1 - b0) * f;
+		}
+		cache.set(name, lut);
+		return lut;
+	}
 	// src/lib/render.ts
 	/** Cường độ tối thiểu, tránh log(0). */
 	var FLOOR = 1e-30;
@@ -1284,7 +1284,7 @@
 			id: "fov",
 			group: "display",
 			label: "Field of view",
-			min: .2,
+			min: .02,
 			max: 30,
 			step: .1,
 			value: 3,
@@ -1356,7 +1356,181 @@
 		]
 	];
 	var specById = (id) => RANGE_SPECS.find((s) => s.id === id);
-	// src/site/plots.ts
+	// src/site/dom.ts
+	/** Tra cứu phần tử theo id; báo lỗi rõ ràng nếu trang thiếu phần tử mà mã cần. */
+	var $ = (id) => {
+		const el = document.getElementById(id);
+		if (!el) throw new Error(`Missing element #${id}`);
+		return el;
+	};
+	var input = (id) => $(id);
+	var select = (id) => $(id);
+	// src/site/controls.ts
+	/**
+	* Các điều khiển của trang: dựng thanh trượt từ đặc tả, đọc giá trị thật, và đọc hoặc áp dụng toàn bộ trạng thái
+	* (dùng cho lưu và nạp cấu hình). Thanh trượt logarit lưu vị trí, nên mọi truy cập đi qua `value` và `setValue`.
+	*/
+	function fieldHtml(s) {
+		const min = s.log ? 0 : s.min;
+		const max = s.log ? LOG_STEPS : s.max;
+		const step = s.log ? 1 : s.step;
+		const value = s.log ? Math.round(toPosition(s, s.value)) : s.value;
+		return `<div class="field"><label for="${s.id}">${s.label}</label><input id="${s.id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"><output for="${s.id}"></output></div>`;
+	}
+	/** Dựng các hàng thanh trượt vào các nhóm, và các lựa chọn của bảng màu. */
+	function buildControls() {
+		for (const group of [
+			"mirror",
+			"seg",
+			"vanes",
+			"vaneEach",
+			"zern",
+			"display"
+		]) $(`g-${group}`).innerHTML = RANGE_SPECS.filter((s) => s.group === group).map(fieldHtml).join("");
+		$("cmap").innerHTML = Object.keys(COLORMAP_LABELS).map((k) => `<option value="${k}"${k === "hot" ? " selected" : ""}>${COLORMAP_LABELS[k]}</option>`).join("");
+	}
+	/** Giá trị thật của một thanh trượt (đã đổi từ vị trí nếu là thang log). */
+	function value(id) {
+		const spec = specById(id);
+		if (!spec) throw new Error(`Unknown control ${id}`);
+		return fromPosition(spec, +input(id).value);
+	}
+	function setValue(id, v) {
+		const spec = specById(id);
+		if (spec) input(id).value = String(toPosition(spec, v));
+	}
+	function syncOutputs() {
+		document.querySelectorAll("#controls output").forEach((o) => {
+			const spec = specById(o.htmlFor.toString());
+			if (spec) o.textContent = spec.format(value(spec.id));
+		});
+	}
+	var seed = 1;
+	var getSeed = () => seed;
+	var setSeed = (n) => {
+		seed = n;
+	};
+	function readParams() {
+		const aberrations = {};
+		for (const name of ZERNIKE_NAMES) aberrations[name] = value(ZERNIKE_IDS[name]);
+		return {
+			diameterM: value("D"),
+			wavelengthNm: value("lam"),
+			bandwidthNm: value("band"),
+			obstructionRatio: value("eps"),
+			vaneCount: Math.round(value("nvane")),
+			vaneThicknessRatio: value("tvane"),
+			vaneAngleDeg: value("avane"),
+			vaneAnglesDeg: input("vane-each").checked ? VANE_IDS.slice(0, Math.round(value("nvane"))).map((id) => value(id)) : null,
+			aberrations,
+			segmented: {
+				enabled: input("seg-on").checked,
+				rings: Math.round(value("seg-rings")),
+				gapRatio: value("seg-gap"),
+				removeCenter: input("seg-center").checked,
+				pistonRms: value("seg-piston"),
+				tiltRms: value("seg-tilt"),
+				seed
+			},
+			fovArcsec: value("fov"),
+			dynamicRangeDecades: value("range"),
+			colormap: select("cmap").value
+		};
+	}
+	/** Toàn bộ trạng thái hiện tại của giao diện, gồm cả những thanh trượt góc đang ẩn và vòng đánh dấu. */
+	function readUiState() {
+		return {
+			params: readParams(),
+			vaneSlots: VANE_IDS.map((id) => value(id)),
+			individualVanes: input("vane-each").checked,
+			showRing: input("showring").checked
+		};
+	}
+	/** Phần "Segmented mirror" chỉ hiện khi bật. */
+	function syncSeg() {
+		$("seg-more").hidden = !input("seg-on").checked;
+	}
+	/** Góc riêng của từng thanh chống: chỉ hiện thanh trượt của những thanh đang có, và chỉ khi tuỳ chọn đang bật. */
+	function syncVanes() {
+		$("vane-more").hidden = !input("vane-each").checked;
+		const n = Math.round(value("nvane"));
+		VANE_IDS.forEach((id, i) => {
+			const field = input(id).closest(".field");
+			if (field) field.hidden = i >= n;
+		});
+	}
+	/** Bắt đầu từ những góc mà các thanh chống đang có (cách đều, trước khi cộng góc xoay), để ảnh không nhảy. */
+	function initVaneAngles() {
+		const n = Math.max(1, Math.round(value("nvane")));
+		VANE_IDS.forEach((id, i) => setValue(id, i < n ? 360 * i / n : 45 * i % 360));
+		syncOutputs();
+	}
+	/** Bảng màu và vòng đánh dấu nằm ngoài biểu mẫu nên biểu mẫu không tự đặt lại chúng. */
+	function resetDisplayControls() {
+		select("cmap").value = "hot";
+		input("showring").checked = false;
+	}
+	/** Đặt mọi điều khiển theo `state` (nạp cấu hình). Người gọi cần gọi lại phần tính toán sau đó. */
+	function applyUiState(state) {
+		const p = state.params;
+		setValue("D", p.diameterM);
+		setValue("lam", p.wavelengthNm);
+		setValue("band", p.bandwidthNm);
+		setValue("eps", p.obstructionRatio);
+		setValue("nvane", p.vaneCount);
+		setValue("tvane", p.vaneThicknessRatio);
+		setValue("avane", p.vaneAngleDeg);
+		for (const name of ZERNIKE_NAMES) setValue(ZERNIKE_IDS[name], p.aberrations[name]);
+		const s = p.segmented;
+		input("seg-on").checked = s.enabled;
+		setValue("seg-rings", s.rings);
+		setValue("seg-gap", s.gapRatio);
+		input("seg-center").checked = s.removeCenter;
+		setValue("seg-piston", s.pistonRms);
+		setValue("seg-tilt", s.tiltRms);
+		setSeed(s.seed);
+		setValue("fov", p.fovArcsec);
+		setValue("range", p.dynamicRangeDecades);
+		select("cmap").value = p.colormap;
+		input("showring").checked = state.showRing;
+		VANE_IDS.forEach((id, i) => setValue(id, state.vaneSlots[i]));
+		input("vane-each").checked = state.individualVanes;
+		syncSeg();
+		syncVanes();
+		syncOutputs();
+	}
+	// src/site/files.ts
+	var SETTINGS_FILE_NAME = "telescope-psf-settings.json";
+	/** Nhãn bước sóng: một giá trị hoặc một dải. */
+	function wavelengthText(p) {
+		if (p.bandwidthNm <= 0) return `${p.wavelengthNm.toFixed(0)} nm`;
+		return `${Math.max(200, p.wavelengthNm - p.bandwidthNm / 2).toFixed(0)}–${(p.wavelengthNm + p.bandwidthNm / 2).toFixed(0)} nm`;
+	}
+	/** Tên tệp ảnh, ví dụ telescope-psf_aperture_D6.50m_550nm_hex18.png. Chỉ có chữ, số, dấu chấm, gạch dưới và gạch nối. */
+	function imageFileName(kind, p, segments = 0) {
+		const lam = p.bandwidthNm > 0 ? wavelengthText(p).replace("–", "-").replace(" nm", "nm") : `${p.wavelengthNm.toFixed(0)}nm`;
+		const parts = [
+			"telescope-psf",
+			kind,
+			`D${p.diameterM.toFixed(2)}m`,
+			lam
+		];
+		if (segments > 0) parts.push(`hex${segments}`);
+		return parts.join("_") + ".png";
+	}
+	/** Dòng chú thích ghi sẵn trên ảnh, để ảnh lưu ra tự mô tả được. */
+	function captionFor(kind, p, s) {
+		const parts = [`D = ${p.diameterM.toFixed(2)} m`, `λ = ${wavelengthText(p)}`];
+		if (s.segmentCount > 0) parts.push(`${s.segmentCount} hexagonal segments`);
+		if (p.obstructionRatio > 0) parts.push(`ε = ${(p.obstructionRatio * 100).toFixed(0)} %`);
+		const vanes = p.vaneAnglesDeg ? p.vaneAnglesDeg.length : p.vaneCount;
+		if (vanes > 0) parts.push(`${vanes} vane${vanes === 1 ? "" : "s"}`);
+		if (kind === "psf") parts.push(`field of view ${p.fovArcsec.toFixed(p.fovArcsec < 10 ? 2 : 1)}″`);
+		parts.push(`Strehl ${s.strehl.toFixed(3)}`);
+		return parts.join(" · ");
+	}
+	// src/site/plotTools.ts
+	/** Công cụ thuần cho việc vẽ đồ thị: màu, phông, bước chia và nhãn. Không phụ thuộc DOM nên kiểm thử được. */
 	var COLOR = {
 		text: "#b3bfd8",
 		grid: "rgba(255,255,255,.08)",
@@ -1366,27 +1540,8 @@
 		grey: "rgba(179,191,216,.8)"
 	};
 	var FONT = "12px system-ui, sans-serif";
-	/** Đặt kích thước điểm ảnh của canvas theo kích thước hiển thị và mật độ màn hình (tối đa 2×). */
-	function fitCanvas(canvas) {
-		const dpr = Math.min(window.devicePixelRatio || 1, 2);
-		const w = canvas.clientWidth;
-		const h = canvas.clientHeight;
-		if (!w || !h) return null;
-		const pw = Math.round(w * dpr);
-		const ph = Math.round(h * dpr);
-		if (canvas.width !== pw || canvas.height !== ph) {
-			canvas.width = pw;
-			canvas.height = ph;
-		}
-		const ctx = canvas.getContext("2d");
-		if (!ctx) return null;
-		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-		return {
-			ctx,
-			w,
-			h
-		};
-	}
+	/** Màu nền của ảnh lưu ra: cùng màu nền của trang, để ảnh đọc được trên mọi nền. */
+	var EXPORT_BACKGROUND = "#0b1326";
 	/** Bước chia "tròn" (1, 2, 5 × 10^k) sao cho có khoảng n vạch trên khoảng range. */
 	function niceStep(range, n) {
 		const raw = range / n;
@@ -1431,11 +1586,34 @@
 	function arcsecLabel(v) {
 		return `${Number(v.toPrecision(2))}″`;
 	}
+	// src/site/plots.ts
+	/** Đặt kích thước điểm ảnh của canvas theo kích thước hiển thị và mật độ màn hình (tối đa 2×). */
+	function fitCanvas(canvas) {
+		const dpr = Math.min(window.devicePixelRatio || 1, 2);
+		const w = canvas.clientWidth;
+		const h = canvas.clientHeight;
+		if (!w || !h) return null;
+		const pw = Math.round(w * dpr);
+		const ph = Math.round(h * dpr);
+		if (canvas.width !== pw || canvas.height !== ph) {
+			canvas.width = pw;
+			canvas.height = ph;
+		}
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return null;
+		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		return {
+			ctx,
+			w,
+			h
+		};
+	}
 	/** Vẽ ảnh PSF (đã tô màu) lên canvas, kèm thanh tỉ lệ và vòng tối đầu tiên tuỳ chọn. */
 	function drawPsf(canvas, source, o) {
-		const f = fitCanvas(canvas);
-		if (!f) return;
-		const { ctx, w, h } = f;
+		const t = fitCanvas(canvas);
+		if (t) paintPsf(t, source, o);
+	}
+	function paintPsf({ ctx, w, h }, source, o) {
 		ctx.clearRect(0, 0, w, h);
 		ctx.imageSmoothingEnabled = true;
 		ctx.drawImage(source, 0, 0, w, h);
@@ -1475,17 +1653,20 @@
 	}
 	/** Vẽ ảnh pupil lên canvas. */
 	function drawPupil(canvas, source) {
-		const f = fitCanvas(canvas);
-		if (!f) return;
-		f.ctx.clearRect(0, 0, f.w, f.h);
-		f.ctx.imageSmoothingEnabled = true;
-		f.ctx.drawImage(source, 0, 0, f.w, f.h);
+		const t = fitCanvas(canvas);
+		if (t) paintPupil(t, source);
+	}
+	function paintPupil({ ctx, w, h }, source) {
+		ctx.clearRect(0, 0, w, h);
+		ctx.imageSmoothingEnabled = true;
+		ctx.drawImage(source, 0, 0, w, h);
 	}
 	/** Profile xuyên tâm trên trục log, so với mẫu Airy lý tưởng. */
 	function drawProfile(canvas, profile, decades) {
-		const f = fitCanvas(canvas);
-		if (!f) return;
-		const { ctx, w, h } = f;
+		const t = fitCanvas(canvas);
+		if (t) paintProfile(t, profile, decades);
+	}
+	function paintProfile({ ctx, w, h }, profile, decades) {
 		ctx.clearRect(0, 0, w, h);
 		const m = {
 			l: 56,
@@ -1575,73 +1756,344 @@
 		ctx.setLineDash([]);
 		ctx.fillText("ideal Airy pattern", lx + 24, m.t + 32);
 	}
-	// src/site/main.ts
-	var $ = (id) => {
-		const el = document.getElementById(id);
-		if (!el) throw new Error(`Missing element #${id}`);
-		return el;
-	};
-	var input = (id) => $(id);
-	function fieldHtml(s) {
-		const min = s.log ? 0 : s.min;
-		const max = s.log ? LOG_STEPS : s.max;
-		const step = s.log ? 1 : s.step;
-		const value = s.log ? Math.round(toPosition(s, s.value)) : s.value;
-		return `<div class="field"><label for="${s.id}">${s.label}</label><input id="${s.id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"><output for="${s.id}"></output></div>`;
-	}
-	for (const group of [
-		"mirror",
-		"seg",
-		"vanes",
-		"vaneEach",
-		"zern",
-		"display"
-	]) $(`g-${group}`).innerHTML = RANGE_SPECS.filter((s) => s.group === group).map(fieldHtml).join("");
-	$("cmap").innerHTML = Object.keys(COLORMAP_LABELS).map((k) => `<option value="${k}"${k === "hot" ? " selected" : ""}>${COLORMAP_LABELS[k]}</option>`).join("");
-	/** Giá trị thật của một thanh trượt (đã đổi từ vị trí nếu là thang log). */
-	function value(id) {
-		const spec = specById(id);
-		if (!spec) throw new Error(`Unknown control ${id}`);
-		return fromPosition(spec, +input(id).value);
-	}
-	function setValue(id, v) {
-		const spec = specById(id);
-		if (spec) input(id).value = String(toPosition(spec, v));
-	}
-	function syncOutputs() {
-		document.querySelectorAll("#controls output").forEach((o) => {
-			const spec = specById(o.htmlFor.toString());
-			if (spec) o.textContent = spec.format(value(spec.id));
-		});
-	}
-	var seed = 1;
-	function readParams() {
-		const aberrations = {};
-		for (const name of ZERNIKE_NAMES) aberrations[name] = value(ZERNIKE_IDS[name]);
+	// src/site/exportImages.ts
+	/**
+	* Canvas ẩn để vẽ ảnh lưu ra, với kích thước logic w × h và độ phân giải `scale` lần (mặc định 2×), đã tô màu nền.
+	* Cùng các hàm vẽ như trên màn hình, nên ảnh lưu ra giống hệt ảnh đang xem, chỉ sắc nét hơn.
+	*/
+	function exportCanvas(w, h, scale = 2) {
+		const canvas = document.createElement("canvas");
+		canvas.width = Math.round(w * scale);
+		canvas.height = Math.round(h * scale);
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return null;
+		ctx.setTransform(scale, 0, 0, scale, 0, 0);
+		ctx.fillStyle = EXPORT_BACKGROUND;
+		ctx.fillRect(0, 0, w, h);
 		return {
-			diameterM: value("D"),
-			wavelengthNm: value("lam"),
-			bandwidthNm: value("band"),
-			obstructionRatio: value("eps"),
-			vaneCount: Math.round(value("nvane")),
-			vaneThicknessRatio: value("tvane"),
-			vaneAngleDeg: value("avane"),
-			vaneAnglesDeg: input("vane-each").checked ? VANE_IDS.slice(0, Math.round(value("nvane"))).map((id) => value(id)) : null,
-			aberrations,
-			segmented: {
-				enabled: input("seg-on").checked,
-				rings: Math.round(value("seg-rings")),
-				gapRatio: value("seg-gap"),
-				removeCenter: input("seg-center").checked,
-				pistonRms: value("seg-piston"),
-				tiltRms: value("seg-tilt"),
-				seed
-			},
-			fovArcsec: value("fov"),
-			dynamicRangeDecades: value("range"),
-			colormap: $("cmap").value
+			canvas,
+			target: {
+				ctx,
+				w,
+				h
+			}
 		};
 	}
+	/** Thang màu của mặt sóng (xanh, trắng, cam) kèm hai nhãn ở hai đầu, dùng cho ảnh pupil lưu ra. */
+	function paintWavefrontScale(ctx, x, y, w, minLabel, maxLabel) {
+		const barW = Math.min(260, w * .5);
+		const bx = x + (w - barW) / 2;
+		const gradient = ctx.createLinearGradient(bx, 0, bx + barW, 0);
+		gradient.addColorStop(0, "#5ab9ff");
+		gradient.addColorStop(.5, "#edf2ff");
+		gradient.addColorStop(1, "#ffaa46");
+		ctx.fillStyle = gradient;
+		ctx.fillRect(bx, y + 11, barW, 10);
+		ctx.strokeStyle = "rgba(255,255,255,.25)";
+		ctx.lineWidth = 1;
+		ctx.strokeRect(bx + .5, y + 11.5, barW - 1, 9);
+		ctx.font = "12px ui-monospace, monospace";
+		ctx.fillStyle = COLOR.text;
+		ctx.textBaseline = "middle";
+		ctx.textAlign = "right";
+		ctx.fillText(minLabel, bx - 10, y + 16);
+		ctx.textAlign = "left";
+		ctx.fillText(maxLabel, bx + barW + 10, y + 16);
+	}
+	/** Dải chú thích (một dòng chữ ở giữa) ở y .. y + h, dùng cho ảnh lưu ra. */
+	function paintCaption(ctx, x, y, w, h, text) {
+		ctx.fillStyle = EXPORT_BACKGROUND;
+		ctx.fillRect(x, y, w, h);
+		ctx.strokeStyle = "rgba(255,255,255,.14)";
+		ctx.lineWidth = 1;
+		ctx.beginPath();
+		ctx.moveTo(x, y + .5);
+		ctx.lineTo(x + w, y + .5);
+		ctx.stroke();
+		ctx.font = FONT;
+		ctx.fillStyle = COLOR.text;
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText(text, x + w / 2, y + h / 2 + .5, w - 16);
+	}
+	/** Kích thước logic của ảnh lưu ra (đơn vị CSS); canvas thật gấp đôi. */
+	var IMAGE_W = 640;
+	var CAPTION_H = 34;
+	var SCALE_H = 36;
+	var PROFILE_H = 380;
+	/** Cho trình duyệt tải một đối tượng Blob xuống với tên cho trước. */
+	function downloadBlob(blob, name) {
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = name;
+		a.rel = "noopener";
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		setTimeout(() => URL.revokeObjectURL(url), 1e4);
+	}
+	/** Lưu nội dung văn bản (ví dụ tệp cấu hình JSON). */
+	function downloadText(text, name, mime = "application/json") {
+		downloadBlob(new Blob([text], { type: mime }), name);
+	}
+	function savePng(canvas, name) {
+		canvas.toBlob((blob) => {
+			if (blob) downloadBlob(blob, name);
+		}, "image/png");
+	}
+	/** Ảnh PSF như đang xem (kèm thanh tỉ lệ, vòng tối đầu tiên nếu đang bật, nhãn bước sóng) và dòng chú thích. */
+	function savePsfImage(frame, params, source, showRing) {
+		const out = exportCanvas(IMAGE_W, 674);
+		if (!out) return;
+		const { canvas, target } = out;
+		paintPsf({
+			ctx: target.ctx,
+			w: IMAGE_W,
+			h: IMAGE_W
+		}, source, {
+			fovArcsec: params.fovArcsec,
+			airyRadiusArcsec: frame.stats.airyRadiusArcsec,
+			showRing,
+			label: wavelengthText(params)
+		});
+		paintCaption(target.ctx, 0, IMAGE_W, IMAGE_W, CAPTION_H, captionFor("psf", params, frame.stats));
+		savePng(canvas, imageFileName("psf", params, frame.stats.segmentCount));
+	}
+	/** Ảnh khẩu độ và mặt sóng, với thang màu của mặt sóng phía trên và dòng chú thích phía dưới. */
+	function saveAperture(frame, params, source) {
+		const out = exportCanvas(IMAGE_W, 710);
+		if (!out) return;
+		const { canvas, target } = out;
+		const r = frame.pupilRangeWaves;
+		paintWavefrontScale(target.ctx, 0, 0, IMAGE_W, `−${r} λ`, `+${r} λ`);
+		target.ctx.save();
+		target.ctx.translate(0, SCALE_H);
+		paintPupil({
+			ctx: target.ctx,
+			w: IMAGE_W,
+			h: IMAGE_W
+		}, source);
+		target.ctx.restore();
+		paintCaption(target.ctx, 0, 676, IMAGE_W, CAPTION_H, captionFor("aperture", params, frame.stats));
+		savePng(canvas, imageFileName("aperture", params, frame.stats.segmentCount));
+	}
+	/** Đồ thị profile xuyên tâm (đường mô phỏng và mẫu Airy lý tưởng) và dòng chú thích. */
+	function saveProfileImage(frame, params) {
+		const out = exportCanvas(IMAGE_W, 414);
+		if (!out) return;
+		const { canvas, target } = out;
+		paintProfile({
+			ctx: target.ctx,
+			w: IMAGE_W,
+			h: PROFILE_H
+		}, frame.profile, params.dynamicRangeDecades);
+		paintCaption(target.ctx, 0, PROFILE_H, IMAGE_W, CAPTION_H, captionFor("profile", params, frame.stats));
+		savePng(canvas, imageFileName("profile", params, frame.stats.segmentCount));
+	}
+	// src/site/settings.ts
+	/**
+	* Lưu và nạp cấu hình của mô phỏng ra tệp JSON.
+	*
+	* Tệp dùng tên trường dễ đọc, theo từng nhóm điều khiển, và giá trị thật (đơn vị SI hoặc giây cung, không phải vị trí
+	* thanh trượt), nên đọc được bằng mắt và không phụ thuộc id của giao diện. Khi nạp, trường thiếu lấy giá trị mặc định,
+	* trường lạ bị bỏ qua, và giá trị ngoài khoảng cho phép bị kẹp vào khoảng đó; mọi điều chỉnh được ghi lại để báo cho người dùng.
+	* Chỉ tệp hỏng hẳn (không phải JSON, sai định dạng, từ phiên bản mới hơn) mới bị từ chối.
+	*/
+	var SETTINGS_FORMAT = "telescope-psf-settings";
+	var SettingsError = class extends Error {};
+	var r6 = (v) => Number(v.toPrecision(6));
+	function serializeSettings(state, savedAt = /* @__PURE__ */ new Date()) {
+		const p = state.params;
+		const doc = {
+			format: SETTINGS_FORMAT,
+			version: 1,
+			savedAt: savedAt.toISOString(),
+			mirror: {
+				diameterM: r6(p.diameterM),
+				wavelengthNm: r6(p.wavelengthNm),
+				bandwidthNm: r6(p.bandwidthNm)
+			},
+			segmented: {
+				enabled: p.segmented.enabled,
+				rings: p.segmented.rings,
+				gapRatio: r6(p.segmented.gapRatio),
+				removeCenter: p.segmented.removeCenter,
+				pistonRms: r6(p.segmented.pistonRms),
+				tiltRms: r6(p.segmented.tiltRms),
+				seed: p.segmented.seed
+			},
+			vanes: {
+				obstructionRatio: r6(p.obstructionRatio),
+				count: p.vaneCount,
+				thicknessRatio: r6(p.vaneThicknessRatio),
+				rotationDeg: r6(p.vaneAngleDeg),
+				individualAngles: state.individualVanes,
+				anglesDeg: state.vaneSlots.map(r6)
+			},
+			aberrations: Object.fromEntries(ZERNIKE_NAMES.map((n) => [n, r6(p.aberrations[n])])),
+			display: {
+				fovArcsec: r6(p.fovArcsec),
+				dynamicRangeDecades: r6(p.dynamicRangeDecades),
+				colormap: p.colormap,
+				markFirstDarkRing: state.showRing
+			}
+		};
+		return JSON.stringify(doc, null, 2) + "\n";
+	}
+	var isRec = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+	function parseSettings(text) {
+		if (text.length > 2e5) throw new SettingsError("The file is too large to be a settings file.");
+		let doc;
+		try {
+			doc = JSON.parse(text);
+		} catch {
+			throw new SettingsError("The file is not valid JSON.");
+		}
+		if (!isRec(doc) || doc.format !== "telescope-psf-settings") throw new SettingsError("This is not a telescope PSF settings file.");
+		if (typeof doc.version !== "number" || !Number.isFinite(doc.version) || doc.version < 1) throw new SettingsError("The settings file has no valid version number.");
+		if (doc.version > 1) throw new SettingsError(`The file was saved by a newer version of this page (version ${doc.version}).`);
+		const notes = [];
+		const section = (key) => {
+			const v = doc[key];
+			if (v === void 0) return {};
+			if (!isRec(v)) {
+				notes.push(`"${key}" was ignored because it is not an object.`);
+				return {};
+			}
+			return v;
+		};
+		const num = (rec, key, id, label, integer = false) => {
+			const spec = specById(id);
+			if (!spec) throw new Error(`Unknown control ${id}`);
+			const raw = rec[key];
+			if (raw === void 0) return spec.value;
+			if (typeof raw !== "number" || !Number.isFinite(raw)) {
+				notes.push(`${label}: not a number, using ${spec.format(spec.value)}.`);
+				return spec.value;
+			}
+			const v = integer ? Math.round(raw) : raw;
+			const clamped = Math.min(spec.max, Math.max(spec.min, v));
+			if (clamped !== v) notes.push(`${label}: ${spec.format(v)} is outside the allowed range, using ${spec.format(clamped)}.`);
+			return clamped;
+		};
+		const bool = (rec, key, fallback, label) => {
+			const raw = rec[key];
+			if (raw === void 0) return fallback;
+			if (typeof raw !== "boolean") {
+				notes.push(`${label}: not true or false, using ${fallback ? "true" : "false"}.`);
+				return fallback;
+			}
+			return raw;
+		};
+		const mirror = section("mirror");
+		const seg = section("segmented");
+		const vanes = section("vanes");
+		const aberr = section("aberrations");
+		const display = section("display");
+		const aberrations = {};
+		for (const name of ZERNIKE_NAMES) aberrations[name] = num(aberr, name, ZERNIKE_IDS[name], `Aberration ${name}`);
+		const count = num(vanes, "count", "nvane", "Number of vanes", true);
+		const individual = bool(vanes, "individualAngles", false, "Individual vane angles");
+		const rawAngles = vanes.anglesDeg;
+		if (rawAngles !== void 0 && !Array.isArray(rawAngles)) notes.push("Vane angles were ignored because they are not a list.");
+		const slots = VANE_IDS.map((id, i) => {
+			const fallback = specById(id)?.value ?? i * 45;
+			const v = Array.isArray(rawAngles) ? rawAngles[i] : void 0;
+			if (v === void 0) return fallback;
+			if (typeof v !== "number" || !Number.isFinite(v)) {
+				notes.push(`Vane ${i + 1} angle: not a number, using ${fallback}°.`);
+				return fallback;
+			}
+			return v >= 0 && v < 360 ? v : (v % 360 + 360) % 360;
+		});
+		if (Array.isArray(rawAngles) && rawAngles.length > 8) notes.push(`Only the first 8 vane angles are used.`);
+		const colormapRaw = display.colormap;
+		let colormap = "hot";
+		if (colormapRaw !== void 0) {
+			if (typeof colormapRaw === "string" && colormapRaw in COLORMAP_LABELS) colormap = colormapRaw;
+			else notes.push("Color map: unknown name, using \"hot\".");
+		}
+		const seedRaw = seg.seed;
+		let seed = 1;
+		if (seedRaw !== void 0) {
+			if (typeof seedRaw === "number" && Number.isFinite(seedRaw)) seed = Math.min(1e9, Math.max(1, Math.trunc(seedRaw)));
+			else notes.push("Random seed: not a number, using 1.");
+		}
+		return {
+			state: {
+				params: {
+					diameterM: num(mirror, "diameterM", "D", "Mirror diameter"),
+					wavelengthNm: num(mirror, "wavelengthNm", "lam", "Wavelength"),
+					bandwidthNm: num(mirror, "bandwidthNm", "band", "Bandwidth"),
+					obstructionRatio: num(vanes, "obstructionRatio", "eps", "Central obstruction"),
+					vaneCount: count,
+					vaneThicknessRatio: num(vanes, "thicknessRatio", "tvane", "Vane thickness"),
+					vaneAngleDeg: num(vanes, "rotationDeg", "avane", "Vane rotation"),
+					vaneAnglesDeg: individual ? slots.slice(0, count) : null,
+					aberrations,
+					segmented: {
+						enabled: bool(seg, "enabled", false, "Segmented mirror"),
+						rings: num(seg, "rings", "seg-rings", "Rings", true),
+						gapRatio: num(seg, "gapRatio", "seg-gap", "Segment gap"),
+						removeCenter: bool(seg, "removeCenter", true, "Remove center segment"),
+						pistonRms: num(seg, "pistonRms", "seg-piston", "Piston error"),
+						tiltRms: num(seg, "tiltRms", "seg-tilt", "Tip/tilt error"),
+						seed
+					},
+					fovArcsec: num(display, "fovArcsec", "fov", "Field of view"),
+					dynamicRangeDecades: num(display, "dynamicRangeDecades", "range", "Dynamic range"),
+					colormap
+				},
+				vaneSlots: slots,
+				individualVanes: individual,
+				showRing: bool(display, "markFirstDarkRing", false, "Mark the first dark ring")
+			},
+			notes
+		};
+	}
+	// src/site/zoom.ts
+	/**
+	* Zoom của ảnh PSF: đổi trường nhìn (giây cung) quanh ngôi sao ở tâm.
+	*
+	* Giới hạn tính theo λ/D của kính hiện tại: không thu hẹp quá ±1 λ/D (ảnh chỉ có 4 mẫu mỗi λ/D, hẹp hơn chỉ là nội suy)
+	* và không nới quá vùng tính toán ±64 λ/D (ngoài đó ảnh bị tô đen). Hai giới hạn còn bị kẹp bởi khoảng của thanh trượt.
+	*/
+	var ZOOM_STEP = 1.5;
+	/** Khoảng trường nhìn cho phép với λ/D = ldArcsec. */
+	function zoomLimits(range, ldArcsec) {
+		const hi = Math.min(range.max, 128 * ldArcsec);
+		return {
+			lo: Math.min(hi, Math.max(range.min, 2 * ldArcsec)),
+			hi
+		};
+	}
+	var clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+	/** Nhân trường nhìn với `factor` (nhỏ hơn 1 là phóng to), kẹp vào khoảng cho phép. */
+	function zoomFov(fov, factor, ldArcsec, range) {
+		const { lo, hi } = zoomLimits(range, ldArcsec);
+		return clamp(fov * factor, lo, hi);
+	}
+	/** Trường nhìn vừa khít ±FIT_FIELD_LD/2 quanh ngôi sao, bất kể đường kính và bước sóng. */
+	function fitFov(ldArcsec, range) {
+		const { lo, hi } = zoomLimits(range, ldArcsec);
+		return clamp(24 * ldArcsec, lo, hi);
+	}
+	/**
+	* Hệ số nhân trường nhìn cho một sự kiện lăn chuột hoặc chụm hai ngón (Ctrl + lăn): lăn xuống hoặc chụm lại là thu nhỏ.
+	* `deltaMode` là của WheelEvent (0 điểm ảnh, 1 dòng, 2 trang).
+	*/
+	function wheelFactor(deltaY, deltaMode = 0) {
+		const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? 100 : 1);
+		return Math.exp(clamp(pixels, -300, 300) * .002);
+	}
+	// src/site/main.ts
+	buildControls();
+	var fovSpec = () => {
+		const spec = specById("fov");
+		if (!spec) throw new Error("Missing fov spec");
+		return spec;
+	};
 	var readCells = {};
 	{
 		const dl = $("read");
@@ -1671,10 +2123,6 @@
 		c.dt.hidden = !visible;
 		c.dd.hidden = !visible;
 	}
-	function bandLabel(p) {
-		if (p.bandwidthNm <= 0) return `${p.wavelengthNm.toFixed(0)} nm`;
-		return `${Math.max(200, p.wavelengthNm - p.bandwidthNm / 2).toFixed(0)}–${(p.wavelengthNm + p.bandwidthNm / 2).toFixed(0)} nm`;
-	}
 	var last = null;
 	var psfOff = document.createElement("canvas");
 	var pupOff = document.createElement("canvas");
@@ -1694,7 +2142,7 @@
 			fovArcsec: params.fovArcsec,
 			airyRadiusArcsec: frame.stats.airyRadiusArcsec,
 			showRing: input("showring").checked,
-			label: bandLabel(params)
+			label: wavelengthText(params)
 		});
 		drawPupil($("pupil"), pupOff);
 		drawProfile($("profile"), frame.profile, params.dynamicRangeDecades);
@@ -1783,31 +2231,11 @@
 		syncVanes();
 		schedule();
 	}
-	var segMore = $("seg-more");
-	var syncSeg = () => {
-		segMore.hidden = !input("seg-on").checked;
-	};
-	var vaneMore = $("vane-more");
-	var syncVanes = () => {
-		vaneMore.hidden = !input("vane-each").checked;
-		const n = Math.round(value("nvane"));
-		VANE_IDS.forEach((id, i) => {
-			const field = input(id).closest(".field");
-			if (field) field.hidden = i >= n;
-		});
-	};
-	/** Start from the angles the vanes already have (equal spacing, before the rotation is added), so nothing jumps. */
-	var initVaneAngles = () => {
-		const n = Math.max(1, Math.round(value("nvane")));
-		VANE_IDS.forEach((id, i) => setValue(id, i < n ? 360 * i / n : 45 * i % 360));
-		syncOutputs();
-	};
 	$("controls").addEventListener("input", onInput);
 	$("controls").addEventListener("change", onInput);
 	$("controls").addEventListener("reset", () => {
-		seed = 1;
-		$("cmap").value = "hot";
-		input("showring").checked = false;
+		setSeed(1);
+		resetDisplayControls();
 		setTimeout(() => {
 			syncSeg();
 			onInput();
@@ -1820,7 +2248,7 @@
 		if (input("vane-each").checked) initVaneAngles();
 	});
 	$("seg-draw").addEventListener("click", () => {
-		seed += 1;
+		setSeed(getSeed() + 1);
 		onInput();
 	});
 	$("clear-zern").addEventListener("click", () => {
@@ -1843,6 +2271,54 @@
 		input("seg-on").checked = true;
 		syncSeg();
 		onInput();
+	});
+	function zoomBy(factor) {
+		const p = readParams();
+		const ld = lambdaOverDArcsec(p.diameterM, p.wavelengthNm);
+		setValue("fov", zoomFov(p.fovArcsec, factor, ld, fovSpec()));
+		onInput();
+	}
+	$("zoom-in").addEventListener("click", () => zoomBy(1 / ZOOM_STEP));
+	$("zoom-out").addEventListener("click", () => zoomBy(ZOOM_STEP));
+	$("zoom-reset").addEventListener("click", () => {
+		const p = readParams();
+		setValue("fov", fitFov(lambdaOverDArcsec(p.diameterM, p.wavelengthNm), fovSpec()));
+		onInput();
+	});
+	$("psf").addEventListener("wheel", (e) => {
+		if (!e.ctrlKey && !e.metaKey) return;
+		e.preventDefault();
+		zoomBy(wheelFactor(e.deltaY, e.deltaMode));
+	}, { passive: false });
+	function withFrame(action) {
+		if (last) action(last.frame, last.params);
+	}
+	$("save-psf").addEventListener("click", () => withFrame((f, p) => savePsfImage(f, p, psfOff, input("showring").checked)));
+	$("save-pupil").addEventListener("click", () => withFrame((f, p) => saveAperture(f, p, pupOff)));
+	$("save-profile").addEventListener("click", () => withFrame((f, p) => saveProfileImage(f, p)));
+	var settingsNote = $("settings-note");
+	function say(text, bad = false) {
+		settingsNote.textContent = text;
+		settingsNote.classList.toggle("bad", bad);
+	}
+	$("save-settings").addEventListener("click", () => {
+		downloadText(serializeSettings(readUiState(), /* @__PURE__ */ new Date()), SETTINGS_FILE_NAME);
+		say("Settings saved.");
+	});
+	$("load-settings").addEventListener("click", () => $("settings-file").click());
+	$("settings-file").addEventListener("change", async () => {
+		const file = input("settings-file").files?.[0];
+		input("settings-file").value = "";
+		if (!file) return;
+		try {
+			if (file.size > 2e5) throw new SettingsError("The file is too large to be a settings file.");
+			const { state, notes } = parseSettings(await file.text());
+			applyUiState(state);
+			onInput();
+			say(notes.length ? `Settings loaded. ${notes.join(" ")}` : "Settings loaded.");
+		} catch (err) {
+			say(err instanceof SettingsError ? err.message : "The file could not be read.", true);
+		}
 	});
 	if (typeof ResizeObserver !== "undefined") {
 		const ro = new ResizeObserver(render);
