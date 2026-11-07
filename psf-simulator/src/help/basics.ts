@@ -64,6 +64,18 @@ export const BASICS: readonly BasicsSection[] = [
     ],
   },
   {
+    title: 'Segmented mirrors',
+    paragraphs: [
+      'Mirrors much larger than about 8 m cannot be cast in one piece, so telescopes such as Keck, JWST and the ELT tile the primary mirror with hexagonal segments. Each segment can be moved a little in three ways: piston (along the axis), and tip and tilt.',
+      'The PSF of a honeycomb is the PSF of one segment (a hexagon, which makes six diffraction spikes) multiplied by an array factor from the lattice of segments. If the segments are not aligned to a fraction of a wavelength (phased), the sharp core fades and light spreads into a speckle halo, so the mirror must be phased to about λ/13 RMS or better.',
+    ],
+    formulas: [
+      'N = 3k(k + 1) + 1 segments for k rings',
+      'Ã(θ) = hex̃(θ) · Σⱼ exp(−i·2π·rⱼ·θ / λ)',
+      'Random piston σ_p:  S ≈ exp[ −(2π σ_p)² ]',
+    ],
+  },
+  {
     title: 'Strehl ratio and the Maréchal criterion',
     paragraphs: [
       'The Strehl ratio S is the peak of the real PSF divided by the peak of a perfect PSF for the same aperture. For small errors it depends only on the RMS wavefront error σ. A system with S of 0.8 or more is called diffraction limited.',

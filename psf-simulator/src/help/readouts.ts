@@ -9,6 +9,7 @@ export type ReadoutKey =
   | 'marechal'
   | 'relativePeak'
   | 'bandSamples'
+  | 'segments'
   | 'computeTime'
   | 'psfImage'
   | 'pupilView'
@@ -56,6 +57,11 @@ export const READOUT_HELP: Record<ReadoutKey, HelpEntry> = {
     title: 'Wavelength samples',
     body: 'How many wavelengths are added together. 1 means monochromatic light.',
   },
+  segments: {
+    title: 'Number of segments',
+    body: 'Hexagonal segments in the primary mirror.',
+    formulas: ['N = 3k(k + 1) + 1  (minus 1 if the center is removed)'],
+  },
   computeTime: {
     title: 'Compute time',
     body: 'Time the background worker needed for the last frame (FFTs and drawing).',
@@ -69,7 +75,7 @@ export const READOUT_HELP: Record<ReadoutKey, HelpEntry> = {
   },
   pupilView: {
     title: 'Pupil view',
-    body: 'The telescope aperture as the star sees it. Brightness is transmission (black is blocked). Color is the wavefront error W: blue negative, red positive, white zero, with a scale of ±1 wave.',
+    body: 'The telescope aperture as the star sees it. Brightness is transmission (black is blocked). Color is the wavefront error W: blue negative, red positive, white zero, The color scale (printed under the picture) adapts to the size of the errors, up to ±1 wave. For a segmented mirror each segment shows its own piston as a flat color and its tilt as a gradient.',
   },
   profilePlot: {
     title: 'Radial profile',

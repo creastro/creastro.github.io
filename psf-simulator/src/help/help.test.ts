@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { COLORMAP_LABELS } from '../lib/colormap'
 import { ZERNIKE_LABELS, ZERNIKE_NAMES } from '../lib/zernike'
-import { BASICS, CONTROL_HELP, READOUT_HELP, ZERNIKE_HELP, type HelpEntry } from './index'
+import { BASICS, CONTROL_HELP, READOUT_HELP, SEGMENT_HELP, ZERNIKE_HELP, type HelpEntry } from './index'
 
 /**
  * Ký tự chỉ có trong tiếng Việt (dấu thanh trên â/ê/ô/ă/ơ/ư, chữ đ…). Cố ý bỏ các chữ có dấu dùng chung với ngôn ngữ khác
@@ -13,6 +13,7 @@ const entries: [string, HelpEntry][] = [
   ...Object.entries(CONTROL_HELP),
   ...Object.entries(ZERNIKE_HELP),
   ...Object.entries(READOUT_HELP),
+  ...Object.entries(SEGMENT_HELP),
 ]
 
 describe('help entries', () => {
@@ -44,9 +45,26 @@ describe('help entries', () => {
   })
 })
 
+describe('segmented mirror help', () => {
+  it('mỗi điều khiển của gương phân đoạn có chú thích với công thức', () => {
+    for (const key of ['segmented', 'presets', 'rings', 'gap', 'removeCenter', 'pistonRms', 'tiltRms', 'newDraw'] as const) {
+      expect(SEGMENT_HELP[key].formulas?.length, key).toBeGreaterThan(0)
+    }
+  })
+
+  it('công thức đếm phân đoạn và Maréchal cho piston xuất hiện', () => {
+    expect(SEGMENT_HELP.rings.formulas?.join(' ')).toContain('3k(k + 1) + 1')
+    expect(SEGMENT_HELP.pistonRms.formulas?.join(' ')).toContain('exp[ −(2π σ_p)² ]')
+  })
+
+  it('Basics có mục về gương phân đoạn', () => {
+    expect(BASICS.some((s) => s.title === 'Segmented mirrors')).toBe(true)
+  })
+})
+
 describe('basics', () => {
   it('có các mục nền tảng chính và mỗi mục có nội dung', () => {
-    expect(BASICS.length).toBeGreaterThanOrEqual(8)
+    expect(BASICS.length).toBeGreaterThanOrEqual(9)
     const titles = BASICS.map((s) => s.title.toLowerCase()).join(' | ')
     for (const word of ['fourier', 'airy', 'zernike', 'strehl', 'wavelength', 'logarithmic'.slice(0, 3)]) {
       expect(titles.includes(word) || BASICS.some((s) => s.paragraphs.join(' ').toLowerCase().includes(word)), word).toBe(true)

@@ -6,11 +6,13 @@ import { ProfilePlot } from './components/ProfilePlot'
 import { PsfCanvas } from './components/PsfCanvas'
 import { PupilCanvas } from './components/PupilCanvas'
 import { Readouts } from './components/Readouts'
+import { SegmentPanel } from './components/SegmentPanel'
 import { Slider } from './components/Slider'
 import { HelpButton, Tip } from './components/Tip'
 import { CONTROL_HELP } from './help'
 import { COLORMAP_LABELS, type ColormapName } from './lib/colormap'
 import { DEFAULT_PARAMS, type SimParams } from './lib/frame'
+import { SEGMENT_PRESETS, type SegmentPresetKey } from './lib/segmentPresets'
 import { ZERO_ABERRATIONS, type ZernikeName } from './lib/zernike'
 import { usePsfFrame } from './usePsfFrame'
 
@@ -21,6 +23,14 @@ export default function App() {
     setParams((p) => ({ ...p, [key]: value }))
   const setAberration = (name: ZernikeName, value: number) =>
     setParams((p) => ({ ...p, aberrations: { ...p.aberrations, [name]: value } }))
+
+  const setSegmented = (patch: Partial<SimParams['segmented']>) =>
+    setParams((p) => ({ ...p, segmented: { ...p.segmented, ...patch } }))
+  const applyPreset = (key: SegmentPresetKey) =>
+    setParams((p) => {
+      const { segmented, ...rest } = SEGMENT_PRESETS[key].patch
+      return { ...p, ...rest, segmented: { ...p.segmented, ...segmented, enabled: true } }
+    })
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -46,7 +56,11 @@ export default function App() {
             </p>
           ) : null}
           <div className="grid gap-4 sm:grid-cols-[auto_1fr]">
-            <PupilCanvas rgba={frame?.pupilRgba ?? null} size={frame?.pupilSize ?? 132} />
+            <PupilCanvas
+              rgba={frame?.pupilRgba ?? null}
+              size={frame?.pupilSize ?? 132}
+              rangeWaves={frame?.pupilRangeWaves ?? 1}
+            />
             <Readouts stats={frame?.stats ?? null} ms={frame?.ms ?? null} />
           </div>
           <ProfilePlot profile={frame?.profile ?? null} dynamicRangeDecades={params.dynamicRangeDecades} />
@@ -86,6 +100,8 @@ export default function App() {
               help={CONTROL_HELP.bandwidth}
             />
           </Panel>
+
+          <SegmentPanel params={params} onSegmented={setSegmented} onPreset={applyPreset} />
 
           <Panel title="Obstruction and spider vanes">
             <Slider
