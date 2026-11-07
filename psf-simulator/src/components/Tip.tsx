@@ -36,6 +36,19 @@ export function HelpButton() {
   )
 }
 
+/**
+ * Focus có đến từ bàn phím không. Bấm chuột vào nút làm nút giữ focus, và nếu tính cả trường hợp đó thì chú thích sẽ
+ * kẹt lại sau khi chuột đã rời đi. `:focus-visible` chỉ đúng với focus từ bàn phím; trình duyệt quá cũ không hiểu
+ * bộ chọn này thì coi như có.
+ */
+function isKeyboardFocus(el: EventTarget): boolean {
+  try {
+    return (el as Element).matches(':focus-visible')
+  } catch {
+    return true
+  }
+}
+
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
 
 interface TipProps {
@@ -126,7 +139,7 @@ export function Tip({ help, children, className }: TipProps) {
         aria-describedby={open ? id : undefined}
         onPointerEnter={(e) => mouseLike(e) && setHover(true)}
         onPointerLeave={(e) => mouseLike(e) && setHover(false)}
-        onFocus={() => setFocus(true)}
+        onFocus={(e) => setFocus(isKeyboardFocus(e.target))}
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus(false)
         }}
