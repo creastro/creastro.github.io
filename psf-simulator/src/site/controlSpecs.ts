@@ -5,7 +5,7 @@
 
 import { ZERNIKE_LABELS, ZERNIKE_NAMES, type ZernikeName } from '../lib/zernike'
 
-export type ControlGroup = 'mirror' | 'seg' | 'vanes' | 'zern' | 'display'
+export type ControlGroup = 'mirror' | 'seg' | 'vanes' | 'vaneEach' | 'zern' | 'display'
 
 export interface RangeSpec {
   id: string
@@ -46,6 +46,21 @@ export const ZERNIKE_IDS: Record<ZernikeName, string> = {
   spherical: 'z-sph',
 }
 
+/** Số thanh chống tối đa, và id thanh trượt góc riêng của từng thanh (va1 … va8). */
+export const MAX_VANES = 8
+export const VANE_IDS: readonly string[] = Array.from({ length: MAX_VANES }, (_, i) => `va${i + 1}`)
+
+const vaneAngleSpecs: RangeSpec[] = VANE_IDS.map((id, i) => ({
+  id,
+  group: 'vaneEach',
+  label: `Vane ${i + 1} angle`,
+  min: 0,
+  max: 360,
+  step: 0.1,
+  value: i * 45,
+  format: (v) => `${v.toFixed(1)}°`,
+}))
+
 const zernikeSpecs: RangeSpec[] = ZERNIKE_NAMES.map((name) => ({
   id: ZERNIKE_IDS[name],
   group: 'zern',
@@ -71,6 +86,7 @@ export const RANGE_SPECS: readonly RangeSpec[] = [
   { id: 'nvane', group: 'vanes', label: 'Spider vanes N', min: 0, max: 8, step: 1, value: 4, format: (v) => String(v) },
   { id: 'tvane', group: 'vanes', label: 'Vane thickness t', min: 0.002, max: 0.05, step: 0.001, value: 0.015, format: (v) => `${(v * 100).toFixed(1)} % of D` },
   { id: 'avane', group: 'vanes', label: 'Vane rotation φ₀', min: 0, max: 180, step: 1, value: 0, format: (v) => `${v.toFixed(0)}°` },
+  ...vaneAngleSpecs,
 
   ...zernikeSpecs,
 
@@ -83,6 +99,7 @@ export const OTHER_CONTROL_IDS = [
   'seg-on',
   'seg-center',
   'seg-draw',
+  'vane-each',
   'preset-jwst',
   'preset-keck',
   'preset-91',
@@ -112,6 +129,8 @@ export const REQUIRED_IDS = [
   'g-mirror',
   'g-seg',
   'g-vanes',
+  'g-vaneEach',
+  'vane-more',
   'g-zern',
   'g-display',
   'seg-more',

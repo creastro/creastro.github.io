@@ -15,6 +15,7 @@ import type { WorkerRequest, WorkerResponse } from '../workers/psf.worker'
 import {
   RANGE_SPECS,
   READ_ROWS,
+  VANE_IDS,
   ZERNIKE_IDS,
   LOG_STEPS,
   fromPosition,
@@ -45,7 +46,7 @@ function fieldHtml(s: RangeSpec): string {
   )
 }
 
-for (const group of ['mirror', 'seg', 'vanes', 'zern', 'display'] as const) {
+for (const group of ['mirror', 'seg', 'vanes', 'vaneEach', 'zern', 'display'] as const) {
   $(`g-${group}`).innerHTML = RANGE_SPECS.filter((s) => s.group === group).map(fieldHtml).join('')
 }
 $('cmap').innerHTML = (Object.keys(COLORMAP_LABELS) as ColormapName[])
@@ -84,6 +85,9 @@ function readParams(): SimParams {
     vaneCount: Math.round(value('nvane')),
     vaneThicknessRatio: value('tvane'),
     vaneAngleDeg: value('avane'),
+    vaneAnglesDeg: input('vane-each').checked
+      ? VANE_IDS.slice(0, Math.round(value('nvane'))).map((id) => value(id))
+      : null,
     aberrations,
     segmented: {
       enabled: input('seg-on').checked,
@@ -259,6 +263,7 @@ function schedule(): void {
 
 function onInput(): void {
   syncOutputs()
+  syncVanes()
   schedule()
 }
 
@@ -267,6 +272,23 @@ function onInput(): void {
 const segMore = $('seg-more')
 const syncSeg = (): void => {
   segMore.hidden = !input('seg-on').checked
+}
+
+// Per-vane angles: the sliders only show for the vanes that exist, and only when the option is on.
+const vaneMore = $('vane-more')
+const syncVanes = (): void => {
+  vaneMore.hidden = !input('vane-each').checked
+  const n = Math.round(value('nvane'))
+  VANE_IDS.forEach((id, i) => {
+    const field = input(id).closest<HTMLElement>('.field')
+    if (field) field.hidden = i >= n
+  })
+}
+/** Start from the angles the vanes already have (equal spacing, before the rotation is added), so nothing jumps. */
+const initVaneAngles = (): void => {
+  const n = Math.max(1, Math.round(value('nvane')))
+  VANE_IDS.forEach((id, i) => setValue(id, i < n ? (360 * i) / n : (45 * i) % 360))
+  syncOutputs()
 }
 
 $('controls').addEventListener('input', onInput)
@@ -284,6 +306,9 @@ $('controls').addEventListener('reset', () => {
 $('cmap').addEventListener('change', onInput)
 $('showring').addEventListener('change', render)
 input('seg-on').addEventListener('change', syncSeg)
+input('vane-each').addEventListener('change', () => {
+  if (input('vane-each').checked) initVaneAngles()
+})
 
 $('seg-draw').addEventListener('click', () => {
   seed += 1
@@ -319,4 +344,5 @@ if (typeof ResizeObserver !== 'undefined') {
 
 syncSeg()
 syncOutputs()
+syncVanes()
 schedule()

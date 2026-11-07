@@ -131,3 +131,36 @@ describe('sampleBilinear', () => {
     expect(sampleBilinear(grid, 2, 0, 1.2)).toBe(0)
   })
 })
+
+describe('computePsf — góc riêng của từng thanh chống', () => {
+  const along = (psf: ReturnType<typeof computePsf>, angleDeg: number, rLD: number) => {
+    const a = (angleDeg * Math.PI) / 180
+    const r = rLD * pad
+    return sampleBilinear(psf.intensity, base.gridSize, c + r * Math.cos(a), c + r * Math.sin(a))
+  }
+
+  // Một thanh đơn chỉ cho nửa biên độ của hai thanh đối nhau (hai thanh tạo thành một đường thẳng), tức là cường độ cánh sao
+  // chỉ bằng khoảng một phần tư; vì vậy ngưỡng ở đây thấp hơn ngưỡng 50 của test hai thanh đối nhau.
+  it('một thanh ở 20° cho cánh sao vuông góc với nó, ở 110° (và 290°)', () => {
+    const psf = computePsf({ ...base, vaneCount: 1, vaneThicknessRatio: 0.02, vaneAnglesDeg: [20] })
+    expect(along(psf, 110, 20) / along(psf, 65, 20)).toBeGreaterThan(15)
+    expect(along(psf, 290, 20) / along(psf, 245, 20)).toBeGreaterThan(15)
+  })
+
+  it('ba thanh ở 0°, 60° và 200° cho ba đường cánh sao ở 90°, 150° và 110° (mod 180°)', () => {
+    const psf = computePsf({ ...base, vaneCount: 3, vaneThicknessRatio: 0.02, vaneAnglesDeg: [0, 60, 200] })
+    const off = along(psf, 45, 20)
+    for (const line of [90, 150, 110]) {
+      expect(along(psf, line, 20) / off, `${line}°`).toBeGreaterThan(30)
+      expect(along(psf, line + 180, 20) / off, `${line + 180}°`).toBeGreaterThan(30)
+    }
+  })
+
+  it('xoay một thanh chuyển cánh sao theo đúng góc đó', () => {
+    const at = (angle: number) => computePsf({ ...base, vaneCount: 1, vaneThicknessRatio: 0.02, vaneAnglesDeg: [angle] })
+    const a = at(0)
+    const b = at(37)
+    expect(along(a, 90, 20)).toBeGreaterThan(along(a, 127, 20) * 15)
+    expect(along(b, 127, 20)).toBeGreaterThan(along(b, 90, 20) * 15)
+  })
+})

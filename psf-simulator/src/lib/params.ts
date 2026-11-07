@@ -49,7 +49,13 @@ export interface SimParams {
   vaneCount: number
   /** Độ dày thanh chống / D. */
   vaneThicknessRatio: number
+  /** Góc xoay của cả bộ thanh chống, độ. Cộng thêm vào góc của từng thanh nếu có `vaneAnglesDeg`. */
   vaneAngleDeg: number
+  /**
+   * Góc riêng của từng thanh chống (độ, đo từ trục +x, trước khi cộng `vaneAngleDeg`). Khi khác null, số thanh là độ dài
+   * của mảng và `vaneCount` bị bỏ qua; null thì các thanh chia đều theo `vaneCount`.
+   */
+  vaneAnglesDeg: readonly number[] | null
   /** Quang sai Zernike tại bước sóng trung tâm, bước sóng RMS. */
   aberrations: Aberrations
   segmented: SegmentedSettings
@@ -67,6 +73,7 @@ export const DEFAULT_PARAMS: SimParams = {
   vaneCount: 4,
   vaneThicknessRatio: 0.015,
   vaneAngleDeg: 0,
+  vaneAnglesDeg: null,
   aberrations: ZERO_ABERRATIONS,
   segmented: DEFAULT_SEGMENTED,
   fovArcsec: 3,

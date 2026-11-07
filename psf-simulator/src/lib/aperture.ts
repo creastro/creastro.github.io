@@ -31,12 +31,17 @@ export interface ApertureParams {
   pupilDiameterPx: number
   /** Tỉ lệ vật cản trung tâm ε = d_phụ / D, trong [0, 0.95). */
   obstructionRatio: number
-  /** Số thanh chống, phân bố đều theo góc. */
+  /** Số thanh chống; phân bố đều theo góc trừ khi có `vaneAnglesDeg`. */
   vaneCount: number
   /** Độ dày thanh chống tính theo D (t / D). */
   vaneThicknessRatio: number
-  /** Góc của thanh chống đầu tiên, độ, đo từ trục +x. */
+  /** Góc của thanh chống đầu tiên, độ, đo từ trục +x (khi các thanh chia đều). */
   vaneAngleDeg: number
+  /**
+   * Nếu có, góc của từng thanh chống (độ, đo từ trục +x) thay cho việc chia đều theo `vaneCount` và `vaneAngleDeg`.
+   * Độ dài phải bằng `vaneCount`. Các thanh có thể ở góc bất kỳ, kể cả trùng nhau hay lệch nhau không đối xứng.
+   */
+  vaneAnglesDeg?: readonly number[]
   /** Có mặt thì gương chính là mảng phân đoạn lục giác thay cho đĩa đặc; D là đường kính đường tròn ngoại tiếp. */
   segments?: SegmentGeometry
 }
@@ -58,6 +63,14 @@ export function validateAperture(p: ApertureParams): void {
   if (p.segments) validateSegments(p.segments)
   if (!Number.isInteger(p.vaneCount) || p.vaneCount < 0) {
     throw new RangeError('vaneCount phải là số nguyên không âm')
+  }
+  if (p.vaneAnglesDeg) {
+    if (p.vaneAnglesDeg.length !== p.vaneCount) {
+      throw new RangeError('vaneAnglesDeg phải có đúng vaneCount phần tử')
+    }
+    if (!p.vaneAnglesDeg.every((a) => Number.isFinite(a))) {
+      throw new RangeError('vaneAnglesDeg phải gồm các số hữu hạn')
+    }
   }
   if (!(p.vaneThicknessRatio >= 0)) {
     throw new RangeError('vaneThicknessRatio phải không âm')
@@ -127,7 +140,9 @@ export function createAperture(p: ApertureParams): Float64Array {
   const ux: number[] = []
   const uy: number[] = []
   for (let j = 0; j < p.vaneCount; j++) {
-    const angle = (p.vaneAngleDeg * Math.PI) / 180 + (2 * Math.PI * j) / p.vaneCount
+    const angle = p.vaneAnglesDeg
+      ? (p.vaneAnglesDeg[j] * Math.PI) / 180
+      : (p.vaneAngleDeg * Math.PI) / 180 + (2 * Math.PI * j) / p.vaneCount
     ux.push(Math.cos(angle))
     uy.push(Math.sin(angle))
   }

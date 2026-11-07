@@ -61,9 +61,10 @@ export function computeFrame(p: SimParams): FrameResult {
     gridSize: GRID_SIZE,
     pupilDiameterPx: PUPIL_PX,
     obstructionRatio: p.obstructionRatio,
-    vaneCount: p.vaneCount,
+    vaneCount: p.vaneAnglesDeg ? p.vaneAnglesDeg.length : p.vaneCount,
     vaneThicknessRatio: p.vaneThicknessRatio,
     vaneAngleDeg: p.vaneAngleDeg,
+    vaneAnglesDeg: p.vaneAnglesDeg ? p.vaneAnglesDeg.map((a) => a + p.vaneAngleDeg) : undefined,
     segments: p.segmented.enabled
       ? { rings: p.segmented.rings, gapRatio: p.segmented.gapRatio, removeCenter: p.segmented.removeCenter }
       : undefined,

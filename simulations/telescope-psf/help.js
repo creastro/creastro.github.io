@@ -38,6 +38,15 @@ window.SIM_HELP = (() => {
     nvane: 'Number of struts holding the secondary mirror.',
     tvane: 'Width of each strut as a fraction of D.',
     avane: 'Rotation of the whole set of struts.',
+    'vane-each': 'Set the direction of every strut yourself instead of spacing them evenly.',
+    va1: 'Direction of strut 1, measured from the horizontal axis before the rotation is added.',
+    va2: 'Direction of strut 2, measured from the horizontal axis before the rotation is added.',
+    va3: 'Direction of strut 3, measured from the horizontal axis before the rotation is added.',
+    va4: 'Direction of strut 4, measured from the horizontal axis before the rotation is added.',
+    va5: 'Direction of strut 5, measured from the horizontal axis before the rotation is added.',
+    va6: 'Direction of strut 6, measured from the horizontal axis before the rotation is added.',
+    va7: 'Direction of strut 7, measured from the horizontal axis before the rotation is added.',
+    va8: 'Direction of strut 8, measured from the horizontal axis before the rotation is added.',
     'z-defocus': 'Focus error. It spreads the core and fills the dark rings.',
     'z-ast0': 'Astigmatism along the horizontal and vertical axes.',
     'z-ast45': 'Astigmatism along the two diagonals.',
@@ -65,6 +74,7 @@ window.SIM_HELP = (() => {
   const bind = {
     D: 'D', lam: 'lam', band: 'band', 'seg-rings': 'segrings', 'seg-gap': 'seggap', 'seg-piston': 'segpiston', 'seg-tilt': 'segtilt',
     eps: 'eps', nvane: 'vanes', tvane: 'vanes', avane: 'vanes',
+    va1: 'vanes', va2: 'vanes', va3: 'vanes', va4: 'vanes', va5: 'vanes', va6: 'vanes', va7: 'vanes', va8: 'vanes',
     'z-defocus': 'defocus', 'z-ast0': 'astig', 'z-ast45': 'astig', 'z-comax': 'coma', 'z-comay': 'coma', 'z-sph': 'spherical',
     fov: 'fov', range: 'range', cmap: 'cmap'
   };
@@ -204,18 +214,21 @@ window.SIM_HELP = (() => {
 
     vanes: {
       title: 'Spider vanes',
-      what: 'The struts that hold the secondary mirror. Each vane is a thin opaque strip, and a strip diffracts light into a bright spike perpendicular to it. You control the number, the width and the rotation of the vanes.',
+      what: 'The struts that hold the secondary mirror. Each vane is a thin opaque strip, and a strip diffracts light into a bright spike perpendicular to it. You control the number, the width, the rotation and, if you wish, the direction of every vane separately.',
       theory: [
         R`The pattern of a thin strip of length $L$ and width $t$ is the product of two $\sin u/u$ functions. It is narrow along the direction of the strip (width about $\lambda/L$) and wide along the perpendicular (about $\lambda/t$), which draws a long thin spike perpendicular to the vane. Thinner vanes give fainter spikes that reach further out.`,
-        R`Vanes opposite each other make one straight line. An even number $N$ of vanes gives $N/2$ lines and so $N$ spikes. An odd number gives $N$ lines, so $2N$ spikes. Rotating the vanes rotates the spikes with them.`
+        R`Each straight line of vanes gives one spike line, which has two spikes pointing in opposite directions. Two vanes 180° apart form one line. With equal spacing, an even number $N$ of vanes gives $N/2$ lines and so $N$ spikes, and an odd number gives $N$ lines, so $2N$ spikes. Rotating the vanes rotates the spikes with them.`,
+        R`With "Set the angle of each vane" you can place every vane anywhere. Each vane keeps its own spike line perpendicular to it, so three vanes at 0°, 60° and 200° give three lines, at 90°, 150° and 110°. Vanes that are not opposite each other leave the mirror lopsided, and the pattern is no longer symmetric about its center.`
       ],
       formulas: [
         { note: R`one vane along $x$, with length $L$ and width $t$ ($\mathrm{sinc}\,u=\sin u/u$)`, tex: R`\tilde A(\theta_x,\theta_y)\propto t\,L\ \mathrm{sinc}\!\left(\frac{\pi L\theta_x}{\lambda}\right)\mathrm{sinc}\!\left(\frac{\pi t\theta_y}{\lambda}\right)` },
-        { note: 'number of spikes', tex: R`N_{\rm spikes}=\begin{cases}N & N\ \text{even}\\ 2N & N\ \text{odd}\end{cases}` },
-        { note: 'direction of vane $j$', tex: R`\varphi_j=\varphi_0+\frac{360^{\circ}\,j}{N}` },
+        { note: 'number of spikes for equally spaced vanes', tex: R`N_{\rm spikes}=\begin{cases}N & N\ \text{even}\\ 2N & N\ \text{odd}\end{cases}` },
+        { note: R`direction of vane $j$, equally spaced`, tex: R`\varphi_j=\varphi_0+\frac{360^{\circ}\,j}{N}` },
+        { note: R`direction of vane $j$ with its own angle $\alpha_j$; $\varphi_0$ turns the whole set`, tex: R`\varphi_j=\varphi_0+\alpha_j` },
+        { note: R`direction of the spike line of vane $j$`, tex: R`\psi_j=\varphi_j+90^{\circ}\pmod{180^{\circ}}` },
         { note: R`area blocked, with $L\approx\frac{D}{2}(1-\epsilon)$`, tex: R`\Delta A\approx N\,t\,D\ \frac{D}{2}\,(1-\epsilon)` }
       ],
-      sim: R`The vanes start at the center and reach the edge of the mirror, so they also cross the {{eps|central obstruction}}. On a {{seg|segmented mirror}} they cross the segments.`,
+      sim: R`The vanes start at the center and reach the edge of the mirror, so they also cross the {{eps|central obstruction}}. On a {{seg|segmented mirror}} they cross the segments. The sliders for individual angles show only for the vanes that exist; when you switch the option on, they start at the equally spaced angles, so nothing moves until you change one.`,
       refs: [HARVEY, BORNWOLF],
       see: ['eps', 'airy', 'seg']
     },

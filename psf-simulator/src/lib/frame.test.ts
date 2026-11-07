@@ -192,3 +192,29 @@ describe('computeFrame — gương phân đoạn', () => {
     expect(small).toBeLessThan(0.25)
   })
 })
+
+describe('computeFrame — góc riêng của từng thanh chống', () => {
+  it('bốn góc chia đều viết tường minh cho đúng ảnh như bốn thanh chia đều', () => {
+    const auto = computeFrame(DEFAULT_PARAMS)
+    const explicit = computeFrame({ ...DEFAULT_PARAMS, vaneAnglesDeg: [0, 90, 180, 270] })
+    expect(explicit.stats.throughput).toBeCloseTo(auto.stats.throughput, 12)
+    expect(explicit.rgba).toEqual(auto.rgba)
+  })
+
+  it('số thanh là độ dài của mảng góc, và góc xoay chung được cộng thêm vào từng thanh', () => {
+    const a = computeFrame({ ...DEFAULT_PARAMS, vaneCount: 7, vaneAnglesDeg: [30, 120], vaneAngleDeg: 0 })
+    const b = computeFrame({ ...DEFAULT_PARAMS, vaneCount: 2, vaneAnglesDeg: [0, 90], vaneAngleDeg: 30 })
+    // Hai thanh ở 30° và 120°, dù viết bằng cách nào, cho cùng một khẩu độ.
+    expect(a.stats.throughput).toBeCloseTo(b.stats.throughput, 12)
+    expect(a.pupilRgba).toEqual(b.pupilRgba)
+    const four = computeFrame(DEFAULT_PARAMS)
+    expect(a.stats.throughput).toBeGreaterThan(four.stats.throughput) // ít thanh hơn thì che ít hơn
+  })
+
+  it('mảng góc rỗng là không có thanh chống nào', () => {
+    const none = computeFrame({ ...DEFAULT_PARAMS, vaneAnglesDeg: [] })
+    const zero = computeFrame({ ...DEFAULT_PARAMS, vaneCount: 0 })
+    expect(none.stats.throughput).toBeCloseTo(zero.stats.throughput, 12)
+  })
+})
+

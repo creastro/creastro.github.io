@@ -91,3 +91,54 @@ describe('nonZeroRowRange', () => {
     expect(nonZeroRowRange(new Float64Array(16), 4)).toEqual([0, 0])
   })
 })
+
+describe('góc riêng của từng thanh chống', () => {
+  const n = base.gridSize
+  const c = n / 2
+  const vaned = { ...base, vaneThicknessRatio: 0.05 }
+  const maxDiff = (a: Float64Array, b: Float64Array) => a.reduce((m, v, i) => Math.max(m, Math.abs(v - b[i])), 0)
+
+  it('góc chia đều viết tường minh cho đúng mặt nạ như chia đều tự động', () => {
+    const auto = createAperture({ ...vaned, vaneCount: 4, vaneAngleDeg: 17 })
+    const explicit = createAperture({ ...vaned, vaneCount: 4, vaneAnglesDeg: [17, 107, 197, 287] })
+    expect(maxDiff(auto, explicit)).toBeLessThan(1e-9)
+  })
+
+  it('một thanh ở góc bất kỳ giống một thanh xoay tới góc đó', () => {
+    const a = createAperture({ ...vaned, vaneCount: 1, vaneAngleDeg: 30 })
+    const b = createAperture({ ...vaned, vaneCount: 1, vaneAnglesDeg: [30] })
+    expect(maxDiff(a, b)).toBeLessThan(1e-9)
+  })
+
+  it('hai thanh ngược nhau ở 0° và 180° giống chia đều hai thanh', () => {
+    const a = createAperture({ ...vaned, vaneCount: 2 })
+    const b = createAperture({ ...vaned, vaneCount: 2, vaneAnglesDeg: [0, 180] })
+    expect(maxDiff(a, b)).toBeLessThan(1e-9)
+  })
+
+  it('hai thanh ở 0° và 90° chỉ chặn nửa trục +x và +y: mặt nạ không đối xứng tâm', () => {
+    const m = createAperture({ ...vaned, vaneCount: 2, vaneAnglesDeg: [0, 90] })
+    expect(m[c * n + (c + 20)]).toBe(0) // trên thanh theo +x
+    expect(m[c * n + (c - 20)]).toBe(1) // phía −x không có thanh
+    expect(m[(c + 20) * n + c]).toBe(0) // trên thanh theo +y
+    expect(m[(c - 20) * n + c]).toBe(1) // phía −y không có thanh
+  })
+
+  it('hai thanh trùng góc chỉ che một lần', () => {
+    const one = openArea(createAperture({ ...vaned, vaneCount: 1, vaneAnglesDeg: [40] }))
+    const twice = openArea(createAperture({ ...vaned, vaneCount: 2, vaneAnglesDeg: [40, 40] }))
+    expect(twice).toBeCloseTo(one, 9)
+  })
+
+  it('mỗi thanh bỏ đi cùng một diện tích dù ở góc nào (xa tâm: thanh không chạm nhau)', () => {
+    const base0 = openArea(createAperture(vaned))
+    const removed = (angle: number) => base0 - openArea(createAperture({ ...vaned, vaneCount: 1, vaneAnglesDeg: [angle] }))
+    const r0 = removed(0)
+    for (const a of [15, 45, 70, 133, 250]) expect(Math.abs(removed(a) / r0 - 1), `${a}°`).toBeLessThan(0.04)
+  })
+
+  it('từ chối độ dài không khớp vaneCount hoặc góc không hữu hạn', () => {
+    expect(() => createAperture({ ...vaned, vaneCount: 3, vaneAnglesDeg: [0, 90] })).toThrow(RangeError)
+    expect(() => createAperture({ ...vaned, vaneCount: 1, vaneAnglesDeg: [Number.NaN] })).toThrow(RangeError)
+  })
+})

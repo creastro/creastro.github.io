@@ -23,13 +23,16 @@
     main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}.back{display:inline-block;margin-bottom:26px;font-size:.92rem;text-decoration:none}.back:hover,.back:focus-visible{text-decoration:underline}
     h1{max-width:900px;font-size:clamp(2.2rem,5.5vw,4.4rem);line-height:1.06;letter-spacing:-.05em;margin:16px 0 22px}p{color:var(--muted)}.intro{max-width:860px;font-size:1.1rem}
     .button{display:inline-block;padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-2px);background:#25405b;color:#fff}.button.primary:hover{background:#b6efff;color:var(--bg)}.button.small{padding:5px 12px;font-size:.85rem}
-    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"controls psf" "controls pupil" "controls profile" "notes notes";gap:18px;margin-top:40px;align-items:stretch}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"pupil psf" "controls side" "notes notes";gap:18px;margin-top:40px;align-items:stretch}
+    [hidden]{display:none!important}
     .panel{padding:18px 20px 20px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
     .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
-    #p-psf{grid-area:psf}#p-pupil{grid-area:pupil}#p-profile{grid-area:profile}#p-notes{grid-area:notes}#p-controls{grid-area:controls}
+    .side{grid-area:side}.side-in{display:flex;flex-direction:column;gap:18px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto}
+    #p-psf{grid-area:psf}#p-pupil{grid-area:pupil}#p-notes{grid-area:notes}#p-controls{grid-area:controls}
     canvas{display:block;width:100%}#psf{aspect-ratio:1/1}#pupil{aspect-ratio:1/1}#profile{aspect-ratio:16/9.5}
-    .pup{width:min(100%,380px);margin:0 auto}
+    .pup{width:100%}
     .cbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;font:12px ui-monospace,monospace;color:var(--muted)}.cbar i{display:block;width:min(260px,50%);height:10px;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:linear-gradient(90deg,#5ab9ff,#edf2ff,#ffaa46)}
+    .cbar.top{margin:8px 0 6px;min-height:34px}
     .bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:8px 0 6px}.bar label{font-size:.88rem;color:var(--muted)}.bar .lbl{font-size:.88rem;color:var(--muted)}
     .chk{display:flex;align-items:center;gap:8px}.chk input{accent-color:var(--accent);width:16px;height:16px;margin:0}
     .stats{margin:10px 0 0;font:13px/1.6 ui-monospace,monospace;color:var(--text)}.stats b{color:var(--accent);font-weight:600}
@@ -37,12 +40,12 @@
     .field{display:grid;grid-template-columns:minmax(130px,190px) 1fr 86px;align-items:center;gap:10px;margin:7px 0}.field label{font-size:.88rem;color:var(--muted)}.field output{font:12px ui-monospace,monospace;color:var(--accent);text-align:right}
     input[type=range]{width:100%;accent-color:var(--accent);margin:0}select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#0d1730;color:var(--text);font:inherit;font-size:.9rem}
     fieldset{margin:0 0 14px;padding:4px 14px 8px;border:1px solid var(--border);border-radius:10px}legend{padding:0 8px;color:var(--text);font-weight:650;font-size:.92rem}
-    dl.read{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:4px 16px;margin:0 0 14px;font-size:.88rem}dl.read dt{color:var(--muted)}dl.read dd{margin:0;text-align:right;font:12.5px ui-monospace,monospace;color:var(--accent)}
+    dl.read{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:4px 16px;margin:0;font-size:.88rem}dl.read dt{color:var(--muted)}dl.read dd{margin:0;text-align:right;font:12.5px ui-monospace,monospace;color:var(--accent)}
     #p-notes ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}#p-notes li{margin:7px 0}#p-notes strong{color:var(--text)}.formula{font-family:ui-monospace,monospace;color:var(--accent);font-size:.9em}
     @media(min-width:901px){#p-notes ul{columns:2;column-gap:40px}#p-notes li{break-inside:avoid}}
     noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
     footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
-    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"psf" "controls" "pupil" "profile" "notes"}}
+    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"psf" "controls" "pupil" "side" "notes"}.side-in{position:static;max-height:none;overflow:visible}}
     @media(max-width:560px){main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 86px}.field label{grid-column:1/-1}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
   </style>
@@ -76,15 +79,9 @@
       <section class="panel" id="p-pupil" aria-labelledby="t-pupil">
         <h2 id="t-pupil">Pupil and wavefront</h2>
         <p class="sub">The aperture as the star sees it: brightness is transmission, colour is the wavefront error (blue negative, orange positive). The colour scale adapts to the size of the error.</p>
+        <div class="cbar top"><span id="pb-min">−1 λ</span><i></i><span id="pb-max">+1 λ</span></div>
         <div class="pup"><canvas id="pupil" role="img" aria-label="The telescope aperture, with any central obstruction, spider vanes or hexagonal segments in black, and the wavefront error shown in colour."></canvas></div>
-        <div class="cbar"><span id="pb-min">−1 λ</span><i></i><span id="pb-max">+1 λ</span></div>
         <p class="stats" id="pupil-stats" aria-live="off">…</p>
-      </section>
-
-      <section class="panel" id="p-profile" aria-labelledby="t-profile">
-        <h2 id="t-profile">Radial profile</h2>
-        <p class="sub">Intensity averaged around the star against angular distance, on a log scale. Dashed: the ideal Airy pattern of a clear circular telescope with the same D and band.</p>
-        <canvas id="profile" role="img" aria-label="Radially averaged intensity of the point spread function versus angular distance from the star, on a log scale, compared with the Airy pattern of a clear circular telescope."></canvas>
       </section>
 
       <section class="panel" id="p-controls" aria-labelledby="t-controls">
@@ -106,6 +103,8 @@
           <fieldset>
             <legend>Obstruction and spider vanes</legend>
             <div id="g-vanes"></div>
+            <div class="bar"><label class="chk"><input type="checkbox" id="vane-each"> Set the angle of each vane</label></div>
+            <div id="vane-more" hidden><div id="g-vaneEach"></div></div>
           </fieldset>
           <fieldset>
             <legend>Aberrations (Zernike modes, waves RMS)</legend>
@@ -116,10 +115,23 @@
             <legend>Display</legend>
             <div id="g-display"></div>
           </fieldset>
-          <dl class="read" id="read" aria-label="Derived quantities"></dl>
           <button class="button" type="reset" id="reset">Reset parameters</button>
         </form>
       </section>
+
+      <div class="side"><div class="side-in">
+        <section class="panel" id="p-profile" aria-labelledby="t-profile">
+          <h2 id="t-profile">Radial profile</h2>
+          <p class="sub">Intensity averaged around the star against angular distance, on a log scale. Dashed: the ideal Airy pattern of a clear circular telescope with the same D and band.</p>
+          <canvas id="profile" role="img" aria-label="Radially averaged intensity of the point spread function versus angular distance from the star, on a log scale, compared with the Airy pattern of a clear circular telescope."></canvas>
+        </section>
+
+        <section class="panel" id="p-read" aria-labelledby="t-read">
+          <h2 id="t-read">Derived quantities</h2>
+          <p class="sub">Numbers computed from the parameters and the image. Click a name for the theory.</p>
+          <dl class="read" id="read" aria-label="Derived quantities"></dl>
+        </section>
+      </div></div>
 
       <section class="panel" id="p-notes" aria-labelledby="t-notes">
         <h2 id="t-notes">What to look for</h2>
@@ -127,7 +139,7 @@
           <li><strong>Resolution.</strong> A bigger mirror or a shorter wavelength makes the star image smaller. The first dark ring sits at <span class="formula">1.22 λ/D</span>, so doubling the diameter halves it. The field of view is fixed in arcseconds, so you see the core shrink.</li>
           <li><strong>Airy rings.</strong> A clear circular mirror gives a bright core and rings that fade outward; the first bright ring holds 1.75 % of the peak. Raise the dynamic range to 6 or 8 decades to follow the faint outer rings.</li>
           <li><strong>Central obstruction.</strong> The secondary mirror moves light from the core into the rings. The open area falls as <span class="formula">1 − ε²</span> and the peak as <span class="formula">(1 − ε²)²</span>, while the first rings get brighter.</li>
-          <li><strong>Spider vanes.</strong> Each vane makes a spike perpendicular to it. An even number N of vanes gives N spikes and an odd number gives 2N. Thinner vanes give fainter spikes that reach further out.</li>
+          <li><strong>Spider vanes.</strong> Each vane makes a spike perpendicular to it. An even number N of vanes gives N spikes and an odd number gives 2N. Thinner vanes give fainter spikes that reach further out. Set the angle of each vane to see that a spike always stays perpendicular to its own vane, and that two vanes 180° apart share one spike line.</li>
           <li><strong>Aberrations.</strong> Defocus and spherical aberration fill in the dark rings, astigmatism stretches the core in one direction, and coma gives a comet-shaped tail. For a small error σ (in waves) the Strehl ratio falls as <span class="formula">exp[−(2πσ)²]</span>, so 0.075 wave RMS is already enough to drop to 0.8.</li>
           <li><strong>Segmented mirror.</strong> A honeycomb makes six diffraction spikes from the hexagonal segments and the hexagonal outline of the array; try the JWST-like preset. Random piston and tip/tilt errors break the phasing: the sharp core fades into a speckle halo and the Strehl ratio falls as <span class="formula">exp[−(2πσ<sub>p</sub>)²]</span>. Press New random draw to see another set of errors with the same RMS.</li>
           <li><strong>Bandwidth.</strong> The rings of different wavelengths have different sizes, so a wide band blurs the rings and fills the dark ones. A geometric error is a fixed length, so in waves it gets smaller at longer wavelengths.</li>

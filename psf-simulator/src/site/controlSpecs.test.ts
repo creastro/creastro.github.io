@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { ZERNIKE_NAMES } from '../lib/zernike'
 import {
   LOG_STEPS,
+  MAX_VANES,
   OTHER_CONTROL_IDS,
   RANGE_SPECS,
   READ_ROWS,
+  VANE_IDS,
   ZERNIKE_IDS,
   fromPosition,
   toPosition,
@@ -81,5 +83,22 @@ describe('giá trị mặc định trên thanh trượt logarit', () => {
       const roundTrip = fromPosition(s, Math.round(toPosition(s, s.value)))
       expect(s.format(roundTrip), s.id).toBe(s.format(s.value))
     }
+  })
+})
+
+describe('góc riêng của từng thanh chống', () => {
+  it('có đúng MAX_VANES thanh trượt va1…va8 trong nhóm vaneEach, mặc định chia đều theo 45°', () => {
+    expect(VANE_IDS).toEqual(['va1', 'va2', 'va3', 'va4', 'va5', 'va6', 'va7', 'va8'])
+    expect(MAX_VANES).toBe(8)
+    const specs = VANE_IDS.map((id) => RANGE_SPECS.find((s) => s.id === id))
+    for (const [i, s] of specs.entries()) {
+      expect(s?.group).toBe('vaneEach')
+      expect(s?.value).toBe(i * 45)
+      expect(s?.max).toBe(360)
+    }
+  })
+
+  it('số thanh tối đa của thanh trượt "Spider vanes N" bằng số thanh trượt góc', () => {
+    expect(RANGE_SPECS.find((s) => s.id === 'nvane')?.max).toBe(MAX_VANES)
   })
 })

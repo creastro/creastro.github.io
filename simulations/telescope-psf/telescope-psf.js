@@ -348,6 +348,10 @@
 		if (!(p.obstructionRatio >= 0 && p.obstructionRatio < .95)) throw new RangeError("obstructionRatio phải nằm trong [0, 0.95)");
 		if (p.segments) validateSegments(p.segments);
 		if (!Number.isInteger(p.vaneCount) || p.vaneCount < 0) throw new RangeError("vaneCount phải là số nguyên không âm");
+		if (p.vaneAnglesDeg) {
+			if (p.vaneAnglesDeg.length !== p.vaneCount) throw new RangeError("vaneAnglesDeg phải có đúng vaneCount phần tử");
+			if (!p.vaneAnglesDeg.every((a) => Number.isFinite(a))) throw new RangeError("vaneAnglesDeg phải gồm các số hữu hạn");
+		}
 		if (!(p.vaneThicknessRatio >= 0)) throw new RangeError("vaneThicknessRatio phải không âm");
 	}
 	/** Điểm (x, y) tính từ tâm có truyền qua không. */
@@ -388,7 +392,7 @@
 		const ux = [];
 		const uy = [];
 		for (let j = 0; j < p.vaneCount; j++) {
-			const angle = p.vaneAngleDeg * Math.PI / 180 + 2 * Math.PI * j / p.vaneCount;
+			const angle = p.vaneAnglesDeg ? p.vaneAnglesDeg[j] * Math.PI / 180 : p.vaneAngleDeg * Math.PI / 180 + 2 * Math.PI * j / p.vaneCount;
 			ux.push(Math.cos(angle));
 			uy.push(Math.sin(angle));
 		}
@@ -1002,9 +1006,10 @@
 			gridSize: 512,
 			pupilDiameterPx: 128,
 			obstructionRatio: p.obstructionRatio,
-			vaneCount: p.vaneCount,
+			vaneCount: p.vaneAnglesDeg ? p.vaneAnglesDeg.length : p.vaneCount,
 			vaneThicknessRatio: p.vaneThicknessRatio,
 			vaneAngleDeg: p.vaneAngleDeg,
+			vaneAnglesDeg: p.vaneAnglesDeg ? p.vaneAnglesDeg.map((a) => a + p.vaneAngleDeg) : void 0,
 			segments: p.segmented.enabled ? {
 				rings: p.segmented.rings,
 				gapRatio: p.segmented.gapRatio,
@@ -1140,6 +1145,27 @@
 		comaY: "z-comay",
 		spherical: "z-sph"
 	};
+	var VANE_IDS = Array.from({ length: 8 }, (_, i) => `va${i + 1}`);
+	var vaneAngleSpecs = VANE_IDS.map((id, i) => ({
+		id,
+		group: "vaneEach",
+		label: `Vane ${i + 1} angle`,
+		min: 0,
+		max: 360,
+		step: .1,
+		value: i * 45,
+		format: (v) => `${v.toFixed(1)}°`
+	}));
+	var zernikeSpecs = ZERNIKE_NAMES.map((name) => ({
+		id: ZERNIKE_IDS[name],
+		group: "zern",
+		label: `${ZERNIKE_LABELS[name].label} (${ZERNIKE_LABELS[name].noll})`,
+		min: -.5,
+		max: .5,
+		step: .005,
+		value: 0,
+		format: signed
+	}));
 	var RANGE_SPECS = [
 		{
 			id: "D",
@@ -1252,16 +1278,8 @@
 			value: 0,
 			format: (v) => `${v.toFixed(0)}°`
 		},
-		...ZERNIKE_NAMES.map((name) => ({
-			id: ZERNIKE_IDS[name],
-			group: "zern",
-			label: `${ZERNIKE_LABELS[name].label} (${ZERNIKE_LABELS[name].noll})`,
-			min: -.5,
-			max: .5,
-			step: .005,
-			value: 0,
-			format: signed
-		})),
+		...vaneAngleSpecs,
+		...zernikeSpecs,
 		{
 			id: "fov",
 			group: "display",
@@ -1575,6 +1593,7 @@
 		"mirror",
 		"seg",
 		"vanes",
+		"vaneEach",
 		"zern",
 		"display"
 	]) $(`g-${group}`).innerHTML = RANGE_SPECS.filter((s) => s.group === group).map(fieldHtml).join("");
@@ -1607,6 +1626,7 @@
 			vaneCount: Math.round(value("nvane")),
 			vaneThicknessRatio: value("tvane"),
 			vaneAngleDeg: value("avane"),
+			vaneAnglesDeg: input("vane-each").checked ? VANE_IDS.slice(0, Math.round(value("nvane"))).map((id) => value(id)) : null,
 			aberrations,
 			segmented: {
 				enabled: input("seg-on").checked,
@@ -1760,11 +1780,27 @@
 	}
 	function onInput() {
 		syncOutputs();
+		syncVanes();
 		schedule();
 	}
 	var segMore = $("seg-more");
 	var syncSeg = () => {
 		segMore.hidden = !input("seg-on").checked;
+	};
+	var vaneMore = $("vane-more");
+	var syncVanes = () => {
+		vaneMore.hidden = !input("vane-each").checked;
+		const n = Math.round(value("nvane"));
+		VANE_IDS.forEach((id, i) => {
+			const field = input(id).closest(".field");
+			if (field) field.hidden = i >= n;
+		});
+	};
+	/** Start from the angles the vanes already have (equal spacing, before the rotation is added), so nothing jumps. */
+	var initVaneAngles = () => {
+		const n = Math.max(1, Math.round(value("nvane")));
+		VANE_IDS.forEach((id, i) => setValue(id, i < n ? 360 * i / n : 45 * i % 360));
+		syncOutputs();
 	};
 	$("controls").addEventListener("input", onInput);
 	$("controls").addEventListener("change", onInput);
@@ -1780,6 +1816,9 @@
 	$("cmap").addEventListener("change", onInput);
 	$("showring").addEventListener("change", render);
 	input("seg-on").addEventListener("change", syncSeg);
+	input("vane-each").addEventListener("change", () => {
+		if (input("vane-each").checked) initVaneAngles();
+	});
 	$("seg-draw").addEventListener("click", () => {
 		seed += 1;
 		onInput();
@@ -1815,5 +1854,6 @@
 	} else window.addEventListener("resize", render);
 	syncSeg();
 	syncOutputs();
+	syncVanes();
 	schedule();
 })();

@@ -194,6 +194,10 @@
 		if (!(p.obstructionRatio >= 0 && p.obstructionRatio < .95)) throw new RangeError("obstructionRatio phải nằm trong [0, 0.95)");
 		if (p.segments) validateSegments(p.segments);
 		if (!Number.isInteger(p.vaneCount) || p.vaneCount < 0) throw new RangeError("vaneCount phải là số nguyên không âm");
+		if (p.vaneAnglesDeg) {
+			if (p.vaneAnglesDeg.length !== p.vaneCount) throw new RangeError("vaneAnglesDeg phải có đúng vaneCount phần tử");
+			if (!p.vaneAnglesDeg.every((a) => Number.isFinite(a))) throw new RangeError("vaneAnglesDeg phải gồm các số hữu hạn");
+		}
 		if (!(p.vaneThicknessRatio >= 0)) throw new RangeError("vaneThicknessRatio phải không âm");
 	}
 	/** Điểm (x, y) tính từ tâm có truyền qua không. */
@@ -234,7 +238,7 @@
 		const ux = [];
 		const uy = [];
 		for (let j = 0; j < p.vaneCount; j++) {
-			const angle = p.vaneAngleDeg * Math.PI / 180 + 2 * Math.PI * j / p.vaneCount;
+			const angle = p.vaneAnglesDeg ? p.vaneAnglesDeg[j] * Math.PI / 180 : p.vaneAngleDeg * Math.PI / 180 + 2 * Math.PI * j / p.vaneCount;
 			ux.push(Math.cos(angle));
 			uy.push(Math.sin(angle));
 		}
@@ -968,9 +972,10 @@
 			gridSize: 512,
 			pupilDiameterPx: 128,
 			obstructionRatio: p.obstructionRatio,
-			vaneCount: p.vaneCount,
+			vaneCount: p.vaneAnglesDeg ? p.vaneAnglesDeg.length : p.vaneCount,
 			vaneThicknessRatio: p.vaneThicknessRatio,
 			vaneAngleDeg: p.vaneAngleDeg,
+			vaneAnglesDeg: p.vaneAnglesDeg ? p.vaneAnglesDeg.map((a) => a + p.vaneAngleDeg) : void 0,
 			segments: p.segmented.enabled ? {
 				rings: p.segmented.rings,
 				gapRatio: p.segmented.gapRatio,
