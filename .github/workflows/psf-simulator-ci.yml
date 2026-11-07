@@ -4,12 +4,16 @@ on:
   pull_request:
     paths:
       - 'psf-simulator/**'
+      - 'simulations/telescope-psf/**'
+      - 'simulations/shared/**'
       - '.github/workflows/psf-simulator-ci.yml'
   push:
     branches:
       - main
     paths:
       - 'psf-simulator/**'
+      - 'simulations/telescope-psf/**'
+      - 'simulations/shared/**'
       - '.github/workflows/psf-simulator-ci.yml'
 
 permissions:
@@ -41,5 +45,10 @@ jobs:
       - name: Test
         run: npm test
 
+      # Type-checks, then regenerates simulations/telescope-psf/telescope-psf.js and psf-worker.js from src/.
       - name: Build
         run: npm run build
+
+      # The generated scripts are committed, so they must match what the sources produce.
+      - name: Check that the generated scripts are up to date
+        run: git diff --exit-code -- ../simulations/telescope-psf
