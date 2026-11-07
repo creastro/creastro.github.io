@@ -21,7 +21,7 @@ Ngôn ngữ: trả lời và viết chú thích bằng tiếng Việt; tên bi�
 - Gốc repo là trang GitHub Pages tĩnh (`index.html`, `research/`, `contact/`, `simulations/`), **không có bước build**.
 - Mã trong `src/` cần bước build (Vite) trước khi triển khai. Không được làm hỏng các trang tĩnh hiện có
   (`simulations/doppler`, `simulations/adaptive-optics`) khi thêm Vite.
-- Không sửa các file trong `simulations/` trừ khi người dùng yêu cầu rõ ràng.
+- Không sửa các file trong `simulations/` trừ khi người dùng yêu cầu rõ ràng. Ngoại lệ: thêm một simulation mới trong thư mục riêng và thẻ của nó ở `simulations/index.html`.
 
 ---
 
@@ -91,12 +91,25 @@ src/
 ├── math/            # Vector 3D, phản xạ, các hàm toán học thuần
 tools/
 └── optics_mcp/      # Python MCP server: numpy/scipy cho ABCD và nhiễu xạ
-psf-simulator/       # Ứng dụng độc lập (Vite + React + Tailwind): mô phỏng PSF bằng FFT 2D
+psf-simulator/       # Nguồn TypeScript và test của simulation PSF (FFT 2D); sinh ra simulations/telescope-psf/
+simulations/
+└── telescope-psf/   # Trang tĩnh của simulation PSF, cùng định dạng với doppler/ và adaptive-optics/
 mcp_optics_guide.md  # Hướng dẫn kết nối MCP
 ```
 
-`psf-simulator/` có `package.json` riêng và không dùng Three.js: nó vẽ PSF lên Canvas 2D sau khi tính bằng FFT
-trong Web Worker. Chạy `npm test`, `npm run lint`, `npm run build` trong thư mục đó trước khi commit.
+`psf-simulator/` có `package.json` riêng và không dùng Three.js: nó tính PSF bằng FFT trong Web Worker và vẽ lên Canvas 2D.
+Chạy `npm test`, `npm run lint`, `npm run build` trong thư mục đó trước khi commit. `npm run build:site` sinh
+`simulations/telescope-psf/telescope-psf.js` và `psf-worker.js`; hai file này được commit, không sửa tay, và CI báo lỗi
+nếu chúng khác bản sinh ra từ mã nguồn.
+
+### Định dạng của một simulation trên trang
+Mỗi simulation là một trang tĩnh `simulations/<tên>/` giống `doppler/` và `adaptive-optics/`, không cần bước build để phục vụ:
+- `index.html` viết tay: điều hướng của site, liên kết quay lại, tiêu đề dạng `Tên | Tin Mai (Mai Như Tín)`, thẻ meta và OG,
+  các panel, hàng điều khiển `.field`, `fieldset`, số liệu dẫn xuất `dl.read`, mục "What to look for" (kèm "Limits of the model"), chân trang.
+- `help.js` định nghĩa `window.SIM_HELP` (`tips` ngắn khi rê chuột, `bind`, `panels`, `topics` có lý thuyết, công thức KaTeX và tham khảo),
+  và dùng chung `simulations/shared/explain.js`, `explain.css`, KaTeX. Chuỗi có TeX phải dùng `String.raw`.
+- `preview.jpg` 1200 × 600 và một thẻ ở `simulations/index.html`.
+- Toàn bộ chữ trên trang bằng tiếng Anh.
 
 Quy tắc phụ thuộc: `optics/` được import `math/`. `math/` **không** được import `optics/`.
 

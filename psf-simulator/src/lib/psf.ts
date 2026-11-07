@@ -22,7 +22,7 @@ import {
 } from './segmentErrors'
 import { ZERO_ABERRATIONS, buildWavefront, hasAberration, type Aberrations } from './zernike'
 
-export const ARCSEC_PER_RAD = (180 / Math.PI) * 3600
+export { ARCSEC_PER_RAD } from './params'
 
 export interface PsfResult {
   readonly gridSize: number

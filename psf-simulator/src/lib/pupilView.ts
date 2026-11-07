@@ -5,14 +5,15 @@ export const RANGE_WAVES = 1
 
 type Rgb = readonly [number, number, number]
 
-const BLUE: Rgb = [59, 76, 192]
-const NEUTRAL: Rgb = [240, 240, 240]
-const RED: Rgb = [180, 4, 38]
+// Cùng hai màu với bản đồ mặt sóng của trang adaptive optics (#5ab9ff và #ffaa46); số 0 là màu chữ của trang (#edf2ff).
+const BLUE: Rgb = [90, 185, 255]
+const NEUTRAL: Rgb = [237, 242, 255]
+const ORANGE: Rgb = [255, 170, 70]
 
-/** Thang phân kỳ xanh–trắng–đỏ cho t ∈ [−1, 1]. */
+/** Thang phân kỳ xanh–trắng–cam cho t ∈ [−1, 1]: âm xanh, dương cam. */
 export function divergingColor(t: number): Rgb {
   const x = Math.max(-1, Math.min(1, t))
-  const end = x < 0 ? BLUE : RED
+  const end = x < 0 ? BLUE : ORANGE
   const f = Math.abs(x)
   return [
     NEUTRAL[0] + (end[0] - NEUTRAL[0]) * f,
@@ -43,7 +44,7 @@ export function pupilViewSize(pupilDiameterPx: number): number {
 }
 
 /**
- * Ảnh RGBA của pupil: màu theo mặt sóng (xanh âm, đỏ dương, trắng là 0), độ sáng theo truyền qua.
+ * Ảnh RGBA của pupil: màu theo mặt sóng (xanh âm, cam dương, trắng là 0), độ sáng theo truyền qua.
  * Nhờ vậy cùng một hình cho thấy cả hình học khẩu độ (vật cản, thanh chống) lẫn quang sai.
  */
 export function renderPupil(
