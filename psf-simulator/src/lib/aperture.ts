@@ -1,7 +1,8 @@
 /**
  * Hàm khẩu độ A(x, y) của kính thiên văn: mảng 2D truyền qua ∈ [0, 1].
  *
- * Hình học: gương chính là đĩa đường kính D; gương phụ che đĩa đồng tâm đường kính ε·D;
+ * Hình học: gương chính là đĩa đường kính D (hoặc một mảng phân đoạn lục giác nội tiếp trong đĩa đó, xem segments.ts);
+ * gương phụ che đĩa đồng tâm đường kính ε·D;
  * mỗi thanh chống là dải chữ nhật rộng t·D bắt đầu từ tâm và kéo dài ra mép (nửa đường thẳng).
  * Pupil nằm ở tâm chỉ số (n/2, n/2); toạ độ pixel dương theo cả x (sang phải) và y (xuống dưới).
  *
@@ -10,6 +11,18 @@
  * Lưới mẫu con mịn (16 × 16) giữ sai số độ rộng dải dưới ~2%; lưới thô khiến dải song song trục bị
  * lệch nhiều phần trăm vì toạ độ mẫu chỉ rơi vào các bội số cố định của bước lưới.
  */
+
+import {
+  edgeDistance,
+  insideHex,
+  layoutFor,
+  nearestSite,
+  site,
+  siteHasMirror,
+  validateSegments,
+  type SegmentGeometry,
+  type SegmentLattice,
+} from './segments'
 
 export interface ApertureParams {
   /** Kích thước lưới n (lũy thừa của 2). */
@@ -24,10 +37,14 @@ export interface ApertureParams {
   vaneThicknessRatio: number
   /** Góc của thanh chống đầu tiên, độ, đo từ trục +x. */
   vaneAngleDeg: number
+  /** Có mặt thì gương chính là mảng phân đoạn lục giác thay cho đĩa đặc; D là đường kính đường tròn ngoại tiếp. */
+  segments?: SegmentGeometry
 }
 
 /** Số mẫu con mỗi chiều cho pixel nằm sát biên; pixel còn lại chỉ cần một điểm. */
 const SS = 16
+/** Gương phân đoạn có rất nhiều cạnh nên dùng lưới mẫu thưa hơn để giữ thời gian tạo mặt nạ dưới ~100 ms. */
+const SS_SEGMENTED = 8
 /** Pixel cách biên gần hơn khoảng này (đơn vị pixel) được lấy mẫu mịn. */
 const EDGE_BAND = 1
 
@@ -38,6 +55,7 @@ export function validateAperture(p: ApertureParams): void {
   if (!(p.obstructionRatio >= 0 && p.obstructionRatio < 0.95)) {
     throw new RangeError('obstructionRatio phải nằm trong [0, 0.95)')
   }
+  if (p.segments) validateSegments(p.segments)
   if (!Number.isInteger(p.vaneCount) || p.vaneCount < 0) {
     throw new RangeError('vaneCount phải là số nguyên không âm')
   }
@@ -53,12 +71,20 @@ interface Geometry {
   readonly halfThickness: number
   readonly ux: readonly number[]
   readonly uy: readonly number[]
+  /** Có mặt thì gương chính là mảng phân đoạn thay cho đĩa. */
+  readonly lattice?: SegmentLattice
 }
 
 /** Điểm (x, y) tính từ tâm có truyền qua không. */
 function isOpen(g: Geometry, x: number, y: number): boolean {
   const d2 = x * x + y * y
-  if (d2 > g.radius * g.radius || d2 < g.rObs * g.rObs) return false
+  if (g.lattice) {
+    nearestSite(g.lattice, x, y)
+    if (!siteHasMirror(g.lattice) || !insideHex(g.lattice, x - site.cx, y - site.cy)) return false
+  } else if (d2 > g.radius * g.radius) {
+    return false
+  }
+  if (d2 < g.rObs * g.rObs) return false
   for (let j = 0; j < g.ux.length; j++) {
     if (x * g.ux[j] + y * g.uy[j] >= 0 && Math.abs(x * g.uy[j] - y * g.ux[j]) <= g.halfThickness) {
       return false
@@ -70,7 +96,16 @@ function isOpen(g: Geometry, x: number, y: number): boolean {
 /** Điểm có nằm trong EDGE_BAND quanh một biên nào đó (gương, vật cản, thanh chống) không. */
 function nearEdge(g: Geometry, x: number, y: number): boolean {
   const r = Math.hypot(x, y)
-  if (Math.abs(r - g.radius) < EDGE_BAND || Math.abs(r - g.rObs) < EDGE_BAND) return true
+  let outerEdge: boolean
+  if (g.lattice) {
+    // Gần cạnh lục giác của ô gần nhất (kể cả ô không có gương, vì cạnh của phân đoạn kề trùng với cạnh ảo đó);
+    // cộng bề rộng khe vì đường biên Voronoi nằm cách mép phân đoạn nửa khe.
+    nearestSite(g.lattice, x, y)
+    outerEdge = edgeDistance(g.lattice, x - site.cx, y - site.cy) < EDGE_BAND + (g.lattice.pitchPx - g.lattice.fPx)
+  } else {
+    outerEdge = Math.abs(r - g.radius) < EDGE_BAND
+  }
+  if (outerEdge || Math.abs(r - g.rObs) < EDGE_BAND) return true
   for (let j = 0; j < g.ux.length; j++) {
     const along = x * g.ux[j] + y * g.uy[j]
     const across = Math.abs(x * g.uy[j] - y * g.ux[j])
@@ -102,12 +137,14 @@ export function createAperture(p: ApertureParams): Float64Array {
     halfThickness: (p.vaneThicknessRatio * p.pupilDiameterPx) / 2,
     ux,
     uy,
+    lattice: p.segments ? layoutFor(p.segments, radius) : undefined,
   }
+  const samples = p.segments ? SS_SEGMENTED : SS
 
   const lo = Math.max(0, Math.floor(c - radius) - 1)
   const hi = Math.min(n - 1, Math.ceil(c + radius) + 1)
   const offsets: number[] = []
-  for (let s = 0; s < SS; s++) offsets.push((s + 0.5) / SS - 0.5)
+  for (let s = 0; s < samples; s++) offsets.push((s + 0.5) / samples - 0.5)
 
   for (let iy = lo; iy <= hi; iy++) {
     for (let ix = lo; ix <= hi; ix++) {
@@ -123,7 +160,7 @@ export function createAperture(p: ApertureParams): Float64Array {
           if (isOpen(g, x0 + ox, y0 + oy)) open++
         }
       }
-      mask[iy * n + ix] = open / (SS * SS)
+      mask[iy * n + ix] = open / (samples * samples)
     }
   }
   return mask
