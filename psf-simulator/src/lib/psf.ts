@@ -14,6 +14,12 @@
 
 import { createAperture, nonZeroRowRange, openArea, type ApertureParams } from './aperture'
 import { fft2d } from './fft'
+import {
+  ZERO_SEGMENT_ERRORS,
+  hasSegmentErrors,
+  segmentWavefront,
+  type SegmentErrors,
+} from './segmentErrors'
 import { ZERO_ABERRATIONS, buildWavefront, hasAberration, type Aberrations } from './zernike'
 
 export const ARCSEC_PER_RAD = (180 / Math.PI) * 3600
@@ -41,19 +47,38 @@ export function marechalStrehl(rmsWaves: number): number {
   return Math.exp(-((2 * Math.PI * rmsWaves) ** 2))
 }
 
+/** Nhớ mặt nạ khẩu độ gần nhất: đổi thang hiển thị, quang sai hay bước sóng không cần dựng lại mặt nạ. */
+let cachedKey = ''
+let cachedMask: Float64Array | null = null
+
+function apertureFor(params: ApertureParams): Float64Array {
+  const key = JSON.stringify(params)
+  if (cachedMask && key === cachedKey) return cachedMask
+  cachedMask = createAperture(params)
+  cachedKey = key
+  return cachedMask
+}
+
 export function computePsf(
   params: ApertureParams,
   aberrations: Aberrations = ZERO_ABERRATIONS,
+  segmentErrors: SegmentErrors = ZERO_SEGMENT_ERRORS,
 ): PsfResult {
   const n = params.gridSize
-  const mask = createAperture(params)
+  const mask = apertureFor(params)
   const area = openArea(mask)
 
-  // Trường pupil U = A · exp(i · 2π · W). Phép nhân với pha không đổi |U| nên không thay đổi
-  // tổng năng lượng (định lý Parseval), chỉ phân bố lại năng lượng trong ảnh.
-  const wavefront = hasAberration(aberrations)
-    ? buildWavefront(n, params.pupilDiameterPx, aberrations)
-    : null
+  // Trường pupil U = A · exp(i · 2π · W), với W = Zernike + sai pha phân đoạn. Phép nhân với pha không đổi |U|
+  // nên không thay đổi tổng năng lượng (định lý Parseval), chỉ phân bố lại năng lượng trong ảnh.
+  const useSegmentErrors = params.segments !== undefined && hasSegmentErrors(segmentErrors)
+  let wavefront: Float64Array | null = null
+  if (hasAberration(aberrations) || useSegmentErrors) {
+    wavefront = buildWavefront(n, params.pupilDiameterPx, aberrations)
+    if (useSegmentErrors && params.segments) {
+      const seg = segmentWavefront(n, params.pupilDiameterPx, params.segments, segmentErrors)
+      for (let i = 0; i < wavefront.length; i++) wavefront[i] += seg[i]
+    }
+  }
   const re = mask.slice()
   const im = new Float64Array(n * n)
   let rms = 0
