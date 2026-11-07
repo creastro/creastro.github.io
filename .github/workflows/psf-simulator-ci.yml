@@ -1,0 +1,45 @@
+name: PSF simulator CI
+
+on:
+  pull_request:
+    paths:
+      - 'psf-simulator/**'
+      - '.github/workflows/psf-simulator-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'psf-simulator/**'
+      - '.github/workflows/psf-simulator-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: psf-simulator
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: psf-simulator/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
