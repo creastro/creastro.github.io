@@ -23,9 +23,10 @@ window.SIM_HELP = (() => {
     ld: 'How much darker the edge of the disk is than its centre.',
     showVel: 'Tint the disk blue where the gas approaches and red where it recedes.',
     showGrid: 'Draw latitude and longitude lines that turn with the planet.',
+    preset: 'Load the spin of a real planet or brown dwarf. The card below lists every source.',
     reset: 'Restore every parameter to its default value.'
   };
-  const bind = { inc: 'inclination', veq: 'speed', sigma: 'linewidth', depth: 'depth', ld: 'limb' };
+  const bind = { preset: 'presets', inc: 'inclination', veq: 'speed', sigma: 'linewidth', depth: 'depth', ld: 'limb' };
   ['A', 'B'].forEach((k) => {
     tips[k + '-type'] = 'Switch the spot off, or make it a dark or a bright patch.';
     tips[k + '-lat'] = 'Latitude of the spot centre. Positive is towards the north pole.';
@@ -213,6 +214,27 @@ window.SIM_HELP = (() => {
       refs: [VOGT83, VOGT87, CROSSFIELD],
       see: ['spot-position', 'profile']
     }
+  };
+
+  topics.presets = {
+    title: 'Real objects: where the presets come from',
+    what: 'Each preset sets only two numbers: the inclination $i$ and the equatorial speed $v_{\\rm eq}$. Line width and depth, limb darkening and spots are not measured for these objects, so they keep your settings.',
+    theory: [
+      R`Neither the NASA Exoplanet Archive nor Exoplanet.eu lists the spin of a planet. The spin comes from papers found through ADS: a measured $v\sin i$, or a rotation period $P$ with a radius $R$. Orbital elements, radii and the other catalog values come from the two catalogs.`,
+      R`When a value exists in several NASA parameter sets, the one with the most recent reference is used. Exoplanet.eu gives no reference for each value, so it cannot take part in that comparison: it is shown beside the NASA value, flagged when the two differ by more than 10%, and used only if NASA has no value.`,
+      R`The spin inclination is the measured one when there is one. Otherwise the spin is assumed parallel to the orbit, so the orbital inclination is folded into 0-90 degrees (the spectrum cannot tell $i$ from $180^\circ - i$). If even that is unknown, $i = 90^\circ$ is assumed. Every number carries a tag: measured, derived, assumed or catalog.`
+    ],
+    formulas: [
+      { note: R`equatorial speed from a measured projected speed`, tex: R`v_{\rm eq} = \frac{v\sin i}{\sin i}` },
+      { note: R`equatorial speed from a period and a radius`, tex: R`v_{\rm eq} = \frac{2\pi R}{P}` }
+    ],
+    sim: R`Choosing a preset moves the inclination and speed sliders. Moving either slider yourself marks the card as modified. Uncertainties are propagated linearly and are large when $i$ is small, as for HD 106906 b.`,
+    refs: [
+      { c: 'NASA Exoplanet Archive, Akeson, R. L. et al. 2013, PASP 125, 989', u: ads('2013PASP..125..989A') },
+      { c: 'Schneider, J. et al. 2011, A&A 532, A79, "Defining and cataloging exoplanets: the exoplanet.eu database"', u: ads('2011A&A...532A..79S') },
+      SNELLEN
+    ],
+    see: ['inclination', 'speed']
   };
 
   return { tips, bind, panels, topics };

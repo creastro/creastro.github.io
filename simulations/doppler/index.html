@@ -35,6 +35,19 @@
     .checks{display:flex;flex-wrap:wrap;gap:8px 22px;margin:4px 0 14px}.checks label{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:8px}.checks input{accent-color:var(--accent);width:16px;height:16px}
     .legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin:10px 0 0;font-size:.8rem;color:var(--muted)}.legend span:before{content:"";display:inline-block;width:12px;height:12px;margin-right:7px;border-radius:3px;vertical-align:-2px;background:var(--c)}
     #p-notes ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}#p-notes li{margin:7px 0}#p-notes strong{color:var(--text)}.formula{font-family:ui-monospace,monospace;color:var(--accent);font-size:.9em}
+    .field select{min-width:0}
+    .preset-card{margin:6px 0 14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:rgba(143,227,255,.05);font-size:.86rem;line-height:1.55}
+    .preset-card h3{margin:0 0 2px;font-size:1rem}.preset-card .kind{margin:0 0 8px;color:var(--muted);font-size:.8rem}
+    .preset-card .sets{margin:0 0 10px;color:var(--text)}.preset-card .sets b{color:var(--accent);font-weight:600}
+    .preset-card .modified{display:none;margin:0 0 8px;padding:6px 10px;border:1px solid var(--warm);border-radius:8px;color:var(--warm);font-size:.8rem}.preset-card.modified .modified{display:block}
+    .preset-card ul{margin:0;padding:0;list-style:none}.preset-card li{padding:7px 0;border-top:1px solid var(--border)}
+    .preset-card .q{color:var(--muted)}.preset-card .v{margin-left:6px;color:var(--text);font-weight:600}
+    .preset-card .src{display:block;margin-top:1px;color:var(--muted);font-size:.78rem}
+    .basis{display:inline-block;margin-left:8px;padding:0 8px;border:1px solid currentColor;border-radius:999px;font-size:.7rem;line-height:1.5;vertical-align:1px}
+    .basis.measured{color:#7bd88f}.basis.assumed{color:var(--warm)}.basis.derived{color:var(--accent)}.basis.catalog{color:var(--muted)}
+    .preset-card .warn{margin:0 0 10px;padding:7px 10px;border:1px solid var(--warm);border-radius:8px;background:rgba(255,207,107,.07);color:#ffe3a3;font-size:.8rem}
+    .preset-card details{margin-top:8px;color:var(--muted);font-size:.8rem}.preset-card summary{cursor:pointer;color:var(--text)}
+    .preset-card .foot{margin:10px 0 0;color:var(--muted);font-size:.76rem}
     noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
     footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
     @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"planet" "profile" "controls" "wf" "notes"}}
@@ -95,8 +108,10 @@
         <form id="controls" autocomplete="off">
           <fieldset>
             <legend>Planet and line</legend>
-            <div class="field"><label for="inc">Inclination i</label><input id="inc" type="range" min="0" max="90" step="1" value="75"><output for="inc" data-unit="°"></output></div>
-            <div class="field"><label for="veq">Equatorial speed v<sub>eq</sub></label><input id="veq" type="range" min="2" max="50" step="1" value="20"><output for="veq" data-unit=" km/s"></output></div>
+            <div class="field"><label for="preset">Real object</label><select id="preset" aria-controls="preset-card"></select><span></span></div>
+            <div id="preset-card" class="preset-card" hidden aria-live="polite"></div>
+            <div class="field"><label for="inc">Inclination i</label><input id="inc" type="range" min="0" max="90" step="0.1" value="75"><output for="inc" data-unit="°"></output></div>
+            <div class="field"><label for="veq">Equatorial speed v<sub>eq</sub></label><input id="veq" type="range" min="2" max="50" step="0.1" value="20"><output for="veq" data-unit=" km/s"></output></div>
             <div class="field"><label for="sigma">Intrinsic line width σ</label><input id="sigma" type="range" min="1" max="8" step="0.5" value="2"><output for="sigma" data-unit=" km/s"></output></div>
             <div class="field"><label for="depth">Line depth</label><input id="depth" type="range" min="0.1" max="0.9" step="0.05" value="0.5"><output for="depth"></output></div>
             <div class="field"><label for="ld">Limb darkening u</label><input id="ld" type="range" min="0" max="1" step="0.05" value="0.6"><output for="ld"></output></div>
@@ -113,6 +128,8 @@
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../../">Return home</a> · <a href="../">All simulations</a> · <a href="../../research">Research</a></footer>
   <script src="doppler.js"></script>
+  <script src="presets.js"></script>
+  <script src="presets-ui.js"></script>
   <script src="help.js"></script>
   <script src="../shared/katex/katex.min.js"></script>
   <script src="../shared/explain.js"></script>

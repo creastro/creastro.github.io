@@ -1,0 +1,11 @@
+[
+  {"id": "beta-pic-b",   "label": "β Pictoris b",     "kind": "directly imaged exoplanet",            "nasa": "bet Pic b",                    "eu": "beta Pic b",            "spin": ["landman2024_vsini"]},
+  {"id": "hr8799-d",     "label": "HR 8799 d",        "kind": "directly imaged exoplanet",            "nasa": "HR 8799 d",                    "eu": "HR 8799 d",             "spin": ["wang2021_vsini_d"]},
+  {"id": "hr8799-e",     "label": "HR 8799 e",        "kind": "directly imaged exoplanet",            "nasa": "HR 8799 e",                    "eu": "HR 8799 e",             "spin": ["wang2021_vsini_e"]},
+  {"id": "gq-lup-b",     "label": "GQ Lupi b",        "kind": "young substellar companion",           "nasa": "GQ Lup b",                     "eu": "GQ Lup Ab",             "spin": ["schwarz2016_vsini"]},
+  {"id": "hd106906-b",   "label": "HD 106906 b",      "kind": "directly imaged planetary-mass companion", "nasa": "HD 106906 b",              "eu": "HD 106906 (AB)b",       "spin": ["bryan2021_vsini", "bryan2021_incl"]},
+  {"id": "yses1-b",      "label": "YSES 1 b (TYC 8998-760-1 b)", "kind": "directly imaged exoplanet", "nasa": "TYC 8998-760-1 b",             "eu": "TYC 8998-760-1 b",      "spin": ["zhang2024_vsini_b"]},
+  {"id": "vhs1256-b",    "label": "VHS 1256-1257 b",  "kind": "planetary-mass companion",             "nasa": "VHS J125601.92-125723.9 b",    "eu": "VHS 1256-1257 (AB)b",   "spin": ["zhou2020_period", "poon2024_incl"]},
+  {"id": "2m1207-b",     "label": "2M1207 b",         "kind": "planetary-mass companion",             "nasa": "2MASS J12073346-3932539 b",    "eu": "2M1207 Ab",             "spin": ["zhou2016_period"]},
+  {"id": "luhman16-b",   "label": "Luhman 16 B",      "kind": "brown dwarf",                          "nasa": "Luhman 16 b",                  "eu": "Luhman 16 B",           "spin": ["apai2021_period"]}
+]

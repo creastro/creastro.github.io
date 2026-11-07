@@ -1,0 +1,27 @@
+{
+ "retrieved_utc": "2026-11-07T09:17:30Z",
+ "files": {
+  "nasa_ps_targets.csv": {
+   "sha256": "608a08f0cd1fc5e20258f44956cd6dc143dd0c2dbf316133b3792b3e92af4aa6",
+   "query": "select * from ps where pl_name in ('bet Pic b','HR 8799 d','HR 8799 e','GQ Lup b','HD 106906 b','TYC 8998-760-1 b','VHS J125601.92-125723.9 b','2MASS J12073346-3932539 b','Luhman 16 b') order by pl_name,pl_pubdate desc"
+  },
+  "nasa_pscomppars_targets.csv": {
+   "sha256": "a463b611dfe858ae83bb5460b75c94d43e05e57a8cf35000d1b67188ed43e47d",
+   "query": "select * from pscomppars where pl_name in ('bet Pic b','HR 8799 d','HR 8799 e','GQ Lup b','HD 106906 b','TYC 8998-760-1 b','VHS J125601.92-125723.9 b','2MASS J12073346-3932539 b','Luhman 16 b') order by pl_name"
+  },
+  "exoplanet_eu_targets.csv": {
+   "sha256": "1023d4a38c0decaa70b200bdc3749399a67f62d5b328d5a0949cc42f44558f03",
+   "rule": "rows of the full catalogue whose name equals the target name"
+  },
+  "ads_abstracts.json": {
+   "sha256": "de557a6189a3488304a00a9015d753f64eefeb77a1d07692ac8bb20429a08351",
+   "query": "bibcode:(\"2014arXiv1404.7506S\" OR \"2016A&A...593A..74S\" OR \"2016ApJ...818..176Z\" OR \"2020AJ....160...77Z\" OR \"2021AJ....162..148W\" OR \"2021AJ....162..217B\" OR \"2021ApJ...906...64A\" OR \"2024A&A...682A..48L\" OR \"2024AJ....168..246Z\" OR \"2024AJ....168..270P\")"
+  }
+ },
+ "full_downloads": {
+  "https://exoplanet.eu/catalog/csv/": {
+   "sha256": "f58ec9408ef808f7298b72270481bc6d6c132ed8375bfc281152124a4c7f9ea4",
+   "bytes": 3730760
+  }
+ }
+}
