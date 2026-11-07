@@ -1,5 +1,0 @@
-export { BASICS, type BasicsSection } from './basics'
-export { CONTROL_HELP, ZERNIKE_HELP, type ControlKey } from './controls'
-export { READOUT_HELP, type ReadoutKey } from './readouts'
-export type { HelpEntry } from './types'
-export { SEGMENT_HELP, type SegmentKey } from './segments'
