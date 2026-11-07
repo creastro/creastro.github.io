@@ -18,8 +18,8 @@ const px = (img: Uint8ClampedArray, x: number, y: number) => {
 }
 
 describe('divergingColor', () => {
-  it('0 là trung tính, âm thiên xanh, dương thiên đỏ, và bị cắt ngoài ±1', () => {
-    expect(divergingColor(0)).toEqual([240, 240, 240])
+  it('0 là trung tính, âm thiên xanh, dương thiên cam, và bị cắt ngoài ±1', () => {
+    expect(divergingColor(0)).toEqual([237, 242, 255])
     const neg = divergingColor(-1)
     const pos = divergingColor(1)
     expect(neg[2]).toBeGreaterThan(neg[0])
@@ -33,11 +33,11 @@ describe('renderPupil', () => {
     const img = renderPupil(computePsf(base), base.pupilDiameterPx)
     expect(img.length).toBe(size * size * 4)
     expect(px(img, size / 2, size / 2)).toEqual([0, 0, 0]) // tâm bị vật cản che
-    expect(px(img, size / 2 + 25, size / 2)).toEqual([240, 240, 240]) // r = 25 px, trong vành khuyên
+    expect(px(img, size / 2 + 25, size / 2)).toEqual([237, 242, 255]) // r = 25 px, trong vành khuyên
     expect(px(img, 0, 0)).toEqual([0, 0, 0]) // góc ngoài gương
   })
 
-  it('mất nét dương: tâm xanh (Z4 âm), mép đỏ (Z4 dương)', () => {
+  it('mất nét dương: tâm xanh (Z4 âm), mép cam (Z4 dương)', () => {
     const psf = computePsf({ ...base, obstructionRatio: 0 }, { ...ZERO_ABERRATIONS, defocus: 0.2 })
     const img = renderPupil(psf, base.pupilDiameterPx)
     const centre = px(img, size / 2, size / 2)
