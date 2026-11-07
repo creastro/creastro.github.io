@@ -49,12 +49,12 @@ const STOPS: Record<MapName, readonly Stop[]> = {
 }
 
 export const COLORMAP_LABELS: Record<ColormapName, string> = {
-  gray: 'Thang xám',
-  hot: 'Nóng (đen–đỏ–vàng–trắng)',
-  inferno: 'Inferno (màu giả)',
-  viridis: 'Viridis (màu giả)',
-  ice: 'Băng (đen–xanh–lam nhạt–trắng)',
-  spectrum: 'Màu theo bước sóng (minh hoạ)',
+  gray: 'Gray',
+  hot: 'Hot (black–red–yellow–white)',
+  inferno: 'Inferno (false color)',
+  viridis: 'Viridis (false color)',
+  ice: 'Ice (black–blue–cyan–white)',
+  spectrum: 'Wavelength color (illustrative)',
 }
 
 const cache = new Map<MapName, Uint8ClampedArray>()

@@ -1,4 +1,6 @@
 import { useId } from 'react'
+import type { HelpEntry } from '../help'
+import { HelpButton, Tip } from './Tip'
 
 interface SliderProps {
   label: string
@@ -11,12 +13,13 @@ interface SliderProps {
   format?: (value: number) => string
   /** Thang logarit: hữu ích cho đại lượng trải nhiều bậc độ lớn như đường kính hay trường nhìn. */
   log?: boolean
-  hint?: string
+  /** Chú thích chi tiết hiện khi rê chuột hoặc focus. */
+  help: HelpEntry
 }
 
 const LOG_STEPS = 1000
 
-export function Slider({ label, value, min, max, step, onChange, format, log = false, hint }: SliderProps) {
+export function Slider({ label, value, min, max, step, onChange, format, log = false, help }: SliderProps) {
   const id = useId()
   const shown = format ? format(value) : String(value)
 
@@ -27,11 +30,14 @@ export function Slider({ label, value, min, max, step, onChange, format, log = f
   }
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="text-sm font-medium text-slate-200">
-          {label}
-        </label>
+    <Tip help={help} className="space-y-1">
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex items-center gap-1.5">
+          <label htmlFor={id} className="text-sm font-medium text-slate-200">
+            {label}
+          </label>
+          <HelpButton />
+        </span>
         <output htmlFor={id} className="font-mono text-sm tabular-nums text-amber-300">
           {shown}
         </output>
@@ -47,7 +53,6 @@ export function Slider({ label, value, min, max, step, onChange, format, log = f
         aria-valuetext={shown}
         onChange={(e) => handle(Number(e.target.value))}
       />
-      {hint ? <p className="text-xs leading-snug text-slate-400">{hint}</p> : null}
-    </div>
+    </Tip>
   )
 }

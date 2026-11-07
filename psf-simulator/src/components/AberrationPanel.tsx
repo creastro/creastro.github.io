@@ -1,6 +1,8 @@
+import { CONTROL_HELP, ZERNIKE_HELP } from '../help'
 import { ZERNIKE_LABELS, ZERNIKE_NAMES, ZERO_ABERRATIONS, type Aberrations, type ZernikeName } from '../lib/zernike'
 import { Panel } from './Panel'
 import { Slider } from './Slider'
+import { Tip } from './Tip'
 
 interface AberrationPanelProps {
   value: Aberrations
@@ -11,9 +13,9 @@ interface AberrationPanelProps {
 export function AberrationPanel({ value, onChange, onReset }: AberrationPanelProps) {
   const dirty = ZERNIKE_NAMES.some((name) => value[name] !== ZERO_ABERRATIONS[name])
   return (
-    <Panel title="Quang sai Zernike (RMS, bước sóng)">
+    <Panel title="Zernike aberrations (waves RMS)">
       <p className="text-xs leading-snug text-slate-400">
-        Mỗi hệ số là sai số mặt sóng RMS của một mode. Khoảng 0,075 λ RMS tương ứng Strehl 0,8 (giới hạn Maréchal).
+        Each coefficient is the RMS wavefront error of one mode, in waves at the center wavelength. About 0.075 wave RMS gives a Strehl ratio of 0.8 (the Maréchal limit).
       </p>
       {ZERNIKE_NAMES.map((name) => (
         <Slider
@@ -25,16 +27,19 @@ export function AberrationPanel({ value, onChange, onReset }: AberrationPanelPro
           step={0.005}
           format={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(3)} λ`}
           onChange={(v) => onChange(name, v)}
+          help={ZERNIKE_HELP[name]}
         />
       ))}
-      <button
-        type="button"
-        disabled={!dirty}
-        className="w-full rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 enabled:hover:bg-slate-800 disabled:opacity-40"
-        onClick={onReset}
-      >
-        Xoá quang sai
-      </button>
+      <Tip help={CONTROL_HELP.clearAberrations}>
+        <button
+          type="button"
+          disabled={!dirty}
+          className="w-full rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-200 enabled:hover:bg-slate-800 disabled:opacity-40"
+          onClick={onReset}
+        >
+          Clear aberrations
+        </button>
+      </Tip>
     </Panel>
   )
 }
