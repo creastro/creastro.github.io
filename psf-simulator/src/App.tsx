@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AberrationPanel } from './components/AberrationPanel'
 import { Panel } from './components/Panel'
+import { ProfilePlot } from './components/ProfilePlot'
 import { PsfCanvas } from './components/PsfCanvas'
 import { PupilCanvas } from './components/PupilCanvas'
 import { Readouts } from './components/Readouts'
@@ -41,10 +42,11 @@ export default function App() {
             <PupilCanvas rgba={frame?.pupilRgba ?? null} size={frame?.pupilSize ?? 132} />
             <Readouts stats={frame?.stats ?? null} ms={frame?.ms ?? null} />
           </div>
+          <ProfilePlot profile={frame?.profile ?? null} dynamicRangeDecades={params.dynamicRangeDecades} />
         </div>
 
         <div className="space-y-4">
-          <Panel title="Gương chính">
+          <Panel title="Gương chính và bước sóng">
             <Slider
               label="Đường kính D"
               value={params.diameterM}
@@ -64,6 +66,16 @@ export default function App() {
               step={5}
               format={(v) => `${v.toFixed(0)} nm`}
               onChange={set('wavelengthNm')}
+            />
+            <Slider
+              label="Dải sóng"
+              value={params.bandwidthNm}
+              min={0}
+              max={300}
+              step={5}
+              format={(v) => (v === 0 ? 'đơn sắc' : `${v.toFixed(0)} nm`)}
+              onChange={set('bandwidthNm')}
+              hint="Dải rộng cộng 7 bước sóng: các vòng Airy nhoè đi vì vòng của λ dài lớn hơn λ ngắn."
             />
           </Panel>
 

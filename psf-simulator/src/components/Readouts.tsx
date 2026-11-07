@@ -13,6 +13,7 @@ export function Readouts({ stats, ms }: { stats: FrameStats | null; ms: number |
     ['Strehl theo Maréchal', stats.marechalStrehl.toFixed(3)],
     ['Đỉnh so với gương không che', `${(stats.relativePeak * 100).toFixed(1)}%`],
   ]
+  if (stats.bandSamples > 1) rows.push(['Số mẫu bước sóng', String(stats.bandSamples)])
   return (
     <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm" aria-live="polite">
       {rows.map(([k, v]) => (

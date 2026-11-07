@@ -1,13 +1,19 @@
 /**
- * Ghép tham số vật lý của người dùng (mét, nanômét, giây cung) thành ảnh PSF.
- * Đây là lớp mỏng giữa giao diện và `computePsf` / `renderPsf`; không phụ thuộc DOM nên test được.
+ * Ghép tham số vật lý của người dùng (mét, nanômét, giây cung) thành ảnh PSF, ảnh pupil và profile.
+ * Đây là lớp mỏng giữa giao diện và các module tính toán; không phụ thuộc DOM nên test được.
+ *
+ * Dải sóng: mỗi mẫu bước sóng có PSF riêng (cùng khẩu độ, quang sai tỉ lệ 1/λ), được cộng có trọng số tại cùng
+ * góc θ. Khi không có quang sai, mọi bước sóng dùng chung một PSF theo λ/D, chỉ khác nhau ở tỉ lệ hiển thị.
  */
 
+import type { ApertureParams } from './aperture'
 import type { ColormapName } from './colormap'
-import { ARCSEC_PER_RAD, computePsf, marechalStrehl } from './psf'
-import { renderPupil, pupilViewSize } from './pupilView'
-import { renderPsf } from './render'
-import { ZERO_ABERRATIONS, type Aberrations } from './zernike'
+import { ARCSEC_PER_RAD, computePsf, marechalStrehl, type PsfResult } from './psf'
+import { radialProfile, type RadialProfile } from './profile'
+import { pupilViewSize, renderPupil } from './pupilView'
+import { renderChannels, type RenderChannel } from './render'
+import { sampleBand, wavelengthToRgb } from './spectrum'
+import { ZERO_ABERRATIONS, hasAberration, scaleAberrations, type Aberrations } from './zernike'
 
 export const GRID_SIZE = 512
 export const PUPIL_PX = 128
@@ -16,15 +22,17 @@ export const IMAGE_SIZE = 512
 export interface SimParams {
   /** Đường kính gương chính, mét. */
   diameterM: number
-  /** Bước sóng, nanômét. */
+  /** Bước sóng trung tâm, nanômét. */
   wavelengthNm: number
+  /** Bề rộng dải sóng phẳng quanh bước sóng trung tâm, nanômét. 0 là đơn sắc. */
+  bandwidthNm: number
   /** Tỉ lệ vật cản trung tâm so với đường kính gương chính. */
   obstructionRatio: number
   vaneCount: number
   /** Độ dày thanh chống / D. */
   vaneThicknessRatio: number
   vaneAngleDeg: number
-  /** Quang sai Zernike, bước sóng RMS. */
+  /** Quang sai Zernike tại bước sóng trung tâm, bước sóng RMS. */
   aberrations: Aberrations
   /** Bề rộng toàn phần của trường nhìn, giây cung. */
   fovArcsec: number
@@ -35,6 +43,7 @@ export interface SimParams {
 export const DEFAULT_PARAMS: SimParams = {
   diameterM: 1,
   wavelengthNm: 550,
+  bandwidthNm: 0,
   obstructionRatio: 0.3,
   vaneCount: 4,
   vaneThicknessRatio: 0.015,
@@ -46,24 +55,26 @@ export const DEFAULT_PARAMS: SimParams = {
 }
 
 export interface FrameStats {
-  /** λ/D, giây cung. */
+  /** λ/D tại bước sóng trung tâm, giây cung. */
   lambdaOverDArcsec: number
   /** Bán kính vòng tối đầu tiên của mẫu Airy, 1.22 λ/D, giây cung. */
   airyRadiusArcsec: number
-  /** Nửa trường nhìn theo đơn vị λ/D. */
+  /** Nửa trường nhìn theo λ/D của bước sóng trung tâm. */
   halfFovLD: number
-  /** false nếu trường nhìn vượt vùng tính toán (±PUPIL_PX/2 λ/D), phần ngoài bị cắt thành đen. */
+  /** false nếu trường nhìn vượt vùng tính toán (±PUPIL_PX/2 λ/D) ở bước sóng ngắn nhất. */
   fovCovered: boolean
   /** Diện tích thu sáng so với gương tròn không che cùng đường kính. */
   throughput: number
   /** Cường độ đỉnh so với gương tròn không che cùng đường kính: throughput² × Strehl. */
   relativePeak: number
-  /** Tỉ số Strehl: đỉnh PSF so với đỉnh của cùng khẩu độ không quang sai. */
+  /** Tỉ số Strehl tại bước sóng trung tâm. */
   strehl: number
-  /** Sai số mặt sóng RMS trên phần khẩu độ mở, bước sóng. */
+  /** Sai số mặt sóng RMS tại bước sóng trung tâm trên phần khẩu độ mở, bước sóng. */
   wavefrontRmsWaves: number
   /** Strehl ước lượng bằng công thức Maréchal exp(−(2π·RMS)²), để đối chiếu. */
   marechalStrehl: number
+  /** Số mẫu bước sóng đã cộng. */
+  bandSamples: number
 }
 
 export interface FrameResult {
@@ -72,6 +83,7 @@ export interface FrameResult {
   /** Ảnh RGBA xem trước pupil, cạnh pupilSize. */
   pupilRgba: Uint8ClampedArray
   pupilSize: number
+  profile: RadialProfile
   stats: FrameStats
 }
 
@@ -80,39 +92,67 @@ export function lambdaOverDArcsec(diameterM: number, wavelengthNm: number): numb
 }
 
 export function computeFrame(p: SimParams): FrameResult {
-  const psf = computePsf({
+  const aperture: ApertureParams = {
     gridSize: GRID_SIZE,
     pupilDiameterPx: PUPIL_PX,
     obstructionRatio: p.obstructionRatio,
     vaneCount: p.vaneCount,
     vaneThicknessRatio: p.vaneThicknessRatio,
     vaneAngleDeg: p.vaneAngleDeg,
-  }, p.aberrations)
+  }
+  const samples = sampleBand(p.wavelengthNm, p.bandwidthNm)
 
-  const ld = lambdaOverDArcsec(p.diameterM, p.wavelengthNm)
-  const halfFovLD = p.fovArcsec / 2 / ld
-  const rgba = renderPsf(psf, {
+  // Không quang sai: PSF theo λ/D giống nhau ở mọi bước sóng, chỉ tính một lần.
+  let shared: PsfResult | null = null
+  const psfs = samples.map((s) => {
+    if (!hasAberration(p.aberrations)) return (shared ??= computePsf(aperture))
+    return computePsf(aperture, scaleAberrations(p.aberrations, p.wavelengthNm / s.wavelengthNm))
+  })
+
+  // Mẫu gần bước sóng trung tâm nhất cung cấp Strehl, mặt sóng và ảnh pupil.
+  let centre = 0
+  samples.forEach((s, i) => {
+    if (Math.abs(s.wavelengthNm - p.wavelengthNm) < Math.abs(samples[centre].wavelengthNm - p.wavelengthNm)) {
+      centre = i
+    }
+  })
+  const centrePsf = psfs[centre]
+
+  const lds = samples.map((s) => lambdaOverDArcsec(p.diameterM, s.wavelengthNm))
+  const channels: RenderChannel[] = samples.map((s, i) => ({
+    psf: psfs[i],
+    halfFovLD: p.fovArcsec / 2 / lds[i],
+    weight: s.weight,
+    rgb: wavelengthToRgb(s.wavelengthNm),
+  }))
+  const rgba = renderChannels(channels, {
     size: IMAGE_SIZE,
-    halfFovLD,
     dynamicRangeDecades: p.dynamicRangeDecades,
     colormap: p.colormap,
   })
+  const profile = radialProfile(
+    samples.map((s, i) => ({ psf: psfs[i], lambdaOverDArcsec: lds[i], weight: s.weight })),
+    p.fovArcsec / 2,
+  )
 
-  const throughput = psf.openArea / (Math.PI * (PUPIL_PX / 2) ** 2)
+  const throughput = centrePsf.openArea / (Math.PI * (PUPIL_PX / 2) ** 2)
+  const centreLd = lambdaOverDArcsec(p.diameterM, p.wavelengthNm)
   return {
     rgba,
-    pupilRgba: renderPupil(psf, PUPIL_PX),
+    pupilRgba: renderPupil(centrePsf, PUPIL_PX),
     pupilSize: pupilViewSize(PUPIL_PX),
+    profile,
     stats: {
-      lambdaOverDArcsec: ld,
-      airyRadiusArcsec: 1.22 * ld,
-      halfFovLD,
-      fovCovered: halfFovLD <= PUPIL_PX / 2,
+      lambdaOverDArcsec: centreLd,
+      airyRadiusArcsec: 1.22 * centreLd,
+      halfFovLD: p.fovArcsec / 2 / centreLd,
+      fovCovered: Math.max(...channels.map((c) => c.halfFovLD)) <= PUPIL_PX / 2,
       throughput,
-      relativePeak: throughput * throughput * psf.strehl,
-      strehl: psf.strehl,
-      wavefrontRmsWaves: psf.wavefrontRmsWaves,
-      marechalStrehl: marechalStrehl(psf.wavefrontRmsWaves),
+      relativePeak: throughput * throughput * centrePsf.strehl,
+      strehl: centrePsf.strehl,
+      wavefrontRmsWaves: centrePsf.wavefrontRmsWaves,
+      marechalStrehl: marechalStrehl(centrePsf.wavefrontRmsWaves),
+      bandSamples: samples.length,
     },
   }
 }

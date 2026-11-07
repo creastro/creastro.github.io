@@ -77,4 +77,75 @@ describe('computeFrame', () => {
   it('trả ảnh xem trước pupil đúng kích thước', () => {
     expect(frame.pupilRgba.length).toBe(frame.pupilSize * frame.pupilSize * 4)
   })
+
+  it('có profile cùng độ dài, bắt đầu ở tâm và kết thúc ở nửa trường nhìn', () => {
+    const { thetaArcsec, intensity, airy } = frame.profile
+    expect(thetaArcsec.length).toBe(intensity.length)
+    expect(airy.length).toBe(intensity.length)
+    expect(thetaArcsec[0]).toBe(0)
+    expect(thetaArcsec[thetaArcsec.length - 1]).toBeCloseTo(DEFAULT_PARAMS.fovArcsec / 2, 12)
+    expect(airy[0]).toBe(1)
+  })
+})
+
+describe('computeFrame — dải sóng', () => {
+  const clear = { ...DEFAULT_PARAMS, vaneCount: 0, obstructionRatio: 0 }
+
+  it('đơn sắc dùng một mẫu, dải rộng dùng nhiều mẫu', () => {
+    expect(computeFrame(clear).stats.bandSamples).toBe(1)
+    expect(computeFrame({ ...clear, bandwidthNm: 100 }).stats.bandSamples).toBe(7)
+  })
+
+  it('dải rộng lấp đầy vòng tối đầu tiên (các vòng của các bước sóng lệch nhau)', () => {
+    const ringIndex = (f: ReturnType<typeof computeFrame>) =>
+      f.profile.thetaArcsec.findIndex((t) => t >= f.stats.airyRadiusArcsec)
+    const mono = computeFrame(clear)
+    const poly = computeFrame({ ...clear, bandwidthNm: 200 })
+    const i = ringIndex(mono)
+    expect(poly.profile.intensity[i]).toBeGreaterThan(mono.profile.intensity[i] * 3)
+  })
+
+  it('Airy tham chiếu của dải sóng là trung bình các mẫu Airy, nên nông hơn vòng tối đơn sắc', () => {
+    const mono = computeFrame(clear)
+    const poly = computeFrame({ ...clear, bandwidthNm: 200 })
+    const i = mono.profile.thetaArcsec.findIndex((t) => t >= mono.stats.airyRadiusArcsec)
+    expect(poly.profile.airy[i]).toBeGreaterThan(mono.profile.airy[i])
+  })
+
+  it('Strehl tại bước sóng trung tâm không phụ thuộc bề rộng dải', () => {
+    const aberrations = { ...ZERO_ABERRATIONS, comaX: 0.05 }
+    const mono = computeFrame({ ...clear, aberrations })
+    const poly = computeFrame({ ...clear, aberrations, bandwidthNm: 100 })
+    expect(poly.stats.strehl).toBeCloseTo(mono.stats.strehl, 12)
+  })
+
+  it('hệ số quang sai được định nghĩa tại bước sóng trung tâm, nên đổi λ trung tâm không đổi Strehl', () => {
+    const aberrations = { ...ZERO_ABERRATIONS, spherical: 0.08 }
+    const s550 = computeFrame({ ...clear, aberrations, wavelengthNm: 550 })
+    const s1100 = computeFrame({ ...clear, aberrations, wavelengthNm: 1100 })
+    expect(s550.stats.wavefrontRmsWaves).toBeCloseTo(0.08, 3)
+    expect(s1100.stats.wavefrontRmsWaves).toBeCloseTo(0.08, 3)
+    expect(s1100.stats.strehl).toBeCloseTo(s550.stats.strehl, 12)
+  })
+
+  it('trong dải sóng rộng, quang sai tỉ lệ 1/λ: bước sóng dài hơn thấy mặt sóng nhỏ hơn theo bước sóng', () => {
+    // Kiểm tra gián tiếp qua Strehl: dải rộng với cầu sai lớn cho Strehl trung tâm không đổi (tính tại λ trung tâm),
+    // nhưng đỉnh ảnh tổng (profile[0]) khác đơn sắc vì các kênh khác có Strehl khác nhau.
+    const aberrations = { ...ZERO_ABERRATIONS, spherical: 0.15 }
+    const mono = computeFrame({ ...clear, aberrations })
+    const poly = computeFrame({ ...clear, aberrations, bandwidthNm: 300 })
+    expect(poly.stats.strehl).toBeCloseTo(mono.stats.strehl, 12)
+    expect(poly.profile.intensity[0]).not.toBeCloseTo(mono.profile.intensity[0], 3)
+  })
+
+  it('màu theo bước sóng: sao đơn sắc 450 nm có tâm thiên xanh, 650 nm thiên đỏ', () => {
+    const centre = (f: ReturnType<typeof computeFrame>) => {
+      const k = (IMAGE_SIZE / 2 * IMAGE_SIZE + IMAGE_SIZE / 2) * 4
+      return [f.rgba[k], f.rgba[k + 1], f.rgba[k + 2]]
+    }
+    const blue = centre(computeFrame({ ...clear, wavelengthNm: 450, colormap: 'spectrum' }))
+    const red = centre(computeFrame({ ...clear, wavelengthNm: 650, colormap: 'spectrum' }))
+    expect(blue[2]).toBeGreaterThan(blue[0])
+    expect(red[0]).toBeGreaterThan(red[2])
+  })
 })
