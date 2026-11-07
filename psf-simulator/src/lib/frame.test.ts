@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_PARAMS, IMAGE_SIZE, computeFrame, lambdaOverDArcsec } from './frame'
+import { ZERO_ABERRATIONS } from './zernike'
 
 /** Số pixel có độ sáng đỏ ≥ ngưỡng, dùng đo kích thước lõi sáng. */
 function brightPixels(rgba: Uint8ClampedArray, threshold: number): number {
@@ -54,5 +55,26 @@ describe('computeFrame', () => {
     const wide = computeFrame({ ...DEFAULT_PARAMS, diameterM: 8, fovArcsec: 20 })
     expect(wide.stats.fovCovered).toBe(false)
     expect(frame.stats.fovCovered).toBe(true)
+  })
+
+  it('không quang sai: Strehl = 1 và RMS = 0', () => {
+    expect(frame.stats.strehl).toBeCloseTo(1, 12)
+    expect(frame.stats.wavefrontRmsWaves).toBe(0)
+  })
+
+  it('quang sai làm giảm Strehl theo Maréchal và giảm đỉnh tương đối', () => {
+    const aberrated = computeFrame({
+      ...DEFAULT_PARAMS,
+      vaneCount: 0,
+      obstructionRatio: 0,
+      aberrations: { ...ZERO_ABERRATIONS, comaX: 0.06 },
+    })
+    expect(aberrated.stats.strehl).toBeLessThan(0.9)
+    expect(Math.abs(aberrated.stats.strehl - aberrated.stats.marechalStrehl)).toBeLessThan(0.01)
+    expect(aberrated.stats.relativePeak).toBeCloseTo(aberrated.stats.throughput ** 2 * aberrated.stats.strehl, 12)
+  })
+
+  it('trả ảnh xem trước pupil đúng kích thước', () => {
+    expect(frame.pupilRgba.length).toBe(frame.pupilSize * frame.pupilSize * 4)
   })
 })

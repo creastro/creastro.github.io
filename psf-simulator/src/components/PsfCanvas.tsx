@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
 import { IMAGE_SIZE } from '../lib/frame'
+import { useImageData } from './useImageData'
 
 interface PsfCanvasProps {
   rgba: Uint8ClampedArray | null
@@ -23,15 +23,7 @@ function formatArcsec(v: number): string {
 }
 
 export function PsfCanvas({ rgba, fovArcsec }: PsfCanvasProps) {
-  const ref = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    const canvas = ref.current
-    const ctx = canvas?.getContext('2d')
-    if (!ctx || !rgba) return
-    const copy = new Uint8ClampedArray(rgba)
-    ctx.putImageData(new ImageData(copy, IMAGE_SIZE, IMAGE_SIZE), 0, 0)
-  }, [rgba])
+  const ref = useImageData(rgba, IMAGE_SIZE)
 
   const bar = niceScaleBar(fovArcsec)
 

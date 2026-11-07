@@ -4,8 +4,10 @@
  */
 
 import type { ColormapName } from './colormap'
-import { ARCSEC_PER_RAD, computePsf } from './psf'
+import { ARCSEC_PER_RAD, computePsf, marechalStrehl } from './psf'
+import { renderPupil, pupilViewSize } from './pupilView'
 import { renderPsf } from './render'
+import { ZERO_ABERRATIONS, type Aberrations } from './zernike'
 
 export const GRID_SIZE = 512
 export const PUPIL_PX = 128
@@ -22,6 +24,8 @@ export interface SimParams {
   /** Độ dày thanh chống / D. */
   vaneThicknessRatio: number
   vaneAngleDeg: number
+  /** Quang sai Zernike, bước sóng RMS. */
+  aberrations: Aberrations
   /** Bề rộng toàn phần của trường nhìn, giây cung. */
   fovArcsec: number
   dynamicRangeDecades: number
@@ -35,6 +39,7 @@ export const DEFAULT_PARAMS: SimParams = {
   vaneCount: 4,
   vaneThicknessRatio: 0.015,
   vaneAngleDeg: 0,
+  aberrations: ZERO_ABERRATIONS,
   fovArcsec: 3,
   dynamicRangeDecades: 5,
   colormap: 'hot',
@@ -51,13 +56,22 @@ export interface FrameStats {
   fovCovered: boolean
   /** Diện tích thu sáng so với gương tròn không che cùng đường kính. */
   throughput: number
-  /** Cường độ đỉnh so với gương tròn không che cùng đường kính, bằng throughput². */
+  /** Cường độ đỉnh so với gương tròn không che cùng đường kính: throughput² × Strehl. */
   relativePeak: number
+  /** Tỉ số Strehl: đỉnh PSF so với đỉnh của cùng khẩu độ không quang sai. */
+  strehl: number
+  /** Sai số mặt sóng RMS trên phần khẩu độ mở, bước sóng. */
+  wavefrontRmsWaves: number
+  /** Strehl ước lượng bằng công thức Maréchal exp(−(2π·RMS)²), để đối chiếu. */
+  marechalStrehl: number
 }
 
 export interface FrameResult {
   /** Ảnh RGBA IMAGE_SIZE × IMAGE_SIZE. */
   rgba: Uint8ClampedArray
+  /** Ảnh RGBA xem trước pupil, cạnh pupilSize. */
+  pupilRgba: Uint8ClampedArray
+  pupilSize: number
   stats: FrameStats
 }
 
@@ -73,7 +87,7 @@ export function computeFrame(p: SimParams): FrameResult {
     vaneCount: p.vaneCount,
     vaneThicknessRatio: p.vaneThicknessRatio,
     vaneAngleDeg: p.vaneAngleDeg,
-  })
+  }, p.aberrations)
 
   const ld = lambdaOverDArcsec(p.diameterM, p.wavelengthNm)
   const halfFovLD = p.fovArcsec / 2 / ld
@@ -87,13 +101,18 @@ export function computeFrame(p: SimParams): FrameResult {
   const throughput = psf.openArea / (Math.PI * (PUPIL_PX / 2) ** 2)
   return {
     rgba,
+    pupilRgba: renderPupil(psf, PUPIL_PX),
+    pupilSize: pupilViewSize(PUPIL_PX),
     stats: {
       lambdaOverDArcsec: ld,
       airyRadiusArcsec: 1.22 * ld,
       halfFovLD,
       fovCovered: halfFovLD <= PUPIL_PX / 2,
       throughput,
-      relativePeak: throughput * throughput,
+      relativePeak: throughput * throughput * psf.strehl,
+      strehl: psf.strehl,
+      wavefrontRmsWaves: psf.wavefrontRmsWaves,
+      marechalStrehl: marechalStrehl(psf.wavefrontRmsWaves),
     },
   }
 }
