@@ -1,75 +1,68 @@
-# Mô phỏng PSF kính thiên văn
+# Telescope PSF Simulator
 
-Ứng dụng web mô phỏng **Point Spread Function (PSF)** của kính thiên văn theo thời gian thực.
-PSF là bình phương độ lớn của biến đổi Fourier 2D của hàm khẩu độ (gần đúng Fraunhofer):
+A web app that simulates the **point spread function (PSF)** of a telescope in real time.
+In the Fraunhofer approximation the PSF is the squared magnitude of the 2D Fourier transform of the aperture:
 
 ```
-PSF(θ) = | FFT( A(x, y) ) |²
+PSF(θ) = | FFT( A(x, y) · exp[i·2π·W(x, y)] ) |²
 ```
 
-## Chạy
+Hover over any control or number for an explanation with formulas, or press **Basics** for the background theory.
+
+## Run
 
 ```bash
 cd psf-simulator
 npm install
-npm run dev        # máy chủ phát triển
+npm run dev        # development server
 npm test           # Vitest
 npm run lint       # oxlint
-npm run build      # kiểm tra kiểu và build production
+npm run build      # type check and production build
 ```
 
-## Điều khiển
+## Controls
 
-| Nhóm | Tham số | Ghi chú |
+| Group | Parameters | Notes |
 |---|---|---|
-| Gương chính | Đường kính D, bước sóng λ | Quyết định λ/D, tức độ phân giải |
-| Che khuất | Vật cản trung tâm ε, số thanh chống, độ dày, góc xoay | Cánh sao vuông góc với thanh chống |
-| Bước sóng | λ trung tâm và dải sóng (0–300 nm) | Dải rộng cộng 7 bước sóng; các vòng Airy nhoè đi |
-| Quang sai | Zernike: mất nét, loạn thị (2), coma (2), cầu sai | Hệ số là sai số mặt sóng RMS, đơn vị bước sóng |
-| Hiển thị | Trường nhìn (giây cung), dải động (số bậc log), thang màu | Thang log cho thấy vòng Airy mờ. Thang: xám, nóng, inferno, viridis, băng, màu theo bước sóng |
+| Mirror and wavelength | Diameter D, center wavelength λ, bandwidth Δλ (0–300 nm) | D and λ set λ/D, the resolution. A wide band adds 7 wavelengths and the Airy rings blur |
+| Obstruction | Central obstruction ε, number of spider vanes, thickness, rotation | Spikes are perpendicular to the vanes |
+| Aberrations | Zernike: defocus, astigmatism (2), coma (2), spherical | Coefficients are RMS wavefront errors in waves |
+| Display | Field of view (arcsec), dynamic range (log decades), color map | The log scale shows the faint Airy rings. Maps: gray, hot, inferno, viridis, ice, wavelength color |
 
-## Cách tính
+## How it is computed
 
-- Lưới FFT 512 × 512; pupil đường kính 128 px, nên mỗi λ/D có 4 mẫu và trường tính toán là ±64 λ/D.
-- Mép pupil và thanh chống được siêu lấy mẫu 16 × 16 ở các pixel sát biên, nên thanh chống mảnh hơn một pixel
-  vẫn đóng góp đúng diện tích (sai số dưới 2.5%).
-- Chuẩn hoá theo `(ΣA)²`: đỉnh của khẩu độ lý tưởng bằng 1. Ảnh hiển thị theo `log10(I)` trong dải
-  `[-R, 0]` với R là dải động.
-- Ảnh được nội suy bicubic (Catmull–Rom) từ PSF sang trường nhìn tính bằng giây cung, nên đổi D hoặc λ
-  làm kích thước lõi sáng thay đổi thật sự.
-- Quang sai: trường pupil là `A · exp(i·2π·W)` với `W = Σ cₖ Zₖ` (đa thức Noll chuẩn hoá, RMS = 1 trên đĩa
-  đơn vị). Tỉ số Strehl là đỉnh PSF chia cho đỉnh của cùng khẩu độ không quang sai, và được đối chiếu với
-  gần đúng Maréchal `exp(−(2π·RMS)²)`.
-- Dải sóng: mỗi mẫu bước sóng có λ/D riêng, nên cùng một góc θ ứng với các bán kính vòng khác nhau; ảnh là tổng có
-  trọng số. Quang sai Zernike được cho tại λ trung tâm và tỉ lệ 1/λ ở các bước sóng khác (sai số đường quang hình
-  học không đổi theo λ). Không có quang sai thì cả dải dùng chung một PSF.
-- Profile xuyên tâm: trung bình PSF theo góc phương vị, vẽ cùng mẫu Airy lý tưởng `[2J₁(x)/x]²` của cùng D và dải
-  sóng. Nội suy bicubic nâng nhẹ các cực tiểu sâu, nên đồ thị không dùng để đo độ sâu vòng tối.
-- Thang "màu theo bước sóng" chỉ minh hoạ sắc độ, không mô hình phổ nguồn hay đáp ứng của mắt.
-- FFT chạy trong Web Worker; khi kéo thanh trượt chỉ giữ yêu cầu mới nhất.
+- The FFT grid is 512 × 512 and the pupil is 128 px across, so there are 4 samples per λ/D and the computed field is ±64 λ/D.
+- Pupil edges and spider vanes are supersampled 16 × 16 at edge pixels, so a vane thinner than one pixel keeps the right area (error below 2.5 %).
+- Normalization is by `(ΣA)²`: the peak of the ideal aperture is 1. The picture shows `log10(I)` over `[-R, 0]`, with R the dynamic range.
+- The image is resampled with bicubic (Catmull–Rom) interpolation to a field of view in arcseconds, so changing D or λ really changes the size of the core.
+- Aberrations: the pupil field is `A · exp(i·2π·W)` with `W = Σ cₖ Zₖ` (Noll-normalized polynomials, RMS = 1 over the unit disk). The Strehl ratio is the PSF peak divided by the ideal peak of the same aperture, and is compared with the Maréchal approximation `exp[−(2π·RMS)²]`.
+- Bandwidth: each wavelength sample has its own λ/D, so one angle θ maps to different ring radii and the image is a weighted sum. Zernike coefficients are given at the center wavelength and scale as 1/λ at other wavelengths (geometric path errors do not depend on λ). Without aberrations the whole band shares one PSF.
+- Radial profile: the PSF averaged around the star, drawn with the ideal Airy pattern `[2J₁(x)/x]²` of the same D and band. Bicubic interpolation lifts the deepest dark rings slightly, so do not use the plot to measure null depth.
+- The wavelength color map only illustrates hue. It does not model the source spectrum or the response of the eye.
+- The FFT runs in a Web Worker and only the latest request is kept while a slider moves.
 
-## Kiểm chứng
+## Verification
 
-Các test so sánh với nghiệm giải tích: DFT ngây thơ, định lý Parseval, mẫu Airy `[2J₁(x)/x]²`,
-mẫu của khẩu độ vành khuyên, 83.8% năng lượng trong vòng tối đầu tiên (1.22 λ/D), và cánh sao nhiễu xạ.
-Với bước sóng: J₁ so với giá trị tham chiếu, profile khớp Airy, dải sóng lấp vòng tối.
-Với quang sai: tính trực chuẩn của Zernike, Strehl khớp Maréchal ở 0.05 waves RMS cho từng mode, bảo toàn
-năng lượng, mất nét ± cho ảnh giống hệt nhau, coma làm PSF bất đối xứng, đổi dấu loạn thị tương đương hoán vị trục.
+Tests compare against analytic results: a naive DFT, Parseval's theorem, the Airy pattern `[2J₁(x)/x]²`, the annular-aperture pattern, 83.8 % of the energy inside the first dark ring (1.22 λ/D), and diffraction spikes.
+Aberrations: Zernike orthonormality, the Maréchal approximation for each mode, energy conservation, identical images for ± defocus, an asymmetric PSF for coma, and the identity that flipping the sign of astigmatism swaps the x and y axes.
+Wavelength: J₁ against reference values, profile against Airy, and dark rings that fill in for a wide band.
+Help: every control has an entry, all text is English, and the core formulas are present.
 
-## Cấu trúc
+## Layout
 
 ```
-src/lib/fft.ts        FFT Cooley–Tukey 1D/2D
-src/lib/aperture.ts   Hàm khẩu độ: gương, vật cản, thanh chống
-src/lib/psf.ts        PSF, chuẩn hoá, nội suy, năng lượng vòng
-src/lib/bessel.ts     J₁ và mẫu Airy giải tích
-src/lib/spectrum.ts   Màu theo bước sóng, lấy mẫu dải sóng
-src/lib/profile.ts    Profile xuyên tâm
-src/lib/zernike.ts    Đa thức Zernike và mặt sóng
-src/lib/pupilView.ts  Ảnh xem trước pupil (khẩu độ và pha)
-src/lib/colormap.ts   Thang màu
-src/lib/render.ts     Các kênh bước sóng → ảnh RGBA theo thang log
-src/lib/frame.ts      Tham số vật lý → ảnh và số liệu
-src/workers/          Worker tính khung
-src/components/       Slider, PsfCanvas
+src/lib/fft.ts        Cooley–Tukey 1D/2D FFT
+src/lib/aperture.ts   Aperture function: mirror, obstruction, spider vanes
+src/lib/psf.ts        PSF, normalization, interpolation, encircled energy
+src/lib/zernike.ts    Zernike polynomials and the wavefront
+src/lib/pupilView.ts  Pupil preview (aperture and phase)
+src/lib/bessel.ts     J₁ and the analytic Airy pattern
+src/lib/spectrum.ts   Wavelength color, band sampling
+src/lib/profile.ts    Radial profile
+src/lib/colormap.ts   Color maps
+src/lib/render.ts     Wavelength channels → RGBA image on a log scale
+src/lib/frame.ts      Physical parameters → image and numbers
+src/help/             Tooltip text, readout text and the Basics content
+src/workers/          Frame worker
+src/components/       Slider, Tip, BasicsDialog, PsfCanvas, ProfilePlot, ...
 ```
