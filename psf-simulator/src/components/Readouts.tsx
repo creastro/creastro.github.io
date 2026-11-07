@@ -15,6 +15,7 @@ export function Readouts({ stats, ms }: { stats: FrameStats | null; ms: number |
     ['marechal', 'Strehl from Maréchal', stats.marechalStrehl.toFixed(3)],
     ['relativePeak', 'Peak vs. clear circle', `${(stats.relativePeak * 100).toFixed(1)}%`],
   ]
+  if (stats.segmentCount > 0) rows.push(['segments', 'Mirror segments', String(stats.segmentCount)])
   if (stats.bandSamples > 1) rows.push(['bandSamples', 'Wavelength samples', String(stats.bandSamples)])
   if (ms !== null) rows.push(['computeTime', 'Compute time', `${ms.toFixed(0)} ms`])
 

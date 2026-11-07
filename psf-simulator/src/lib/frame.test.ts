@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_PARAMS, IMAGE_SIZE, computeFrame, lambdaOverDArcsec } from './frame'
+import { DEFAULT_PARAMS, DEFAULT_SEGMENTED, IMAGE_SIZE, computeFrame, lambdaOverDArcsec } from './frame'
 import { ZERO_ABERRATIONS } from './zernike'
 
 /** Số pixel có độ sáng đỏ ≥ ngưỡng, dùng đo kích thước lõi sáng. */
@@ -147,5 +147,48 @@ describe('computeFrame — dải sóng', () => {
     const red = centre(computeFrame({ ...clear, wavelengthNm: 650, colormap: 'spectrum' }))
     expect(blue[2]).toBeGreaterThan(blue[0])
     expect(red[0]).toBeGreaterThan(red[2])
+  })
+})
+
+describe('computeFrame — gương phân đoạn', () => {
+  const seg = { ...DEFAULT_SEGMENTED, enabled: true, rings: 3, removeCenter: true, gapRatio: 0.02 }
+  const params = { ...DEFAULT_PARAMS, vaneCount: 0, obstructionRatio: 0, segmented: seg }
+
+  it('đĩa liền có 0 phân đoạn, gương phân đoạn có số phân đoạn đúng', () => {
+    expect(computeFrame(DEFAULT_PARAMS).stats.segmentCount).toBe(0)
+    expect(computeFrame(params).stats.segmentCount).toBe(36)
+  })
+
+  it('diện tích thu sáng nhỏ hơn đĩa tròn cùng đường kính (lục giác trong đường tròn, khe và lỗ ở tâm)', () => {
+    const f = computeFrame(params)
+    expect(f.stats.throughput).toBeLessThan(0.85)
+    expect(f.stats.throughput).toBeGreaterThan(0.5)
+  })
+
+  it('piston ngẫu nhiên làm giảm Strehl theo Maréchal; không có sai số thì Strehl = 1', () => {
+    expect(computeFrame(params).stats.strehl).toBeCloseTo(1, 12)
+    const f = computeFrame({ ...params, segmented: { ...seg, pistonRms: 0.06 } })
+    expect(f.stats.strehl).toBeLessThan(0.95)
+    expect(Math.abs(f.stats.strehl - f.stats.marechalStrehl)).toBeLessThan(0.03)
+  })
+
+  it('sai số phân đoạn tỉ lệ 1/λ trong dải rộng: đỉnh ảnh đa sắc khác đơn sắc dù Strehl ở λ trung tâm giống nhau', () => {
+    const noisy = { ...params, segmented: { ...seg, pistonRms: 0.1 } }
+    const mono = computeFrame(noisy)
+    const poly = computeFrame({ ...noisy, bandwidthNm: 300 })
+    expect(poly.stats.strehl).toBeCloseTo(mono.stats.strehl, 12)
+    expect(poly.profile.intensity[0]).not.toBeCloseTo(mono.profile.intensity[0], 3)
+  })
+
+  it('sai số phân đoạn bị bỏ qua khi tắt chế độ phân đoạn', () => {
+    const f = computeFrame({ ...params, segmented: { ...seg, enabled: false, pistonRms: 0.3 } })
+    expect(f.stats.strehl).toBeCloseTo(1, 12)
+    expect(f.stats.segmentCount).toBe(0)
+  })
+
+  it('thang màu pupil co giãn theo sai số', () => {
+    expect(computeFrame(params).pupilRangeWaves).toBe(1)
+    const small = computeFrame({ ...params, segmented: { ...seg, pistonRms: 0.01 } }).pupilRangeWaves
+    expect(small).toBeLessThan(0.25)
   })
 })
