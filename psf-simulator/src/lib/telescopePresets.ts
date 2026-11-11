@@ -6,6 +6,8 @@ import type { SimParams } from './frame'
  * làm tròn; độ dày thanh chống và khe giữa các phân đoạn là giá trị gần đúng. Góc thanh chống chỉ là một lựa chọn:
  * hướng cánh sao trên bầu trời của kính thật còn phụ thuộc vào góc quay của kính.
  *
+ * Thanh chống JWST (3, một thanh dọc và hai thanh lệch 150° so với nó) và Keck (6, rộng 0.025 m) lấy từ nguồn thứ cấp,
+ * chưa đối chiếu với tài liệu kỹ thuật; độ rộng thanh JWST là ước lượng.
  * Mô hình chỉ có gương lục giác, nên GMT (7 gương tròn) chưa có, và ELT (798 phân đoạn) chỉ được xấp xỉ bằng 8 vòng (217).
  * Trường nhìn được chọn sao cho ±64 λ/D chứa mẫu nhiễu xạ ở cả 380 nm và 550 nm.
  */
@@ -14,6 +16,8 @@ export interface TelescopePreset {
   /** Mô tả ngắn hiển thị trong chú thích. */
   summary: string
   patch: Pick<SimParams, 'diameterM' | 'fovArcsec' | 'obstructionRatio' | 'vaneCount' | 'vaneThicknessRatio' | 'vaneAngleDeg'> & {
+    /** Góc riêng của từng thanh chống (độ, từ trục +x, y hướng xuống); nếu có thì thay cho việc chia đều. */
+    vaneAnglesDeg?: readonly number[]
     segmented: { enabled: boolean; rings: number; gapRatio: number; removeCenter: boolean }
   }
 }
@@ -35,13 +39,28 @@ export const TELESCOPE_PRESETS: Record<TelescopeKey, TelescopePreset> = {
   },
   jwst: {
     label: 'JWST',
-    summary: '18 hexagonal segments, D = 6.5 m. The secondary mirror and its struts are not included.',
-    patch: { ...SEGMENT_PRESETS.jwst.patch, vaneThicknessRatio: 0.015, vaneAngleDeg: 0, segmented: { enabled: true, ...SEGMENT_PRESETS.jwst.patch.segmented } },
+    summary: '18 hexagonal segments, D = 6.5 m, secondary obstruction about 0.11 and its three struts (one vertical, two at 150° from it).',
+    patch: {
+      ...SEGMENT_PRESETS.jwst.patch,
+      obstructionRatio: 0.11,
+      vaneCount: 3,
+      vaneThicknessRatio: 0.015,
+      vaneAngleDeg: 0,
+      // Thanh dọc hướng lên (y xuống nên là 270°) và hai thanh còn lại lệch 150° so với nó.
+      vaneAnglesDeg: [270, 60, 120],
+      segmented: { enabled: true, ...SEGMENT_PRESETS.jwst.patch.segmented },
+    },
   },
   keck: {
     label: 'Keck',
-    summary: '36 hexagonal segments, D = 10 m, empty center. The secondary mirror and its struts are not included.',
-    patch: { ...SEGMENT_PRESETS.keck.patch, vaneThicknessRatio: 0.015, vaneAngleDeg: 0, segmented: { enabled: true, ...SEGMENT_PRESETS.keck.patch.segmented } },
+    summary: '36 hexagonal segments, D = 10 m, empty center and six thin spider arms (0.025 m wide).',
+    patch: {
+      ...SEGMENT_PRESETS.keck.patch,
+      vaneCount: 6,
+      vaneThicknessRatio: 0.0025,
+      vaneAngleDeg: 0,
+      segmented: { enabled: true, ...SEGMENT_PRESETS.keck.patch.segmented },
+    },
   },
   elt: {
     label: 'ELT',

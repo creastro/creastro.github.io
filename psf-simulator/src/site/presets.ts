@@ -3,8 +3,8 @@
 import { SEGMENT_PRESETS, type SegmentPresetKey } from '../lib/segmentPresets'
 import { TELESCOPE_PRESETS, type TelescopeKey } from '../lib/telescopePresets'
 import { ZERNIKE_NAMES } from '../lib/zernike'
-import { setValue, syncSeg, syncVanes } from './controls'
-import { ZERNIKE_IDS } from './controlSpecs'
+import { setValue, syncOutputs, syncSeg, syncVanes } from './controls'
+import { VANE_IDS, ZERNIKE_IDS } from './controlSpecs'
 import { $, input } from './dom'
 
 export const SEGMENT_PRESET_BUTTONS: Record<string, SegmentPresetKey> = { 'preset-jwst': 'jwst', 'preset-keck': 'keck', 'preset-91': 'rings5' }
@@ -43,7 +43,9 @@ export function wirePresets(onChange: () => void): void {
       setValue('nvane', p.vaneCount)
       setValue('tvane', p.vaneThicknessRatio)
       setValue('avane', p.vaneAngleDeg)
-      input('vane-each').checked = false
+      const angles = p.vaneAnglesDeg
+      input('vane-each').checked = angles !== undefined
+      if (angles) angles.forEach((a, i) => setValue(VANE_IDS[i], a))
       input('seg-on').checked = p.segmented.enabled
       setValue('seg-rings', p.segmented.rings)
       setValue('seg-gap', p.segmented.gapRatio)
@@ -54,6 +56,7 @@ export function wirePresets(onChange: () => void): void {
       setValue('seg-tilt', 0)
       syncSeg()
       syncVanes()
+      syncOutputs()
       onChange()
     })
   }
