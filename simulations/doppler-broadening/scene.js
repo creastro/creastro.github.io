@@ -202,7 +202,7 @@ window.DopplerScene = (() => {
       ctx.fillStyle = COLOR.ink; ctx.beginPath(); ctx.arc(X(pole.x), Y(pole.y), 3, 0, TAU); ctx.fill();
     }
     ctx.font = FONT; ctx.fillStyle = COLOR.text; ctx.textAlign = 'center';
-    ctx.textBaseline = 'top'; ctx.fillText('spin axis', cx + 34, cy + Rc * 1.1);
+    ctx.textBaseline = 'top'; ctx.textAlign = 'left'; ctx.fillText('spin axis', cx + 26, cy + Rc * 1.1); ctx.textAlign = 'center';
 
     // rotation sense: arc around the axis above the star, front side moving to the right
     const ay = cy - Rc * 1.28, rx = Rc * 0.42, ry = Rc * 0.1;
@@ -214,18 +214,18 @@ window.DopplerScene = (() => {
     ctx.moveTo(cx + rx, ay); ctx.lineTo(cx + rx - 7, ay - 4); ctx.lineTo(cx + rx - 7, ay + 5); ctx.closePath(); ctx.fill();
     ctx.textBaseline = 'bottom'; ctx.fillText('rotation', cx, ay - ry - 3);
 
-    if (eqLabel) {
+    if (eqLabel && s.incDeg >= 10) {
       ctx.fillStyle = '#080d1c'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('equator', X(eqLabel.x), Y(eqLabel.y) + 11);
     }
 
     // limb labels
-    const vtxt = s.vsiniKms.toFixed(1);
+    const vtxt = s.vsiniKms.toFixed(1), neg = s.vsiniKms >= 0.05 ? '−' : '', pos = s.vsiniKms >= 0.05 ? '+' : '';
     ctx.font = FONT; ctx.textBaseline = 'top';
     ctx.textAlign = 'left'; ctx.fillStyle = COLOR.blue;
-    ctx.fillText('approaching limb', 8, 8); ctx.fillText('−' + vtxt + ' km/s · blueshift', 8, 24);
+    ctx.fillText('approaching limb', 8, 8); ctx.fillText(neg + vtxt + ' km/s · blueshift', 8, 24);
     ctx.textAlign = 'right'; ctx.fillStyle = COLOR.red;
-    ctx.fillText('receding limb', w - 8, 8); ctx.fillText('+' + vtxt + ' km/s · redshift', w - 8, 24);
+    ctx.fillText('receding limb', w - 8, 8); ctx.fillText(pos + vtxt + ' km/s · redshift', w - 8, 24);
 
     // colour bar: line-of-sight velocity
     const bw = Math.min(w * 0.7, 340), bx = (w - bw) / 2, by = h - 30;

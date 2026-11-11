@@ -141,8 +141,10 @@
     if (!w) return;
     ctx.clearRect(0, 0, w, h);
     const grid = makeGrid(lo, hi, 600);
-    const rest = profile(grid, S.lambda0, 0, S.sigmaRestNm, false);
-    const obs = profile(grid, S.lamObs, 0, S.sigmaObsNm, false);
+    // A line narrower than ~1/120 of the window would vanish: draw it wider and say so.
+    const minSig = (hi - lo) / 120, thin = S.sigmaObsNm < minSig;
+    const rest = profile(grid, S.lambda0, 0, Math.max(S.sigmaRestNm, minSig), false);
+    const obs = profile(grid, S.lamObs, 0, Math.max(S.sigmaObsNm, minSig), false);
     const f = Ch.frame(ctx, w, h, { xlo: lo, xhi: hi, ylo: 1 - S.depth - 0.1, yhi: 1.06, xLabel: 'Wavelength (nm)', yLabel: 'Normalised flux', margin: { l: 58, r: 14, t: 12, b: 48 } });
     Ch.spectrumBand(ctx, f, h, lo, hi);
     Ch.trace(ctx, f, grid, rest, { color: COLOR.ref, width: 1.8, dash: [6, 5] });
@@ -162,7 +164,11 @@
     const word = S.dop.deltaLambdaNm > 0 ? 'Redshift' : S.dop.deltaLambdaNm < 0 ? 'Blueshift' : 'No shift';
     ctx.font = 'bold 13px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
     ctx.fillStyle = S.dop.deltaLambdaNm > 0 ? COLOR.red : S.dop.deltaLambdaNm < 0 ? COLOR.blue : COLOR.text;
-    ctx.fillText(word, f.m.l + 8, f.m.t + 26);
+    ctx.fillText(word, f.m.l + 8, h - f.m.b - 24);
+    if (thin) {
+      ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'right'; ctx.fillStyle = COLOR.text;
+      ctx.fillText('lines drawn wider than their true width', w - f.m.r - 8, h - f.m.b - 24);
+    }
   }
 
   /* ---------- section B ---------- */
@@ -224,7 +230,7 @@
     } else {
       ctx.fillStyle = COLOR.text; ctx.font = Ch.FONT; ctx.textBaseline = 'top';
       ctx.textAlign = S.lamObs > S.lambda0 ? 'left' : 'right';
-      ctx.fillText((S.lamObs > S.lambda0 ? '◀ ' : '') + 'rest line λ₀ = ' + nm(S.lambda0) + ' is off the plot' + (S.lamObs > S.lambda0 ? '' : ' ▶'), S.lamObs > S.lambda0 ? f.m.l + 8 : w - f.m.r - 8, f.m.t + 6);
+      ctx.fillText((S.lamObs > S.lambda0 ? '◀ ' : '') + 'rest line λ₀ = ' + nm(S.lambda0) + ' is off the plot' + (S.lamObs > S.lambda0 ? '' : ' ▶'), S.lamObs > S.lambda0 ? f.m.l + 8 : w - f.m.r - 8, h - f.m.b - 24);
     }
     Ch.trace(ctx, f, grid, unb, { color: COLOR.shifted, width: 1.9, dash: [3, 3] });
     Ch.trace(ctx, f, grid, rot, { color: COLOR.broadened, width: 2.6, fill: 'rgba(255,207,107,.10)' });
