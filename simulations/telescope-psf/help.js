@@ -27,8 +27,8 @@ window.SIM_HELP = (() => {
     'seg-on': 'Build the primary mirror from hexagonal segments instead of one solid disk.',
     'tel-hubble': 'Hubble Space Telescope: D = 2.4 m, central obstruction about 0.33 and four spider vanes. Also clears the aberrations.',
     'tel-vlt': 'One 8.2 m Unit Telescope of the VLT: obstruction about 0.14 and four thin vanes. Also clears the aberrations.',
-    'tel-jwst': 'James Webb Space Telescope: 18 hexagonal segments, D = 6.5 m. The secondary mirror and struts are not included.',
-    'tel-keck': 'A Keck telescope: 36 hexagonal segments, D = 10 m. The secondary mirror and struts are not included.',
+    'tel-jwst': 'James Webb Space Telescope: 18 hexagonal segments, D = 6.5 m, with its secondary obstruction and three struts.',
+    'tel-keck': 'A Keck telescope: 36 hexagonal segments, D = 10 m, empty center and six thin spider arms.',
     'tel-elt': 'Extremely Large Telescope: D = 39 m, obstruction about 0.11, six vanes and a simplified 217-segment mirror (the real one has 798).',
     'preset-jwst': 'Layout of the James Webb Space Telescope: 18 segments, empty center, D = 6.5 m.',
     'preset-keck': 'Layout of a Keck telescope: 36 segments, empty center, D = 10 m.',
@@ -560,8 +560,8 @@ window.SIM_HELP = (() => {
       title: 'Telescope buttons',
       what: 'Sets the mirror, the central obstruction, the spider vanes and the field of view to those of a real telescope, and clears the aberrations and segment errors, so you see the ideal diffraction pattern of that design.',
       theory: [
-        R`Hubble (D = 2.4 m) and the VLT Unit Telescopes (D = 8.2 m) are one solid mirror with a secondary mirror held by four vanes, which is the aperture of the {{eps|central obstruction}} and {{vanes|spider vane}} controls. JWST (6.5 m, 18 segments) and Keck (10 m, 36 segments) are {{seg|segmented}} hexagonal mirrors. The ELT (39 m) is also segmented, with six spider vanes.`,
-        R`These are approximations. Diameters, segment counts and obstruction ratios are rounded values from the published designs; the vane thickness and the gaps between segments are rough estimates. The secondary mirror and struts of JWST and Keck are not drawn. The real ELT has 798 segments, but this model supports at most 8 rings, so the ELT button uses 217 segments, which keeps the spikes and the segment pattern but not their exact angles. The Giant Magellan Telescope, made of seven round mirrors, cannot be represented because the model only knows hexagonal segments.`,
+        R`Hubble (D = 2.4 m) and the VLT Unit Telescopes (D = 8.2 m) are one solid mirror with a secondary mirror held by four vanes, which is the aperture of the {{eps|central obstruction}} and {{vanes|spider vane}} controls. JWST (6.5 m, 18 segments) and Keck (10 m, 36 segments) are {{seg|segmented}} hexagonal mirrors. JWST has three struts, one vertical and two at 150° from it, which add two faint horizontal spikes to the six of the hexagons; Keck has six thin arms. The ELT (39 m) is also segmented, with six spider vanes.`,
+        R`These are approximations. Diameters, segment counts and obstruction ratios are rounded values from the published designs; the vane thickness and the gaps between segments are rough estimates. The strut layouts of JWST (three, with the two others at 150° from the vertical one) and Keck (six, 0.025 m wide) come from secondary sources and I have not checked them against the telescopes' engineering documents; the width of the JWST struts is a rough estimate, and the Keck center hole is the removed center segment. The real ELT has 798 segments, but this model supports at most 8 rings, so the ELT button uses 217 segments, which keeps the spikes and the segment pattern but not their exact angles. The Giant Magellan Telescope, made of seven round mirrors, cannot be represented because the model only knows hexagonal segments.`,
         R`The direction of the diffraction spikes on the sky also depends on how the telescope is turned. The buttons choose one orientation; use the vane rotation to turn it.`
       ],
       formulas: [

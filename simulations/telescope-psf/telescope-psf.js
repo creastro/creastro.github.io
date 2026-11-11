@@ -1927,11 +1927,18 @@
 		},
 		jwst: {
 			label: "JWST",
-			summary: "18 hexagonal segments, D = 6.5 m. The secondary mirror and its struts are not included.",
+			summary: "18 hexagonal segments, D = 6.5 m, secondary obstruction about 0.11 and its three struts (one vertical, two at 150° from it).",
 			patch: {
 				...SEGMENT_PRESETS.jwst.patch,
+				obstructionRatio: .11,
+				vaneCount: 3,
 				vaneThicknessRatio: .015,
 				vaneAngleDeg: 0,
+				vaneAnglesDeg: [
+					270,
+					60,
+					120
+				],
 				segmented: {
 					enabled: true,
 					...SEGMENT_PRESETS.jwst.patch.segmented
@@ -1940,10 +1947,11 @@
 		},
 		keck: {
 			label: "Keck",
-			summary: "36 hexagonal segments, D = 10 m, empty center. The secondary mirror and its struts are not included.",
+			summary: "36 hexagonal segments, D = 10 m, empty center and six thin spider arms (0.025 m wide).",
 			patch: {
 				...SEGMENT_PRESETS.keck.patch,
-				vaneThicknessRatio: .015,
+				vaneCount: 6,
+				vaneThicknessRatio: .0025,
 				vaneAngleDeg: 0,
 				segmented: {
 					enabled: true,
@@ -2007,7 +2015,9 @@
 			setValue("nvane", p.vaneCount);
 			setValue("tvane", p.vaneThicknessRatio);
 			setValue("avane", p.vaneAngleDeg);
-			input("vane-each").checked = false;
+			const angles = p.vaneAnglesDeg;
+			input("vane-each").checked = angles !== void 0;
+			if (angles) angles.forEach((a, i) => setValue(VANE_IDS[i], a));
 			input("seg-on").checked = p.segmented.enabled;
 			setValue("seg-rings", p.segmented.rings);
 			setValue("seg-gap", p.segmented.gapRatio);
@@ -2017,6 +2027,7 @@
 			setValue("seg-tilt", 0);
 			syncSeg();
 			syncVanes();
+			syncOutputs();
 			onChange();
 		});
 	}
