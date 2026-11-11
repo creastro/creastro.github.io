@@ -1075,51 +1075,6 @@
 			}
 		};
 	}
-	// src/lib/segmentPresets.ts
-	var SEGMENT_PRESETS = {
-		jwst: {
-			label: "JWST-like (18)",
-			patch: {
-				diameterM: 6.5,
-				fovArcsec: 1,
-				obstructionRatio: 0,
-				vaneCount: 0,
-				segmented: {
-					rings: 2,
-					gapRatio: .005,
-					removeCenter: true
-				}
-			}
-		},
-		keck: {
-			label: "Keck-like (36)",
-			patch: {
-				diameterM: 10,
-				fovArcsec: .8,
-				obstructionRatio: 0,
-				vaneCount: 0,
-				segmented: {
-					rings: 3,
-					gapRatio: .002,
-					removeCenter: true
-				}
-			}
-		},
-		rings5: {
-			label: "91 segments",
-			patch: {
-				diameterM: 30,
-				fovArcsec: .3,
-				obstructionRatio: 0,
-				vaneCount: 0,
-				segmented: {
-					rings: 5,
-					gapRatio: .005,
-					removeCenter: false
-				}
-			}
-		}
-	};
 	// src/site/controlSpecs.ts
 	/**
 	* Đặc tả các điều khiển của trang: id, nhãn, khoảng giá trị và cách hiển thị. Là dữ liệu thuần (không DOM) để
@@ -1172,7 +1127,7 @@
 			group: "mirror",
 			label: "Mirror diameter D",
 			min: .1,
-			max: 10,
+			max: 40,
 			step: .01,
 			value: 1,
 			log: true,
@@ -1203,7 +1158,7 @@
 			group: "seg",
 			label: "Rings k",
 			min: 1,
-			max: 5,
+			max: 8,
 			step: 1,
 			value: 2,
 			format: (v) => String(v)
@@ -1891,6 +1846,180 @@
 		paintCaption(target.ctx, 0, PROFILE_H, IMAGE_W, CAPTION_H, captionFor("profile", params, frame.stats));
 		savePng(canvas, imageFileName("profile", params, frame.stats.segmentCount));
 	}
+	// src/lib/segmentPresets.ts
+	var SEGMENT_PRESETS = {
+		jwst: {
+			label: "JWST-like (18)",
+			patch: {
+				diameterM: 6.5,
+				fovArcsec: 1,
+				obstructionRatio: 0,
+				vaneCount: 0,
+				segmented: {
+					rings: 2,
+					gapRatio: .005,
+					removeCenter: true
+				}
+			}
+		},
+		keck: {
+			label: "Keck-like (36)",
+			patch: {
+				diameterM: 10,
+				fovArcsec: .8,
+				obstructionRatio: 0,
+				vaneCount: 0,
+				segmented: {
+					rings: 3,
+					gapRatio: .002,
+					removeCenter: true
+				}
+			}
+		},
+		rings5: {
+			label: "91 segments",
+			patch: {
+				diameterM: 30,
+				fovArcsec: .3,
+				obstructionRatio: 0,
+				vaneCount: 0,
+				segmented: {
+					rings: 5,
+					gapRatio: .005,
+					removeCenter: false
+				}
+			}
+		}
+	};
+	// src/lib/telescopePresets.ts
+	var off = {
+		enabled: false,
+		rings: 2,
+		gapRatio: .005,
+		removeCenter: true
+	};
+	var TELESCOPE_PRESETS = {
+		hubble: {
+			label: "Hubble",
+			summary: "D = 2.4 m, central obstruction about 0.33, four spider vanes.",
+			patch: {
+				diameterM: 2.4,
+				fovArcsec: 2,
+				obstructionRatio: .33,
+				vaneCount: 4,
+				vaneThicknessRatio: .0125,
+				vaneAngleDeg: 45,
+				segmented: off
+			}
+		},
+		vlt: {
+			label: "VLT",
+			summary: "One 8.2 m Unit Telescope of the VLT: obstruction about 0.14, four thin vanes.",
+			patch: {
+				diameterM: 8.2,
+				fovArcsec: .8,
+				obstructionRatio: .14,
+				vaneCount: 4,
+				vaneThicknessRatio: .005,
+				vaneAngleDeg: 0,
+				segmented: off
+			}
+		},
+		jwst: {
+			label: "JWST",
+			summary: "18 hexagonal segments, D = 6.5 m. The secondary mirror and its struts are not included.",
+			patch: {
+				...SEGMENT_PRESETS.jwst.patch,
+				vaneThicknessRatio: .015,
+				vaneAngleDeg: 0,
+				segmented: {
+					enabled: true,
+					...SEGMENT_PRESETS.jwst.patch.segmented
+				}
+			}
+		},
+		keck: {
+			label: "Keck",
+			summary: "36 hexagonal segments, D = 10 m, empty center. The secondary mirror and its struts are not included.",
+			patch: {
+				...SEGMENT_PRESETS.keck.patch,
+				vaneThicknessRatio: .015,
+				vaneAngleDeg: 0,
+				segmented: {
+					enabled: true,
+					...SEGMENT_PRESETS.keck.patch.segmented
+				}
+			}
+		},
+		elt: {
+			label: "ELT",
+			summary: "D = 39 m, obstruction about 0.11, six spider vanes, simplified to 217 segments (the real one has 798).",
+			patch: {
+				diameterM: 39,
+				fovArcsec: .2,
+				obstructionRatio: .11,
+				vaneCount: 6,
+				vaneThicknessRatio: .013,
+				vaneAngleDeg: 0,
+				segmented: {
+					enabled: true,
+					rings: 8,
+					gapRatio: .003,
+					removeCenter: false
+				}
+			}
+		}
+	};
+	// src/site/presets.ts
+	/** Nút cấu hình có sẵn: đặt các điều khiển theo một cấu hình rồi để trang tính lại. */
+	var SEGMENT_PRESET_BUTTONS = {
+		"preset-jwst": "jwst",
+		"preset-keck": "keck",
+		"preset-91": "rings5"
+	};
+	var TELESCOPE_BUTTONS = {
+		"tel-hubble": "hubble",
+		"tel-vlt": "vlt",
+		"tel-jwst": "jwst",
+		"tel-keck": "keck",
+		"tel-elt": "elt"
+	};
+	/** Gắn các nút; `onChange` được gọi sau khi điều khiển đã đổi. */
+	function wirePresets(onChange) {
+		for (const [id, key] of Object.entries(SEGMENT_PRESET_BUTTONS)) $(id).addEventListener("click", () => {
+			const p = SEGMENT_PRESETS[key].patch;
+			setValue("D", p.diameterM);
+			setValue("fov", p.fovArcsec);
+			setValue("eps", p.obstructionRatio);
+			setValue("nvane", p.vaneCount);
+			setValue("seg-rings", p.segmented.rings);
+			setValue("seg-gap", p.segmented.gapRatio);
+			input("seg-center").checked = p.segmented.removeCenter;
+			input("seg-on").checked = true;
+			syncSeg();
+			onChange();
+		});
+		for (const [id, key] of Object.entries(TELESCOPE_BUTTONS)) $(id).addEventListener("click", () => {
+			const p = TELESCOPE_PRESETS[key].patch;
+			setValue("D", p.diameterM);
+			setValue("fov", p.fovArcsec);
+			setValue("eps", p.obstructionRatio);
+			setValue("nvane", p.vaneCount);
+			setValue("tvane", p.vaneThicknessRatio);
+			setValue("avane", p.vaneAngleDeg);
+			input("vane-each").checked = false;
+			input("seg-on").checked = p.segmented.enabled;
+			setValue("seg-rings", p.segmented.rings);
+			setValue("seg-gap", p.segmented.gapRatio);
+			input("seg-center").checked = p.segmented.removeCenter;
+			for (const name of ZERNIKE_NAMES) setValue(ZERNIKE_IDS[name], 0);
+			setValue("seg-piston", 0);
+			setValue("seg-tilt", 0);
+			syncSeg();
+			syncVanes();
+			onChange();
+		});
+	}
 	// src/site/settings.ts
 	/**
 	* Lưu và nạp cấu hình của mô phỏng ra tệp JSON.
@@ -2255,23 +2384,7 @@
 		for (const name of ZERNIKE_NAMES) setValue(ZERNIKE_IDS[name], 0);
 		onInput();
 	});
-	for (const [id, key] of Object.entries({
-		"preset-jwst": "jwst",
-		"preset-keck": "keck",
-		"preset-91": "rings5"
-	})) $(id).addEventListener("click", () => {
-		const p = SEGMENT_PRESETS[key].patch;
-		setValue("D", p.diameterM);
-		setValue("fov", p.fovArcsec);
-		setValue("eps", p.obstructionRatio);
-		setValue("nvane", p.vaneCount);
-		setValue("seg-rings", p.segmented.rings);
-		setValue("seg-gap", p.segmented.gapRatio);
-		input("seg-center").checked = p.segmented.removeCenter;
-		input("seg-on").checked = true;
-		syncSeg();
-		onInput();
-	});
+	wirePresets(onInput);
 	function zoomBy(factor) {
 		const p = readParams();
 		const ld = lambdaOverDArcsec(p.diameterM, p.wavelengthNm);

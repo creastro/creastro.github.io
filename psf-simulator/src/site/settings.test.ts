@@ -126,7 +126,7 @@ describe('giá trị không hợp lệ', () => {
       d.mirror.wavelengthNm = 5
       d.display.dynamicRangeDecades = -3
     }))
-    expect(state.params.diameterM).toBe(10)
+    expect(state.params.diameterM).toBe(40)
     expect(state.params.wavelengthNm).toBe(380)
     expect(state.params.dynamicRangeDecades).toBe(2)
     expect(notes).toHaveLength(3)
@@ -139,7 +139,7 @@ describe('giá trị không hợp lệ', () => {
       d.segmented.rings = 99
     }))
     expect(state.params.vaneCount).toBe(4)
-    expect(state.params.segmented.rings).toBe(5)
+    expect(state.params.segmented.rings).toBe(8)
   })
 
   it('sai kiểu dữ liệu thì dùng mặc định và có ghi chú', () => {

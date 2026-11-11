@@ -73,11 +73,11 @@ const zernikeSpecs: RangeSpec[] = ZERNIKE_NAMES.map((name) => ({
 }))
 
 export const RANGE_SPECS: readonly RangeSpec[] = [
-  { id: 'D', group: 'mirror', label: 'Mirror diameter D', min: 0.1, max: 10, step: 0.01, value: 1, log: true, format: (v) => `${v.toFixed(2)} m` },
+  { id: 'D', group: 'mirror', label: 'Mirror diameter D', min: 0.1, max: 40, step: 0.01, value: 1, log: true, format: (v) => `${v.toFixed(2)} m` },
   { id: 'lam', group: 'mirror', label: 'Center wavelength λ', min: 380, max: 1000, step: 5, value: 550, format: (v) => `${v.toFixed(0)} nm` },
   { id: 'band', group: 'mirror', label: 'Bandwidth Δλ', min: 0, max: 300, step: 5, value: 0, format: (v) => (v === 0 ? 'single λ' : `${v.toFixed(0)} nm`) },
 
-  { id: 'seg-rings', group: 'seg', label: 'Rings k', min: 1, max: 5, step: 1, value: 2, format: (v) => String(v) },
+  { id: 'seg-rings', group: 'seg', label: 'Rings k', min: 1, max: 8, step: 1, value: 2, format: (v) => String(v) },
   { id: 'seg-gap', group: 'seg', label: 'Gap between segments', min: 0, max: 0.1, step: 0.001, value: 0.02, format: (v) => `${(v * 100).toFixed(1)} %` },
   { id: 'seg-piston', group: 'seg', label: 'Piston error (RMS)', min: 0, max: 0.3, step: 0.005, value: 0, format: (v) => `${v.toFixed(3)} λ` },
   { id: 'seg-tilt', group: 'seg', label: 'Tip/tilt error (RMS)', min: 0, max: 0.3, step: 0.005, value: 0, format: (v) => `${v.toFixed(3)} λ` },
@@ -103,6 +103,11 @@ export const OTHER_CONTROL_IDS = [
   'preset-jwst',
   'preset-keck',
   'preset-91',
+  'tel-hubble',
+  'tel-vlt',
+  'tel-jwst',
+  'tel-keck',
+  'tel-elt',
   'cmap',
   'showring',
   'clear-zern',
