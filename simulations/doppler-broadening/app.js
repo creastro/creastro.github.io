@@ -129,11 +129,9 @@
 
   function drawA(t) {
     const z = S.dop.z, M = magnification();
-    const rgb = Ch.wavelengthToRgb(S.lamObs);
     Sc.drawWaves($('waves'), {
       vrKms: S.vrKms, vrText: trim(Math.abs(S.vrKms), 6),
-      zVis: z * M, magnified: M, restText: nm(S.lambda0), obsText: nm(S.lamObs),
-      obsColor: rgb ? 'rgb(' + rgb.join(',') + ')' : COLOR.ink
+      zVis: z * M, magnified: M, restText: nm(S.lambda0), obsText: nm(S.lamObs)
     }, t);
 
     const [lo, hi] = windowA();
