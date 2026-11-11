@@ -77,26 +77,19 @@ window.DopplerScene = (() => {
     ctx.fillStyle = COLOR.text; ctx.textBaseline = 'top'; ctx.textAlign = 'center';
     ctx.fillText('observer', ox, sy + 4 + Math.min(34, h * 0.13) * 0.9 + 6);
 
-    // waves: same speed, different wavelength. The pattern moves from the source to the observer.
+    // One wave train as received. Its colour follows the sign of the shift (blue: approaching, red: receding).
     const L0 = Math.max(26, Math.min(54, w * 0.055));
-    const L1 = L0 * (1 + s.zVis);
-    const amp = h * 0.075, speed = 70;
-    const lanes = [
-      { y: h * 0.27, L: L0, color: 'rgba(179,191,216,.75)', label: 'emitted, source frame:  λ₀ = ' + s.restText },
-      { y: h * 0.73, L: L1, color: s.obsColor, label: 'received by the observer:  λobs = ' + s.obsText }
-    ];
-    lanes.forEach((lane) => {
-      ctx.font = FONT; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillStyle = COLOR.text;
-      ctx.fillText(lane.label, x0, lane.y - amp - 6);
-      ctx.lineWidth = 2.2; ctx.strokeStyle = lane.color; ctx.beginPath();
-      const step = 2;
-      for (let x = x0; x <= x1; x += step) {
-        const env = Math.min(1, (x - x0) / 30, (x1 - x) / 30);
-        const y = lane.y - amp * env * Math.sin(TAU * ((x - x0 - speed * t) / lane.L));
-        if (x === x0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    });
+    const L = L0 * (1 + s.zVis);
+    const amp = h * 0.1, speed = 70, y0 = h * 0.5;
+    ctx.font = FONT; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillStyle = COLOR.text;
+    ctx.fillText('received by the observer:  λobs = ' + s.obsText + '  (λ₀ = ' + s.restText + ')', x0, y0 - amp - 10);
+    ctx.lineWidth = 2.6; ctx.strokeStyle = tint; ctx.beginPath();
+    for (let x = x0; x <= x1; x += 2) {
+      const env = Math.min(1, (x - x0) / 30, (x1 - x) / 30);
+      const y = y0 - amp * env * Math.sin(TAU * ((x - x0 - speed * t) / L));
+      if (x === x0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
     ctx.fillStyle = COLOR.text; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     ctx.fillText(s.magnified > 1.5 ? 'wave spacing: shift magnified ×' + Math.round(s.magnified) + ' to be visible (spectra are to scale)' : 'wave spacing drawn to scale', (x0 + x1) / 2, h - 2);
   }
