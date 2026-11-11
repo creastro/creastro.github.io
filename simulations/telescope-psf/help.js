@@ -25,6 +25,11 @@ window.SIM_HELP = (() => {
     lam: 'Center wavelength of the light. Longer wavelengths give a larger pattern.',
     band: 'Width of the band of wavelengths added together. Zero means one wavelength.',
     'seg-on': 'Build the primary mirror from hexagonal segments instead of one solid disk.',
+    'tel-hubble': 'Hubble Space Telescope: D = 2.4 m, central obstruction about 0.33 and four spider vanes. Also clears the aberrations.',
+    'tel-vlt': 'One 8.2 m Unit Telescope of the VLT: obstruction about 0.14 and four thin vanes. Also clears the aberrations.',
+    'tel-jwst': 'James Webb Space Telescope: 18 hexagonal segments, D = 6.5 m. The secondary mirror and struts are not included.',
+    'tel-keck': 'A Keck telescope: 36 hexagonal segments, D = 10 m. The secondary mirror and struts are not included.',
+    'tel-elt': 'Extremely Large Telescope: D = 39 m, obstruction about 0.11, six vanes and a simplified 217-segment mirror (the real one has 798).',
     'preset-jwst': 'Layout of the James Webb Space Telescope: 18 segments, empty center, D = 6.5 m.',
     'preset-keck': 'Layout of a Keck telescope: 36 segments, empty center, D = 10 m.',
     'preset-91': 'A mirror of 5 rings and 91 segments, with D = 30 m.',
@@ -103,7 +108,7 @@ window.SIM_HELP = (() => {
       ],
       sim: R`The image is computed on a grid of 512 × 512 points; see {{numerics|the numerical method and its limits}}.`,
       refs: [GOODMAN, BORNWOLF],
-      see: ['psf', 'airy', 'strehl', 'pupil', 'profile', 'saving', 'numerics']
+      see: ['psf', 'airy', 'strehl', 'pupil', 'profile', 'telescopes', 'saving', 'numerics']
     },
 
     psf: {
@@ -549,6 +554,21 @@ window.SIM_HELP = (() => {
       ],
       refs: [CHANAN],
       see: ['segpiston', 'seg', 'wavefront']
+    },
+
+    telescopes: {
+      title: 'Telescope buttons',
+      what: 'Sets the mirror, the central obstruction, the spider vanes and the field of view to those of a real telescope, and clears the aberrations and segment errors, so you see the ideal diffraction pattern of that design.',
+      theory: [
+        R`Hubble (D = 2.4 m) and the VLT Unit Telescopes (D = 8.2 m) are one solid mirror with a secondary mirror held by four vanes, which is the aperture of the {{eps|central obstruction}} and {{vanes|spider vane}} controls. JWST (6.5 m, 18 segments) and Keck (10 m, 36 segments) are {{seg|segmented}} hexagonal mirrors. The ELT (39 m) is also segmented, with six spider vanes.`,
+        R`These are approximations. Diameters, segment counts and obstruction ratios are rounded values from the published designs; the vane thickness and the gaps between segments are rough estimates. The secondary mirror and struts of JWST and Keck are not drawn. The real ELT has 798 segments, but this model supports at most 8 rings, so the ELT button uses 217 segments, which keeps the spikes and the segment pattern but not their exact angles. The Giant Magellan Telescope, made of seven round mirrors, cannot be represented because the model only knows hexagonal segments.`,
+        R`The direction of the diffraction spikes on the sky also depends on how the telescope is turned. The buttons choose one orientation; use the vane rotation to turn it.`
+      ],
+      formulas: [
+        { note: 'size of the pattern for each telescope at 550 nm', tex: R`\frac{\lambda}{D}=\frac{550\ {\rm nm}}{D}:\quad 0.047''\ ({\rm Hubble}),\ 0.014''\ ({\rm VLT}),\ 0.003''\ ({\rm ELT})` }
+      ],
+      refs: [],
+      see: ['D', 'eps', 'vanes', 'seg', 'segpresets']
     },
 
     saving: {

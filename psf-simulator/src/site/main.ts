@@ -8,7 +8,6 @@
 
 import { computeFrame, type FrameResult } from '../lib/frame'
 import { lambdaOverDArcsec, type SimParams } from '../lib/params'
-import { SEGMENT_PRESETS, type SegmentPresetKey } from '../lib/segmentPresets'
 import { ZERNIKE_NAMES } from '../lib/zernike'
 import type { WorkerRequest, WorkerResponse } from '../workers/psf.worker'
 import {
@@ -30,6 +29,7 @@ import { READ_ROWS, ZERNIKE_IDS, specById } from './controlSpecs'
 import { $, input } from './dom'
 import { downloadText, saveAperture, savePsfImage, saveProfileImage } from './exportImages'
 import { SETTINGS_FILE_NAME, wavelengthText } from './files'
+import { wirePresets } from './presets'
 import { drawProfile, drawPsf, drawPupil } from './plots'
 import { MAX_SETTINGS_BYTES, SettingsError, parseSettings, serializeSettings } from './settings'
 import { ZOOM_STEP, fitFov, wheelFactor, zoomFov } from './zoom'
@@ -225,22 +225,7 @@ $('clear-zern').addEventListener('click', () => {
   for (const name of ZERNIKE_NAMES) setValue(ZERNIKE_IDS[name], 0)
   onInput()
 })
-const presetButtons: Record<string, SegmentPresetKey> = { 'preset-jwst': 'jwst', 'preset-keck': 'keck', 'preset-91': 'rings5' }
-for (const [id, key] of Object.entries(presetButtons)) {
-  $(id).addEventListener('click', () => {
-    const p = SEGMENT_PRESETS[key].patch
-    setValue('D', p.diameterM)
-    setValue('fov', p.fovArcsec)
-    setValue('eps', p.obstructionRatio)
-    setValue('nvane', p.vaneCount)
-    setValue('seg-rings', p.segmented.rings)
-    setValue('seg-gap', p.segmented.gapRatio)
-    input('seg-center').checked = p.segmented.removeCenter
-    input('seg-on').checked = true
-    syncSeg()
-    onInput()
-  })
-}
+wirePresets(onInput)
 
 /* ---------- zoom: the field of view is the zoom ---------- */
 
