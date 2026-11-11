@@ -1,0 +1,27 @@
+name: Doppler broadening tests
+
+on:
+  pull_request:
+    paths:
+      - 'simulations/doppler-broadening/**'
+      - '.github/workflows/doppler-broadening-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'simulations/doppler-broadening/**'
+      - '.github/workflows/doppler-broadening-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Physics tests use only Node's built-in runner: the page has no build step and no dependencies.
+      - run: node --test simulations/doppler-broadening/physics.test.js

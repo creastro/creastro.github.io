@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive simulation of the Doppler effect in astronomical spectroscopy and of rotational line broadening: how radial motion shifts a spectral line and how the rotation of a star or planet widens it.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23080d1c'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%238fe3ff'/%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Doppler Effect &amp; Rotational Line Broadening | Tin Mai (Mai Như Tín)">
+  <meta property="og:description" content="Interactive simulation of the Doppler effect in astronomical spectroscopy and of rotational line broadening: how radial motion shifts a spectral line and how the rotation of a star or planet widens it.">
+  <meta property="og:url" content="https://creastro.github.io/simulations/doppler-broadening/">
+  <meta property="og:image" content="https://creastro.github.io/simulations/doppler-broadening/preview.jpg">
+  <title>Doppler Effect &amp; Rotational Line Broadening | Tin Mai (Mai Như Tín)</title>
+  <link rel="stylesheet" href="../shared/katex/katex.min.css">
+  <link rel="stylesheet" href="../shared/explain.css">
+  <style>
+    :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--warm:#ffcf6b;--border:rgba(255,255,255,.14);--panel:#111b30e0}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 system-ui,sans-serif}
+    .sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 80% 20%,#18345a55,transparent 55%),radial-gradient(ellipse at 20% 70%,#41266344,transparent 50%)}
+    .sky:before,.sky:after{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20px 30px,#fff 99%,transparent),radial-gradient(2px 2px at 90px 110px,#b5d9ff 99%,transparent),radial-gradient(1px 1px at 160px 60px,#fff 99%,transparent),radial-gradient(1px 1px at 220px 170px,#fff 99%,transparent);background-size:260px 220px;animation:twinkle 5s ease-in-out infinite alternate}.sky:after{transform:translate(65px,85px);opacity:.4;animation-delay:-3s;animation-duration:7s}@keyframes twinkle{from{opacity:.25}to{opacity:.85}}
+    a{color:var(--accent)}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.container{width:min(1240px,92%);margin:auto}
+    nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}.brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:12px}.nav-links a{padding:5px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;transition:background .2s,color .2s}.nav-links a:hover,.nav-links a:focus-visible,.nav-links .active{background:var(--accent);color:var(--bg)!important}.home-link{color:var(--accent)!important}
+    main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}.back{display:inline-block;margin-bottom:26px;font-size:.92rem;text-decoration:none}.back:hover,.back:focus-visible{text-decoration:underline}
+    h1{max-width:900px;font-size:clamp(2.2rem,5.5vw,4.4rem);line-height:1.06;letter-spacing:-.05em;margin:16px 0 22px}p{color:var(--muted)}.intro{max-width:860px;font-size:1.1rem}
+    .button{display:inline-block;padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-2px);background:#25405b;color:#fff}.button.primary:hover{background:#b6efff;color:var(--bg)}
+    .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
+    .field{display:grid;grid-template-columns:minmax(120px,170px) 1fr 62px;align-items:center;gap:10px;margin:7px 0}.field label{font-size:.88rem;color:var(--muted)}.field output{font:12px ui-monospace,monospace;color:var(--accent);text-align:right}
+    input[type=range]{width:100%;accent-color:var(--accent);margin:0}select,input[type=number]{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#0d1730;color:var(--text);font:inherit;font-size:.9rem}input[type=number]:disabled,input:disabled{opacity:.5}
+    fieldset{margin:0 0 14px;padding:4px 14px 8px;border:1px solid var(--border);border-radius:10px}legend{padding:0 8px;color:var(--text);font-weight:650;font-size:.92rem}.dot{display:inline-block;width:10px;height:10px;margin-right:8px;border-radius:50%;vertical-align:baseline}
+    .checks{display:flex;flex-wrap:wrap;gap:8px 22px;margin:4px 0 14px}.checks label{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:8px}.checks input{accent-color:var(--accent);width:16px;height:16px}
+    .legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin:10px 0 0;font-size:.8rem;color:var(--muted)}.legend span:before{content:"";display:inline-block;width:12px;height:12px;margin-right:7px;border-radius:3px;vertical-align:-2px;background:var(--c)}
+    .field select{min-width:0}
+    footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+    .panel{padding:18px 20px 20px;background:var(--panel);border:1px solid var(--border);border-radius:14px}
+    .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
+    .sec{display:flex;align-items:baseline;gap:14px;margin:54px 0 14px}.sec h2{margin:0;font-size:1.5rem;letter-spacing:-.02em}.sec .letter{color:var(--accent);font:700 .85rem ui-monospace,monospace;letter-spacing:.1em}.sec p{margin:0;font-size:.92rem}
+    .row{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}.stack{display:grid;gap:18px;min-width:0}
+    canvas{display:block;width:100%;touch-action:pan-y}#waves{aspect-ratio:16/6.4}#spec-a{aspect-ratio:16/8}#disk{aspect-ratio:1/.9;cursor:crosshair}#spec-b{aspect-ratio:16/8}#kernel{aspect-ratio:16/5.5}#spec-c{aspect-ratio:16/8}
+    .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:28px 0 0}.toolbar .hint{margin:0;font-size:.88rem}
+    .hover-read{margin:8px 0 0;min-height:1.6em;font:12.5px ui-monospace,monospace;color:var(--accent)}
+    dl.read{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:4px 16px;margin:0;font-size:.88rem}
+    dl.read dt{color:var(--muted)}dl.read dd{margin:0;text-align:right;font:12.5px ui-monospace,monospace;color:var(--accent)}
+    dl.read dt.eq{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}dl.read dt.eq+dd{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+    .eq-line{margin:12px 0 0;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:rgba(143,227,255,.05);font-size:.85rem;color:var(--muted)}.eq-line b{color:var(--text);font-weight:600}
+    .note{margin:10px 0 0;padding:7px 10px;border:1px solid var(--warm);border-radius:8px;background:rgba(255,207,107,.07);color:#ffe3a3;font-size:.8rem}.note[hidden]{display:none}
+    .formula{font-family:ui-monospace,monospace;color:var(--accent);font-size:.9em}
+    #p-notes{margin-top:54px}#p-notes ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}#p-notes li{margin:7px 0}#p-notes strong{color:var(--text)}
+    noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
+    @media(max-width:900px){.row{grid-template-columns:minmax(0,1fr)}.sec{flex-wrap:wrap;gap:4px 14px}}
+    @media(max-width:560px){main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 62px}.field label{grid-column:1/-1}}
+  </style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../../">Home</a><a href="../../#education">Education</a><a href="../../research">Research</a><a class="active" href="../../simulations">Simulations</a><a href="../../story">My story</a><a href="../../contact">Contact</a></div></nav></header>
+  <main class="container">
+    <a class="back" href="../">← All simulations</a><br>
+    <span class="eyebrow">Simulation · Spectroscopy</span>
+    <h1>Doppler Effect &amp; Rotational Line Broadening</h1>
+    <p class="intro">Understanding stellar motion through astronomical spectroscopy. A spectral line moves when its source moves along our line of sight, and it widens when the source spins, because one half of the disk approaches while the other recedes. A spectrograph adds the light of the whole disk, so the line it records is the sum of all these shifts.</p>
+
+    <noscript><p>This simulation needs JavaScript. Please enable it to explore the Doppler effect.</p></noscript>
+
+    <form id="controls" autocomplete="off">
+      <div class="toolbar">
+        <button class="button primary" type="button" id="play" aria-label="Pause the animation">Pause</button>
+        <button class="button" type="reset" id="reset">Reset parameters</button>
+        <p class="hint">Sign convention: positive radial velocity = receding = redshift.</p>
+      </div>
+
+      <div class="sec"><span class="letter">A</span><h2>Doppler effect</h2><p>Radial motion shifts the whole line.</p></div>
+      <div class="row">
+        <div class="stack">
+          <section class="panel" aria-labelledby="t-waves">
+            <h2 id="t-waves">Source, light and observer</h2>
+            <p class="sub">Same speed of light, different wavelength: compressed waves when the source approaches, stretched when it recedes.</p>
+            <canvas id="waves" role="img" aria-label="A star moving along the line of sight towards or away from an observer with a telescope. Two wave trains are drawn: the wave emitted at the rest wavelength and the wave received by the observer, which is shorter when the star approaches and longer when it recedes."></canvas>
+          </section>
+          <section class="panel" aria-labelledby="t-spec-a">
+            <h2 id="t-spec-a">Rest-frame and observed line</h2>
+            <p class="sub">Dashed: line at rest. Solid: line as observed. The colour band under the axis is the visible spectrum.</p>
+            <canvas id="spec-a" role="img" aria-label="Absorption line versus wavelength. The rest-frame line is dashed and the observed line is shifted to longer wavelengths for a receding source or shorter wavelengths for an approaching one."></canvas>
+          </section>
+        </div>
+        <div class="stack">
+          <section class="panel" aria-labelledby="t-ctl-a">
+            <h2 id="t-ctl-a">Radial motion and line</h2>
+            <fieldset>
+              <legend>Spectral line</legend>
+              <div class="field"><label for="line">Line</label><select id="line"></select><span></span></div>
+              <div class="field"><label for="lambda0">Rest wavelength λ₀</label><input id="lambda0" type="number" min="100" max="2000" step="0.001" value="656.281" disabled><output for="lambda0">nm</output></div>
+              <div class="field"><label for="depth">Line depth</label><input id="depth" type="range" min="0.1" max="0.9" step="0.05" value="0.5"><output for="depth" data-dec="2"></output></div>
+              <div class="field"><label for="sigma">Intrinsic width σ</label><input id="sigma" type="range" min="2" max="20" step="1" value="6"><output for="sigma" data-unit=" km/s"></output></div>
+            </fieldset>
+            <fieldset>
+              <legend>Motion of the source</legend>
+              <div class="field"><label for="dir">Direction</label><select id="dir"><option value="app">Approaching (blueshift)</option><option value="still">Stationary</option><option value="rec" selected>Receding (redshift)</option></select><span></span></div>
+              <div class="field"><label for="speed">Radial speed |v<sub>r</sub>|</label><input id="speed" type="range" min="0" max="600" step="1" value="120"><output for="speed" data-fmt="kms" data-unit=" km/s"></output></div>
+              <div class="field"><label for="scale">Speed range</label><select id="scale"><option value="star" selected>Stars · up to 600 km/s</option><option value="rel">Fast sources · up to 0.9 c</option></select><span></span></div>
+              <div class="field"><label for="model">Doppler formula</label><select id="model"><option value="nr">Non-relativistic</option><option value="rel" selected>Relativistic</option></select><span></span></div>
+              <div class="checks"><label><input type="checkbox" id="magnify" checked> Magnify the shift in the wave picture</label></div>
+            </fieldset>
+            <dl class="read" aria-label="Doppler quantities">
+              <dt data-tip-key="r-lam0" data-topic="doppler">Rest wavelength λ₀</dt><dd id="r-lam0"></dd>
+              <dt data-tip-key="r-lamobs" data-topic="doppler">Observed wavelength λobs</dt><dd id="r-lamobs"></dd>
+              <dt data-tip-key="r-vr" data-topic="doppler">Radial velocity v<sub>r</sub></dt><dd id="r-vr"></dd>
+              <dt data-tip-key="r-dl" data-topic="doppler">Wavelength shift Δλ</dt><dd id="r-dl"></dd>
+              <dt data-tip-key="r-z" data-topic="doppler">Redshift z</dt><dd id="r-z"></dd>
+              <dt data-tip-key="r-beta" data-topic="relativistic">Speed β = v<sub>r</sub>/c</dt><dd id="r-beta"></dd>
+              <dt data-tip-key="r-model" data-topic="relativistic">Relativistic correction</dt><dd id="r-model"></dd>
+            </dl>
+          </section>
+        </div>
+      </div>
+
+      <div class="sec"><span class="letter">B</span><h2>Rotational broadening</h2><p>Rotation spreads the line around its centre.</p></div>
+      <div class="row">
+        <div class="stack">
+          <section class="panel" aria-labelledby="t-disk">
+            <h2 id="t-disk">Rotating disk</h2>
+            <p class="sub">Colour is the line-of-sight velocity of the surface. Point at the disk: every point of a vertical strip shares one velocity, so one wavelength.</p>
+            <canvas id="disk" role="img" aria-label="A rotating star seen from Earth with its spin axis, the sense of rotation, the approaching left limb in blue, the receding right limb in red and a neutral central strip. Latitude and longitude lines turn with the star."></canvas>
+            <p class="hover-read" id="hover-read" aria-live="off">Point at the disk to read the line-of-sight velocity of a strip.</p>
+          </section>
+          <section class="panel" aria-labelledby="t-spec-b">
+            <h2 id="t-spec-b">Rotationally broadened line</h2>
+            <p class="sub">Dashed: narrow line without rotation. Solid: the sum over the whole disk. Both have the same equivalent width.</p>
+            <canvas id="spec-b" role="img" aria-label="Absorption line versus wavelength: the narrow line without rotation, dashed, and the same line broadened by rotation, wider and shallower with a rounded profile."></canvas>
+            <p class="legend"><span style="--c:#b3bfd8">No rotation</span><span style="--c:#ffcf6b">Broadened by rotation</span></p>
+            <canvas id="kernel" role="img" aria-label="The rotational broadening kernel G of x equal to the wavelength offset divided by its maximum, for the chosen limb darkening and for none."></canvas>
+            <p class="legend"><span style="--c:#ffcf6b">Kernel G(x), your limb darkening</span><span style="--c:#b3bfd8">No limb darkening (ellipse)</span></p>
+          </section>
+        </div>
+        <div class="stack">
+          <section class="panel" aria-labelledby="t-ctl-b">
+            <h2 id="t-ctl-b">Rotation</h2>
+            <fieldset>
+              <legend>Spin</legend>
+              <div class="field"><label for="mode">Set the spin by</label><select id="mode"><option value="veq" selected>Equatorial speed</option><option value="rp">Radius and period</option></select><span></span></div>
+              <div class="field"><label for="veq">Equatorial speed v<sub>eq</sub></label><input id="veq" type="range" min="0" max="300" step="1" value="80"><output for="veq" data-unit=" km/s"></output></div>
+              <div class="field"><label for="radius">Radius R</label><input id="radius" type="range" min="0.05" max="3" step="0.05" value="1.8"><output for="radius" data-dec="2" data-unit=" R☉"></output></div>
+              <div class="field"><label for="period">Rotation period P</label><input id="period" type="range" min="0.1" max="30" step="0.1" value="1.1" disabled><output for="period" data-dec="1" data-unit=" d"></output></div>
+              <div class="field"><label for="inc">Inclination i</label><input id="inc" type="range" min="0" max="90" step="1" value="60"><output for="inc" data-unit="°"></output></div>
+              <div class="field"><label for="ld">Limb darkening ε</label><input id="ld" type="range" min="0" max="1" step="0.05" value="0.6"><output for="ld" data-dec="2"></output></div>
+            </fieldset>
+            <div class="eq-line"><b>v sin i = v<sub>eq</sub> sin i</b>, with v<sub>eq</sub> = 2πR/P. i = 0° is pole-on, i = 90° is edge-on.</div>
+            <dl class="read" style="margin-top:14px" aria-label="Rotation quantities">
+              <dt data-tip-key="b-vsini" data-topic="vsini">Projected speed v sin i</dt><dd id="b-vsini"></dd>
+              <dt data-tip-key="b-veq" data-topic="vsini">Equatorial speed v<sub>eq</sub></dt><dd id="b-veq"></dd>
+              <dt data-tip-key="b-period" data-topic="vsini">Rotation period P</dt><dd id="b-period"></dd>
+              <dt data-tip-key="b-dlmax" data-topic="kernel">Half-width Δλmax</dt><dd id="b-dlmax"></dd>
+              <dt data-tip-key="b-fwhm0" data-topic="intrinsic">FWHM without rotation</dt><dd id="b-fwhm0"></dd>
+              <dt data-tip-key="b-fwhm" data-topic="kernel">FWHM with rotation</dt><dd id="b-fwhm"></dd>
+            </dl>
+            <p class="note" id="b-warn" hidden>v<sub>eq</sub> above ~450 km/s is close to the break-up speed of most stars.</p>
+          </section>
+        </div>
+      </div>
+
+      <div class="sec"><span class="letter">C</span><h2>Combined spectral analysis</h2><p>Radial velocity from A, rotation from B.</p></div>
+      <div class="row">
+        <section class="panel" aria-labelledby="t-spec-c">
+          <h2 id="t-spec-c">Shifted and broadened line</h2>
+          <p class="sub">The radial velocity moves the centre; v sin i sets the width. They are different quantities.</p>
+          <canvas id="spec-c" role="img" aria-label="Three absorption lines versus wavelength: the rest-frame line, the Doppler-shifted narrow line, and the Doppler-shifted line broadened by rotation, centred on the shifted wavelength."></canvas>
+          <p class="legend"><span style="--c:#b3bfd8">Rest frame</span><span style="--c:#8fe3ff">Doppler-shifted, no rotation</span><span style="--c:#ffcf6b">Doppler-shifted and rotationally broadened</span></p>
+          <p class="note" id="c-note" hidden>The shift is far larger than the broadening, so the plot follows the shifted line and the rest line is off the axis.</p>
+        </section>
+        <section class="panel" aria-labelledby="t-read-c">
+          <h2 id="t-read-c">Combined quantities</h2>
+          <dl class="read" aria-label="Combined quantities">
+            <dt data-tip-key="c-center" data-topic="doppler">Line centre λobs (from v<sub>r</sub>)</dt><dd id="c-center"></dd>
+            <dt data-tip-key="c-centroid" data-topic="combined">Centroid of the broadened line</dt><dd id="c-centroid"></dd>
+            <dt data-tip-key="c-dlmax" data-topic="combined">Half-width Δλmax (from v sin i)</dt><dd id="c-dlmax"></dd>
+            <dt data-tip-key="c-fwhm0" data-topic="intrinsic">FWHM, shifted, no rotation</dt><dd id="c-fwhm0"></dd>
+            <dt data-tip-key="c-fwhm" data-topic="combined">FWHM, shifted and broadened</dt><dd id="c-fwhm"></dd>
+          </dl>
+        </section>
+      </div>
+    </form>
+
+    <section class="panel" id="p-notes" aria-labelledby="t-notes">
+      <h2 id="t-notes">What to look for</h2>
+      <ul>
+        <li><strong>The sign of v<sub>r</sub> sets the colour.</strong> Positive radial velocity is a source moving away: its light is stretched to longer wavelengths (<span class="formula">z &gt; 0</span>, redshift). A negative one gives a blueshift, and zero gives no shift at all.</li>
+        <li><strong>Slow or fast.</strong> For <span class="formula">|v<sub>r</sub>| ≪ c</span> the two formulas agree to <span class="formula">β²/2</span>. At 30 km/s that is 5 × 10⁻⁹ in z, far below anything visible. Switch to the 0.9 c range to see them part: at β = 0.5 the relativistic z is 0.73 instead of 0.5.</li>
+        <li><strong>One disk, many shifts.</strong> Each strip of the disk has its own shift, <span class="formula">v<sub>los</sub> = v sin i · x</span>, and the spectrograph adds them all. The edge of the line is at <span class="formula">±Δλmax = ±λ v sin i / c</span>, where the limbs of the star are. A single surface element has a shift but no broadening.</li>
+        <li><strong>Inclination.</strong> Slide i towards 0° with v<sub>eq</sub> fixed: v sin i shrinks to zero and the line returns to its unbroadened shape. At i = 90° the broadening is largest.</li>
+        <li><strong>Limb darkening</strong> makes the dim limbs count less, so the profile gets a more pointed centre and shorter wings than the half-ellipse of ε = 0.</li>
+        <li><strong>Radial speed is not rotation speed.</strong> In C changing v<sub>r</sub> moves the line without changing its width, and changing v sin i changes the width without moving the centroid.</li>
+        <li><strong>Limits of the model.</strong> Rigid rotation, linear limb darkening, one Gaussian intrinsic line (no pressure or Zeeman effects, no macroturbulence, no instrument profile), no differential rotation, no noise. The broadening is evaluated in the observer's frame by scaling the width with λobs.</li>
+      </ul>
+    </section>
+  </main>
+  <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../../">Return home</a> · <a href="../">All simulations</a> · <a href="../../research">Research</a></footer>
+  <script src="physics.js"></script>
+  <script src="charts.js"></script>
+  <script src="scene.js"></script>
+  <script src="app.js"></script>
+  <script src="help.js"></script>
+  <script src="../shared/katex/katex.min.js"></script>
+  <script src="../shared/explain.js"></script>
+</body>
+</html>
