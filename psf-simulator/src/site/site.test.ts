@@ -222,7 +222,7 @@ describe('index.html', () => {
     expect(html).toContain('← All simulations')
     expect(html).toContain('<footer class="container">')
     expect(html).toContain('og:image')
-    expect(html).toContain('<title>Telescope PSF | Tin Mai (Mai Như Tín)</title>')
+    expect(html).toContain('<title>Telescope Point Spread Function | Tin Mai (Mai Như Tín)</title>')
     expect(html).toContain('<h2 id="t-notes">What to look for</h2>')
   })
 
