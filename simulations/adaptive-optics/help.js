@@ -426,7 +426,7 @@ window.SIM_HELP = (() => {
       what: 'Starlight arrives as a flat wave. The atmosphere delays it by different amounts at different places of the telescope pupil. The three maps show this delay, the correction of the mirror, and what remains.',
       theory: [
         R`The delay is shown as a phase in radians: $2\pi$ rad is one wavelength. A flat wavefront gives a perfect image. The piston, the mean phase, is removed because it does not change the image. About 87 % of the variance of Kolmogorov turbulence over a pupil is tilt (Noll 1976).`,
-        R`The residual is what the camera sees: the atmosphere minus the mirror. The three maps share the same colour scale, which is set from the turbulence.`
+        R`The residual is what the camera sees: the atmosphere minus the mirror. The three maps share the same color scale, which is set from the turbulence.`
       ],
       formulas: [
         { tex: R`\varphi(x,y)=\frac{2\pi}{\lambda}\,{\rm OPD}(x,y)` },

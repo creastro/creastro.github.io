@@ -67,7 +67,7 @@ window.SIM_HELP = (() => {
         { note: 'redshift', tex: R`z=\frac{\lambda_{\rm obs}-\lambda_0}{\lambda_0}` },
         { note: 'speed of light used here', tex: R`c = 299\,792.458\ {\rm km/s}` }
       ],
-      sim: R`Panel A draws the same line twice: dashed at $\lambda_0$ and solid at $\lambda_{\rm obs}$. The colour of the arrow is blue for approaching and red for receding.`,
+      sim: R`Panel A draws the same line twice: dashed at $\lambda_0$ and solid at $\lambda_{\rm obs}$. The color of the arrow is blue for approaching and red for receding.`,
       refs: [GRAY, CARROLL],
       see: ['relativistic', 'combined']
     },
@@ -100,7 +100,7 @@ window.SIM_HELP = (() => {
         { note: 'projected speed', tex: R`v\sin i=v_{\rm eq}\sin i` },
         { note: 'line-of-sight speed at position $x$ on the disk', tex: R`v_{\rm los}=v\sin i\;x` }
       ],
-      sim: R`The disk is coloured with $v_{\rm los}$ on a fixed scale of $\pm100$ km/s, so a slow or pole-on star looks pale. With "radius and period" the equatorial speed is computed from $2\pi R/P$ with $R$ in solar radii.`,
+      sim: R`The disk is colored with $v_{\rm los}$ on a fixed scale of $\pm100$ km/s, so a slow or pole-on star looks pale. With "radius and period" the equatorial speed is computed from $2\pi R/P$ with $R$ in solar radii.`,
       refs: [GRAY, SHAJN],
       see: ['inclination', 'kernel']
     },
