@@ -10,6 +10,8 @@
   <meta property="og:description" content="Interactive astronomy simulations and animations by Tin Mai (Mai Như Tín), built to run in the browser.">
   <meta property="og:url" content="https://creastro.github.io/simulations/">
   <meta property="og:image" content="https://creastro.github.io/images/ava.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://creastro.github.io/simulations/">
   <title>Simulations | Tin Mai (Mai Như Tín)</title>
   <style>
     :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--border:rgba(255,255,255,.14);--panel:#111b30e0}
@@ -22,7 +24,7 @@
     h1{max-width:820px;font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.04;letter-spacing:-.05em;margin:16px 0 28px}h2{font-size:1.4rem;line-height:1.25;margin:0 0 10px}h3{font-size:1.4rem;line-height:1.25;margin:0 0 10px}p{color:var(--muted)}.intro{max-width:760px;font-size:1.15rem}
     .category{margin-top:64px}.category+.category{margin-top:72px}.cat-title{font-size:1.8rem;letter-spacing:-.02em;margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid var(--border)}.cat-desc{margin:0;max-width:760px}.category .grid{margin-top:22px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:56px}
-    .card{display:block;padding:26px;background:var(--panel);border:1px solid var(--border);border-radius:14px;color:inherit;text-decoration:none;transition:transform .2s,border-color .2s}a.card:hover,a.card:focus-visible{transform:translateY(-5px);border-color:var(--accent)}.card p:last-child{margin-bottom:0}.tag{color:var(--accent);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px}.more{margin-top:14px;color:var(--accent);font-weight:650}.card.soon{border-style:dashed;align-self:start}.thumb{display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;margin:0 0 18px;border:1px solid var(--border);border-radius:10px;background:#0f182c}
+    .card{position:relative;display:flex;flex-direction:column;padding:26px;background:var(--panel);border:1px solid var(--border);border-radius:14px;color:inherit;text-decoration:none;transition:transform .2s,border-color .2s}.card:hover,.card:focus-within{transform:translateY(-5px);border-color:var(--accent)}.card h3 a{color:inherit;text-decoration:none}.card h3 a:after{content:"";position:absolute;inset:0;border-radius:14px}.card h3 a:focus-visible{outline:none}.card:has(h3 a:focus-visible){outline:3px solid var(--accent);outline-offset:4px}.level{margin:0 0 12px;color:var(--muted);font-size:.85rem}.level b{color:var(--text);font-weight:600}.card p:last-child{margin-bottom:0}.card>p:not(.tag):not(.level):not(.more){margin:0 0 4px}.tag{color:var(--accent);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px}.more{margin-top:auto;padding-top:14px;color:var(--accent);font-weight:650}.soon-note{margin-top:64px;padding-top:18px;border-top:1px dashed var(--border)}.thumb{display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;margin:0 0 18px;border:1px solid var(--border);border-radius:10px;background:#0f182c}
     footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
     @media(max-width:760px){main{padding:65px 0 90px}.grid{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
@@ -30,58 +32,56 @@
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
-  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../">Home</a><a href="../#education">Education</a><a href="../research">Research</a><a class="active" href="../simulations">Simulations</a><a href="../story">My story</a><a href="../contact">Contact</a></div></nav></header>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../">Home</a><a href="../#education">Education</a><a href="../research">Research</a><a class="active" href="../simulations/" aria-current="page">Simulations</a><a href="../story">My story</a><a href="../contact">Contact</a></div></nav></header>
   <main class="container">
     <span class="eyebrow">Learn by playing</span>
     <h1>Simulations</h1>
-    <p class="intro">Small interactive models of the physics behind my research. Change the parameters and see what happens.</p>
+    <p class="intro">Small interactive models of the physics behind my research. Change the parameters and see what happens. Each simulation explains its physics and the limits of its model, and all of them run in your browser. The <a href="https://github.com/creastro/creastro.github.io/tree/main/simulations">source code</a> is on GitHub.</p>
     <section class="category" aria-labelledby="spectroscopy">
       <h2 class="cat-title" id="spectroscopy">Spectroscopy</h2>
-      <p class="cat-desc">How light carries information about motion, temperature and composition: line shifts, broadening and profiles.</p>
+      <p class="cat-desc">How spectral lines reveal motion: Doppler shifts, rotational broadening and line profiles.</p>
       <div class="grid">
-        <a class="card" href="doppler/">
-          <img class="thumb" src="doppler/preview.jpg" width="1200" height="600" loading="lazy" alt="Preview of the simulation: a rotating planet with a dark and a bright spot, and the resulting spectral line profile.">
-          <p class="tag">Exoplanets · High-resolution spectroscopy</p>
-          <h3>Doppler shifts of a rotating planet</h3>
-          <p>How a rotating planet broadens a spectral line, and how a dark or bright spot on its surface draws a bump or a dip that drifts through the profile.</p>
-          <p class="more">Open the simulation →</p>
-        </a>
-        <a class="card" href="doppler-broadening/">
-          <img class="thumb" src="doppler-broadening/preview.jpg" width="1200" height="600" loading="lazy" alt="Preview of the simulation: a rotating star coloured blue on its approaching side and red on its receding side, and a spectral line that is shifted and broadened.">
-          <p class="tag">Spectroscopy · Doppler effect</p>
-          <h3>Doppler effect &amp; rotational line broadening</h3>
-          <p>How radial motion shifts a spectral line and how the rotation of a star or planet widens it. Compare the rest-frame, shifted and broadened lines, with the relativistic formula and limb darkening.</p>
-          <p class="more">Open the simulation →</p>
-        </a>
+        <article class="card">
+          <img class="thumb" src="doppler-broadening/preview.jpg" width="1200" height="600" loading="lazy" alt="A rotating star colored blue on its approaching side and red on its receding side, next to a spectral line that is shifted and broadened.">
+          <p class="tag">Doppler effect</p>
+          <h3><a href="doppler-broadening/">Doppler effect &amp; rotational line broadening</a></h3>
+          <p class="level"><b>Level:</b> introductory</p>
+          <p>How radial motion shifts a spectral line and how the rotation of a star or planet widens it. Compare the rest-frame line with the shifted and broadened ones, using the relativistic formula and limb darkening.</p>
+          <p class="more" aria-hidden="true">Open the simulation →</p>
+        </article>
+        <article class="card">
+          <img class="thumb" src="doppler/preview.jpg" width="1200" height="600" loading="lazy" alt="A rotating planet with a dark and a bright spot, next to the spectral line profile they produce.">
+          <p class="tag">Exoplanets · Surface spots</p>
+          <h3><a href="doppler/">Doppler shifts of a rotating planet</a></h3>
+          <p class="level"><b>Level:</b> intermediate</p>
+          <p>How a rotating planet broadens a spectral line, and how a dark or bright spot on its surface produces a bump or a dip that drifts through the profile.</p>
+          <p class="more" aria-hidden="true">Open the simulation →</p>
+        </article>
       </div>
     </section>
     <section class="category" aria-labelledby="instrumentation">
       <h2 class="cat-title" id="instrumentation">Instrumentation</h2>
       <p class="cat-desc">How telescopes and their optics shape what we measure: diffraction, aberrations and atmospheric correction.</p>
       <div class="grid">
-        <a class="card" href="adaptive-optics/">
-          <img class="thumb" src="adaptive-optics/preview.jpg" width="1200" height="600" loading="lazy" alt="Preview of the simulation: the image of a star with the adaptive optics loop open (a cloud of speckles) and closed (a sharp core with Airy rings).">
-          <p class="tag">Instrumentation · Adaptive optics</p>
-          <h3>Adaptive optics loop</h3>
+        <article class="card">
+          <img class="thumb" src="telescope-psf/preview.jpg" width="1200" height="600" loading="lazy" alt="The image of a star made by a telescope with a central obstruction and four spider vanes, next to the six-spike image made by a hexagonal segmented mirror.">
+          <p class="tag">Telescope optics</p>
+          <h3><a href="telescope-psf/">Telescope point spread function</a></h3>
+          <p class="level"><b>Level:</b> intermediate</p>
+          <p>How the shape of a telescope determines the image of a star: mirror size, central obstruction, spider vanes, hexagonal segments, aberrations and wavelength. Watch the Airy rings, the diffraction spikes and the Strehl ratio change.</p>
+          <p class="more" aria-hidden="true">Open the simulation →</p>
+        </article>
+        <article class="card">
+          <img class="thumb" src="adaptive-optics/preview.jpg" width="1200" height="600" loading="lazy" alt="The image of a star with the adaptive optics loop open (a cloud of speckles) and closed (a sharp core with Airy rings).">
+          <p class="tag">Adaptive optics</p>
+          <h3><a href="adaptive-optics/">Adaptive optics loop</a></h3>
+          <p class="level"><b>Level:</b> advanced</p>
           <p>How a deformable mirror cancels atmospheric turbulence in real time, and what limits the correction: actuators, loop speed, wind and guide-star brightness.</p>
-          <p class="more">Open the simulation →</p>
-        </a>
-        <a class="card" href="telescope-psf/">
-          <img class="thumb" src="telescope-psf/preview.jpg" width="1200" height="600" loading="lazy" alt="Preview of the simulation: the image of a star made by a telescope with a central obstruction and four spider vanes, next to the six-spike image made by a hexagonal segmented mirror.">
-          <p class="tag">Instrumentation · Telescope optics</p>
-          <h3>Telescope point spread function</h3>
-          <p>How the shape of a telescope decides the image of a star: mirror size, central obstruction, spider vanes, hexagonal segments, aberrations and wavelength. Watch the Airy rings, the diffraction spikes and the Strehl ratio change.</p>
-          <p class="more">Open the simulation →</p>
-        </a>
+          <p class="more" aria-hidden="true">Open the simulation →</p>
+        </article>
       </div>
     </section>
-    <div class="grid">
-      <div class="card soon">
-        <p class="tag">Coming soon</p>
-        <h3>More simulations</h3>
-        <p>Next ideas: exoplanet transits and coronagraphy.</p>
-      </div>
-    </div>
+    <p class="soon-note"><strong>Coming soon:</strong> exoplanet transits and coronagraphy.</p>
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../">Return home</a> · <a href="../cv.pdf">CV</a></footer>
 </body>
