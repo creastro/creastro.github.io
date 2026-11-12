@@ -55,7 +55,7 @@ window.SIM_HELP = (() => {
         { note: 'line-of-sight speed of the surface at horizontal position $x$ on the disk, in units of the radius', tex: R`v_{\rm los} = v_{\rm eq}\,\sin i\;x` },
         { note: 'spin axis seen from the observer (sky frame: $x$ right, $y$ up, $z$ towards us)', tex: R`\hat{\mathbf s} = (0,\ \sin i,\ \cos i)` }
       ],
-      sim: R`Each pixel of the disk is shifted by $v_{\rm eq}\sin i\,x$. The disk is tinted blue and red by this velocity when you switch on "Colour by velocity".`,
+      sim: R`Each pixel of the disk is shifted by $v_{\rm eq}\sin i\,x$. The disk is tinted blue and red by this velocity when you switch on "Color by velocity".`,
       refs: [GRAY, SNELLEN],
       see: ['inclination', 'speed', 'profile']
     },

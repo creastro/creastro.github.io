@@ -67,7 +67,7 @@
     <div class="layout">
       <section class="panel" id="p-wave" aria-labelledby="t-wave">
         <h2 id="t-wave">Wavefront in the telescope pupil</h2>
-        <p class="sub">Phase in radians at the imaging wavelength, same colour scale for the three maps. Orange: advanced, blue: delayed.</p>
+        <p class="sub">Phase in radians at the imaging wavelength, same color scale for the three maps. Orange: advanced, blue: delayed.</p>
         <div class="wf">
           <figure><canvas id="wf-atm" role="img" aria-label="Phase map of the turbulent atmosphere across the telescope pupil."></canvas><figcaption><strong>Atmosphere</strong>turbulent phase</figcaption></figure>
           <figure><canvas id="wf-dm" role="img" aria-label="Phase map of the correction applied by the deformable mirror."></canvas><figcaption><strong>Deformable mirror</strong>correction</figcaption></figure>
@@ -121,7 +121,7 @@
         <h2 id="t-dm">Deformable mirror in motion</h2>
         <p class="sub">Each pin is an actuator pushing a thin faceplate. Left: stroke of every actuator, seen from above. Right: side view of one row of actuators, compared with the shape the turbulence asks the mirror to take.</p>
         <div class="dmgrid">
-          <figure><canvas id="dm-top" role="img" aria-label="Top view of the deformable mirror: a grid of actuators inside the telescope pupil, coloured by how far each one pushes or pulls the faceplate."></canvas></figure>
+          <figure><canvas id="dm-top" role="img" aria-label="Top view of the deformable mirror: a grid of actuators inside the telescope pupil, colored by how far each one pushes or pulls the faceplate."></canvas></figure>
           <div>
             <canvas id="dm-side" role="img" aria-label="Side view of one row of actuators. The faceplate follows the shape of the turbulence, but more smoothly and a little late."></canvas>
             <div class="field"><label for="dm-row">Row shown in the side view</label><input id="dm-row" type="range" min="-0.5" max="0.5" step="0.01" value="0"><output id="dm-row-out" for="dm-row"></output></div>

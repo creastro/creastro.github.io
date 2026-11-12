@@ -61,12 +61,12 @@ window.SIM_HELP = (() => {
     'clear-zern': 'Set every Zernike coefficient to zero.',
     fov: 'Full width of the picture, in arcseconds.',
     range: 'Number of factors of 10 of brightness shown below the peak.',
-    cmap: 'How brightness is turned into colour.',
+    cmap: 'How brightness is turned into color.',
     'zoom-in': 'Zoom in: halve the field of view step by step. You can also hold Ctrl (⌘ on a Mac) and scroll over the image.',
     'zoom-out': 'Zoom out: widen the field of view. The picture stops at ±64 λ/D, the edge of the computed area.',
     'zoom-reset': 'Fit the picture to the first rings of the pattern.',
     'save-psf': 'Download the image of the star as a PNG file, with the angular scale and a caption of the settings.',
-    'save-pupil': 'Download the aperture and wavefront picture as a PNG file, with its colour scale.',
+    'save-pupil': 'Download the aperture and wavefront picture as a PNG file, with its color scale.',
     'save-profile': 'Download the radial profile plot as a PNG file.',
     'save-settings': 'Download every setting of this page as a small JSON file, to reload later or to share.',
     'load-settings': 'Load a settings file saved from this page. Values outside the allowed ranges are clamped.',
@@ -100,7 +100,7 @@ window.SIM_HELP = (() => {
       theory: [
         R`In the far field, the light in the focal plane is the Fourier transform of the light across the aperture. The aperture function $A$ is 1 where the mirror reflects and 0 where it is blocked, and the wavefront error $W$ (in waves) adds a phase. The PSF is the squared modulus of that transform, which the program computes with a fast Fourier transform (FFT).`,
         R`Angles are shown in arcseconds, but the natural unit of the pattern is $\lambda/D$: the angle set by the wavelength $\lambda$ and the mirror diameter $D$. A bigger mirror or a shorter wavelength shrinks the whole pattern.`,
-        R`The controls come in groups: the {{D|mirror}} and the {{lam|wavelength}}; an optional {{seg|segmented mirror}}; the {{eps|central obstruction}} and {{vanes|spider vanes}} that block light; the {{zernike|Zernike aberrations}} that bend the wavefront; and the display settings ({{fov|field of view}}, {{range|dynamic range}}, {{cmap|colours}}). Click any parameter name for its theory, or hover over it for a short description.`
+        R`The controls come in groups: the {{D|mirror}} and the {{lam|wavelength}}; an optional {{seg|segmented mirror}}; the {{eps|central obstruction}} and {{vanes|spider vanes}} that block light; the {{zernike|Zernike aberrations}} that bend the wavefront; and the display settings ({{fov|field of view}}, {{range|dynamic range}}, {{cmap|colors}}). Click any parameter name for its theory, or hover over it for a short description.`
       ],
       formulas: [
         { note: 'what the simulation computes', tex: R`{\rm PSF}(\boldsymbol\theta)=\left|\mathcal F\left\{A(\mathbf x)\,e^{\,i\,2\pi W(\mathbf x)}\right\}\right|^{2}` },
@@ -194,7 +194,7 @@ window.SIM_HELP = (() => {
 
     band: {
       title: 'Bandwidth Δλ',
-      what: 'The width of a flat band of wavelengths centred on λ. Zero means light of a single wavelength. A wider band adds the images of seven wavelengths, so the rings of different colours blur together.',
+      what: 'The width of a flat band of wavelengths centred on λ. Zero means light of a single wavelength. A wider band adds the images of seven wavelengths, so the rings of different colors blur together.',
       theory: [
         R`Each wavelength has its own pattern, scaled by $\lambda$. At one angle $\theta$ the rings of different wavelengths do not line up, so their sum has weaker contrast: the dark rings fill in and the rings fade. The outer rings, where the shift between wavelengths is largest, fade first.`,
         R`Every sample keeps the same aberrations in length, so in waves they scale as $1/\lambda$. Without aberrations all the samples share one pattern in units of $\lambda/D$, so the sum is fast to compute; with aberrations each wavelength needs its own FFT.`
@@ -204,7 +204,7 @@ window.SIM_HELP = (() => {
         { tex: R`\lambda_i=\lambda-\frac{\Delta\lambda}{2}+\left(i-\tfrac12\right)\frac{\Delta\lambda}{7}` },
         { note: 'geometric errors, in waves', tex: R`c(\lambda_i)=c(\lambda)\,\frac{\lambda}{\lambda_i}` }
       ],
-      sim: R`The colour map "Wavelength color" tints each sample with its own hue. With seven samples, the widest bands can leave faint ghost rings beyond about the twelfth ring.`,
+      sim: R`The color map "Wavelength color" tints each sample with its own hue. With seven samples, the widest bands can leave faint ghost rings beyond about the twelfth ring.`,
       refs: [GOODMAN],
       see: ['lam', 'airy', 'zernike', 'cmap']
     },
@@ -268,7 +268,7 @@ window.SIM_HELP = (() => {
       title: 'Defocus (Z4)',
       what: 'Focus error: the detector sits slightly in front of or behind the best focus. The core widens symmetrically and light moves into the rings.',
       theory: [
-        R`Defocus is a wavefront that is a paraboloid, $\rho^2$. After removing the average (piston) it is the Zernike mode $Z_4$. The star image is the same whether the detector is in front of or behind the focus, so a positive and a negative coefficient give identical pictures; only the colours of the pupil view swap.`,
+        R`Defocus is a wavefront that is a paraboloid, $\rho^2$. After removing the average (piston) it is the Zernike mode $Z_4$. The star image is the same whether the detector is in front of or behind the focus, so a positive and a negative coefficient give identical pictures; only the colors of the pupil view swap.`,
         R`A focus shift $\Delta z$ at focal ratio $F$ gives a peak wavefront error $W_{020}=\Delta z/(8F^2)$ at the edge of the pupil, and $c_4=W_{020}/(2\sqrt3)$ RMS.`
       ],
       formulas: [
@@ -357,10 +357,10 @@ window.SIM_HELP = (() => {
 
     pupil: {
       title: 'Pupil and wavefront',
-      what: 'The aperture as the star sees it. Brightness is the transmission (black means blocked) and colour is the wavefront error: blue negative, orange positive, white zero.',
+      what: 'The aperture as the star sees it. Brightness is the transmission (black means blocked) and color is the wavefront error: blue negative, orange positive, white zero.',
       theory: [
-        R`This is the function that the Fourier transform acts on: $A\,e^{i2\pi W}$. The shape of the black parts (central obstruction, spider vanes, the gaps and the outline of the segments) decides the shape of the diffraction pattern, and the colours decide how the light is redistributed.`,
-        R`The colour scale is the smallest of $\pm0.05$, $\pm0.1$, $\pm0.25$, $\pm0.5$ and $\pm1$ wave that holds the whole wavefront, and it is printed under the picture. On a {{seg|segmented mirror}} each segment shows its piston as a flat colour and its tilt as a gradient.`
+        R`This is the function that the Fourier transform acts on: $A\,e^{i2\pi W}$. The shape of the black parts (central obstruction, spider vanes, the gaps and the outline of the segments) decides the shape of the diffraction pattern, and the colors decide how the light is redistributed.`,
+        R`The color scale is the smallest of $\pm0.05$, $\pm0.1$, $\pm0.25$, $\pm0.5$ and $\pm1$ wave that holds the whole wavefront, and it is printed under the picture. On a {{seg|segmented mirror}} each segment shows its piston as a flat color and its tilt as a gradient.`
       ],
       formulas: [
         { tex: R`U(x,y)=A(x,y)\,e^{\,i\,2\pi W(x,y)}` }
@@ -411,13 +411,13 @@ window.SIM_HELP = (() => {
 
     cmap: {
       title: 'Color map',
-      what: 'How the brightness value becomes a colour. Gray, Hot, Inferno, Viridis and Ice are false-colour maps: the same data in different colours.',
+      what: 'How the brightness value becomes a color. Gray, Hot, Inferno, Viridis and Ice are false-color maps: the same data in different colors.',
       theory: [
-        R`The brightness $v$ on the log scale, from 0 to 1, indexes a table of colours. Inferno and Viridis change steadily in lightness, which keeps faint structure readable.`,
-        R`"Wavelength color" is different: each wavelength sample gets the hue of that wavelength, and the pixel colour is the average of these hues weighted by brightness. It only illustrates which colour is where. It does not model the spectrum of a source or the response of the eye, so a white star does not come out white.`
+        R`The brightness $v$ on the log scale, from 0 to 1, indexes a table of colors. Inferno and Viridis change steadily in lightness, which keeps faint structure readable.`,
+        R`"Wavelength color" is different: each wavelength sample gets the hue of that wavelength, and the pixel color is the average of these hues weighted by brightness. It only illustrates which color is where. It does not model the spectrum of a source or the response of the eye, so a white star does not come out white.`
       ],
       formulas: [
-        { tex: R`{\rm colour}={\rm LUT}(v)` }
+        { tex: R`{\rm color}={\rm LUT}(v)` }
       ],
       see: ['range', 'band']
     },
@@ -575,7 +575,7 @@ window.SIM_HELP = (() => {
       title: 'Saving images and settings',
       what: 'Three PNG downloads and one settings file let you keep or share what you see.',
       theory: [
-        R`The PSF image is saved at twice the screen size with the angular scale, the colour map and a caption that lists the diameter, wavelength, obstruction, vanes and Strehl ratio. The aperture image has its wavefront colour scale in waves. The profile plot includes the Airy curve for comparison. File names carry the main parameters, for example D, wavelength and the number of segments.`,
+        R`The PSF image is saved at twice the screen size with the angular scale, the color map and a caption that lists the diameter, wavelength, obstruction, vanes and Strehl ratio. The aperture image has its wavefront color scale in waves. The profile plot includes the Airy curve for comparison. File names carry the main parameters, for example D, wavelength and the number of segments.`,
         R`The settings file is plain JSON with a format name and a version number. It stores the mirror, the segmented-mirror options and random seed, the vanes (including the angle of each vane), the Zernike coefficients and the display options. Loading is forgiving: missing values keep their defaults, out-of-range values are clamped and listed in a note, and files from another program or from a newer version are refused with a message.`
       ],
       formulas: [],

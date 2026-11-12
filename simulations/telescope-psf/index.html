@@ -6,11 +6,11 @@
   <meta name="description" content="Interactive simulation of the point spread function of a telescope: mirror size, central obstruction, spider vanes, segmented mirrors, aberrations and wavelength.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23080d1c'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%238fe3ff'/%3E%3C/svg%3E">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Telescope PSF | Tin Mai (Mai Như Tín)">
+  <meta property="og:title" content="Telescope Point Spread Function | Tin Mai (Mai Như Tín)">
   <meta property="og:description" content="Interactive simulation of the point spread function of a telescope: mirror size, central obstruction, spider vanes, segmented mirrors, aberrations and wavelength.">
   <meta property="og:url" content="https://creastro.github.io/simulations/telescope-psf/">
   <meta property="og:image" content="https://creastro.github.io/simulations/telescope-psf/preview.jpg">
-  <title>Telescope PSF | Tin Mai (Mai Như Tín)</title>
+  <title>Telescope Point Spread Function | Tin Mai (Mai Như Tín)</title>
   <link rel="stylesheet" href="../shared/katex/katex.min.css">
   <link rel="stylesheet" href="../shared/explain.css">
   <style>
@@ -87,9 +87,9 @@
 
       <section class="panel" id="p-pupil" aria-labelledby="t-pupil">
         <h2 id="t-pupil">Pupil and wavefront</h2>
-        <p class="sub">The aperture as the star sees it: brightness is transmission, colour is the wavefront error (blue negative, orange positive). The colour scale adapts to the size of the error.</p>
+        <p class="sub">The aperture as the star sees it: brightness is transmission, color is the wavefront error (blue negative, orange positive). The color scale adapts to the size of the error.</p>
         <div class="cbar top"><span id="pb-min">−1 λ</span><i></i><span id="pb-max">+1 λ</span></div>
-        <div class="pup"><canvas id="pupil" role="img" aria-label="The telescope aperture, with any central obstruction, spider vanes or hexagonal segments in black, and the wavefront error shown in colour."></canvas></div>
+        <div class="pup"><canvas id="pupil" role="img" aria-label="The telescope aperture, with any central obstruction, spider vanes or hexagonal segments in black, and the wavefront error shown in color."></canvas></div>
         <p class="stats" id="pupil-stats" aria-live="off">…</p>
         <div class="bar"><button class="button small" type="button" id="save-pupil">Save image (PNG)</button></div>
       </section>
@@ -156,7 +156,7 @@
           <li><strong>Aberrations.</strong> Defocus and spherical aberration fill in the dark rings, astigmatism stretches the core in one direction, and coma gives a comet-shaped tail. For a small error σ (in waves) the Strehl ratio falls as <span class="formula">exp[−(2πσ)²]</span>, so 0.075 wave RMS is already enough to drop to 0.8.</li>
           <li><strong>Segmented mirror.</strong> A honeycomb makes six diffraction spikes from the hexagonal segments and the hexagonal outline of the array; try the JWST-like preset. Random piston and tip/tilt errors break the phasing: the sharp core fades into a speckle halo and the Strehl ratio falls as <span class="formula">exp[−(2πσ<sub>p</sub>)²]</span>. Press New random draw to see another set of errors with the same RMS.</li>
           <li><strong>Bandwidth.</strong> The rings of different wavelengths have different sizes, so a wide band blurs the rings and fills the dark ones. A geometric error is a fixed length, so in waves it gets smaller at longer wavelengths.</li>
-          <li><strong>Limits of the model.</strong> Far-field (Fraunhofer) image of an on-axis point source, with no atmosphere (see the adaptive optics page for turbulence), no detector sampling and no noise. The grid has 4 samples per λ/D and covers ±64 λ/D; light beyond it wraps around, which is negligible for clean apertures. Interpolation lifts the deepest dark rings slightly above theory. The wavelength colour map only illustrates hue and does not model a source spectrum or the response of the eye. Segment edges are sampled 8 × 8 within a pixel, so the light scattered by gaps far thinner than a pixel is only approximate. Segment errors are piston and tip/tilt only, with no curvature errors or edge roll-off.</li>
+          <li><strong>Limits of the model.</strong> Far-field (Fraunhofer) image of an on-axis point source, with no atmosphere (see the adaptive optics page for turbulence), no detector sampling and no noise. The grid has 4 samples per λ/D and covers ±64 λ/D; light beyond it wraps around, which is negligible for clean apertures. Interpolation lifts the deepest dark rings slightly above theory. The wavelength color map only illustrates hue and does not model a source spectrum or the response of the eye. Segment edges are sampled 8 × 8 within a pixel, so the light scattered by gaps far thinner than a pixel is only approximate. Segment errors are piston and tip/tilt only, with no curvature errors or edge roll-off.</li>
         </ul>
       </section>
     </div>
