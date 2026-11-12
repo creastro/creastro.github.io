@@ -24,7 +24,7 @@
     h1{max-width:820px;font-size:clamp(2.6rem,7vw,5.6rem);line-height:1.04;letter-spacing:-.05em;margin:16px 0 28px}h2{font-size:1.4rem;line-height:1.25;margin:0 0 10px}h3{font-size:1.4rem;line-height:1.25;margin:0 0 10px}p{color:var(--muted)}.intro{max-width:760px;font-size:1.15rem}
     .category{margin-top:64px}.category+.category{margin-top:72px}.cat-title{font-size:1.8rem;letter-spacing:-.02em;margin:0 0 6px;padding-bottom:10px;border-bottom:1px solid var(--border)}.cat-desc{margin:0;max-width:760px}.category .grid{margin-top:22px}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:56px}
-    .card{position:relative;display:flex;flex-direction:column;padding:26px;background:var(--panel);border:1px solid var(--border);border-radius:14px;color:inherit;text-decoration:none;transition:transform .2s,border-color .2s}.card:hover,.card:focus-within{transform:translateY(-5px);border-color:var(--accent)}.card h3 a{color:inherit;text-decoration:none}.card h3 a:after{content:"";position:absolute;inset:0;border-radius:14px}.card h3 a:focus-visible{outline:none}.card:has(h3 a:focus-visible){outline:3px solid var(--accent);outline-offset:4px}.level{margin:0 0 12px;color:var(--muted);font-size:.85rem}.level b{color:var(--text);font-weight:600}.card p:last-child{margin-bottom:0}.card>p:not(.tag):not(.level):not(.more){margin:0 0 4px}.tag{color:var(--accent);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px}.more{margin-top:auto;padding-top:14px;color:var(--accent);font-weight:650}.soon-note{margin-top:64px;padding-top:18px;border-top:1px dashed var(--border)}.thumb{display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;margin:0 0 18px;border:1px solid var(--border);border-radius:10px;background:#0f182c}
+    .card{position:relative;display:flex;flex-direction:column;padding:26px;background:var(--panel);border:1px solid var(--border);border-radius:14px;color:inherit;text-decoration:none;transition:transform .2s,border-color .2s}.card:not(.soon):hover,.card:focus-within{transform:translateY(-5px);border-color:var(--accent)}.card h3 a{color:inherit;text-decoration:none}.card h3 a:after{content:"";position:absolute;inset:0;border-radius:14px}.card h3 a:focus-visible{outline:none}.card:has(h3 a:focus-visible){outline:3px solid var(--accent);outline-offset:4px}.level{margin:0 0 12px;color:var(--muted);font-size:.85rem}.level b{color:var(--text);font-weight:600}.card p:last-child{margin-bottom:0}.card>p:not(.tag):not(.level):not(.more){margin:0 0 4px}.tag{color:var(--accent);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px}.more{margin-top:auto;padding-top:14px;color:var(--accent);font-weight:650}.card.soon{border-style:dashed;align-self:start}.soon-grid{margin-top:72px}.thumb{display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;margin:0 0 18px;border:1px solid var(--border);border-radius:10px;background:#0f182c}
     footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
     @media(max-width:760px){main{padding:65px 0 90px}.grid{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
@@ -81,7 +81,13 @@
         </article>
       </div>
     </section>
-    <p class="soon-note"><strong>Coming soon:</strong> exoplanet transits and coronagraphy.</p>
+    <div class="grid soon-grid">
+      <div class="card soon">
+        <p class="tag">Coming soon</p>
+        <h3>More simulations on the way</h3>
+        <p>New interactive models of the light, planets and telescopes behind my research are in the works. Check back soon.</p>
+      </div>
+    </div>
   </main>
   <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../">Return home</a> · <a href="../cv.pdf">CV</a></footer>
 </body>
