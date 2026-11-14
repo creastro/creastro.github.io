@@ -142,4 +142,20 @@ Peak = maximum normalised intensity within 1.5 λ/D; zone mean = mean raw contra
 | Throughput | ≈ 0 on axis; IWA within ×2 of nominal; > 0.6 max beyond 3 × IWA | |
 | Vortex IWA | 0.7–1.5 λ/D for charge 2, increasing with charge | |
 
-The wavefront-sensing and control thresholds are listed in the next section once implemented.
+### Wavefront sensing and control thresholds
+
+Injected aberration for the sensor tests: Noll 4, 5, 7, 11 = 10, −8, 6, −5 nm at λ = 1600 nm (14.9 nm RMS,
+≈ 0.06 rad), well inside the linear range of every sensor.
+
+| Test | Threshold | Reason |
+|---|---|---|
+| SH (8×8), pyramid (r_mod = 3 λ/D), Zernike, curvature (z' = 0.05) | modal error < 10 % of the injected RMS | linear-range error is a few % |
+| Pyramid linear range | error without modulation > with modulation (90 nm RMS) | modulation extends the linear range |
+| Phase diversity (0.15 λ RMS defocus diversity) | error < 10 %, signs recovered | Gonsalves (1982) |
+| SCC (ξ0 = 1.65 D, hole 0.08 D) behind vortex and Lyot | field error < 15 % in 3–8 λ/D | Galicher et al. (2010) |
+| Pairwise probing (3 probes, adaptive amplitude) | field error < 15 % | Give'on et al. (2007) |
+| AO loop, each pupil-plane sensor, 30 DM modes, 10 iterations | final RMS < initial/2 and < 1.25 × modal fitting error + 1 nm | the loop cannot beat the fitting error of its basis |
+| AO loop and NCPA | science-arm RMS stays > 15 nm with 20 nm NCPA, WFS arm < half of it | the WFS cannot see NCPA |
+| EFC, perfect knowledge, one-sided hole 3–7 λ/D, 16×16 DM | contrast improves ≥ 10× in 5 iterations | requirement; measured ≈ 1000× |
+| EFC with pairwise probing | ≥ 10× in 6 iterations | requirement |
+| Speckle nulling | ≥ 10× in 15 iterations | Bordé & Traub (2006) |

@@ -47,20 +47,22 @@ function kernel(u: Float64Array, x: Float64Array, sign: number): Kernel {
 }
 
 /**
- * General MFT. Input: square n×n field sampled at xIn (both axes). Output: v.length rows × u.length columns.
+ * General MFT. Input: yIn.length rows × xIn.length columns (yIn defaults to xIn).
+ * Output: v.length rows × u.length columns.
  */
 export function mftGeneral(
   inRe: Float64Array, inIm: Float64Array, xIn: Float64Array,
-  u: Float64Array, v: Float64Array, sign: -1 | 1, weight: number,
+  u: Float64Array, v: Float64Array, sign: -1 | 1, weight: number, yIn: Float64Array = xIn,
 ): Grid2 {
   const n = xIn.length
+  const ny = yIn.length
   const mu = u.length, mv = v.length
   const A = kernel(u, xIn, sign)
-  const B = kernel(v, xIn, sign)
+  const B = kernel(v, yIn, sign)
   // T[y][k] = Σ_x E[y][x] A[k][x]
-  const tRe = new Float64Array(n * mu)
-  const tIm = new Float64Array(n * mu)
-  for (let y = 0; y < n; y++) {
+  const tRe = new Float64Array(ny * mu)
+  const tIm = new Float64Array(ny * mu)
+  for (let y = 0; y < ny; y++) {
     const row = y * n
     let empty = true
     for (let x = 0; x < n; x++) if (inRe[row + x] !== 0 || inIm[row + x] !== 0) { empty = false; break }
@@ -82,9 +84,9 @@ export function mftGeneral(
   const re = new Float64Array(mv * mu)
   const im = new Float64Array(mv * mu)
   for (let l = 0; l < mv; l++) {
-    const lb = l * n
+    const lb = l * ny
     const o = l * mu
-    for (let y = 0; y < n; y++) {
+    for (let y = 0; y < ny; y++) {
       const br = B.re[lb + y], bi = B.im[lb + y]
       const t = y * mu
       for (let k = 0; k < mu; k++) {

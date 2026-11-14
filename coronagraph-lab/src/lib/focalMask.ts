@@ -17,7 +17,7 @@
  */
 import { fft2d, fftshift2d } from './fft.ts'
 import { type Field, focalCoords, makeField } from './field.ts'
-import { mftGeneral } from './mft.ts'
+import { type Grid2, mftGeneral } from './mft.ts'
 
 /** Complex mask value at focal coordinates (u, v) in λ0/D. */
 export type MaskFn = (u: number, v: number) => readonly [number, number]
@@ -29,16 +29,30 @@ export function radialWindow(r: number, a: number, b: number): number {
   return 0.5 * (1 + Math.cos((Math.PI * (r - a)) / (b - a)))
 }
 
-function mulMaskOnGrid(g: { re: Float64Array; im: Float64Array }, u: Float64Array, v: Float64Array,
-  mask: (u: number, v: number) => readonly [number, number]): void {
-  for (let l = 0; l < v.length; l++) {
-    for (let k = 0; k < u.length; k++) {
-      const i = l * u.length + k
-      const [mr, mi] = mask(u[k], v[l])
-      const r = g.re[i] * mr - g.im[i] * mi
-      g.im[i] = g.re[i] * mi + g.im[i] * mr
-      g.re[i] = r
-    }
+/** Sampled mask values, cached per mask function and grid (masks are evaluated once, not at every propagation). */
+const maskCache = new WeakMap<object, Map<string, { re: Float64Array; im: Float64Array }>>()
+
+function sampledMask(owner: object, key: string, nu: number, nv: number,
+  value: (k: number, l: number) => readonly [number, number]): { re: Float64Array; im: Float64Array } {
+  let m = maskCache.get(owner)
+  if (!m) { m = new Map(); maskCache.set(owner, m) }
+  const hit = m.get(key)
+  if (hit) return hit
+  const re = new Float64Array(nu * nv), im = new Float64Array(nu * nv)
+  for (let l = 0; l < nv; l++) for (let k = 0; k < nu; k++) { const [a, b] = value(k, l); re[l * nu + k] = a; im[l * nu + k] = b }
+  if (m.size > 32) m.delete(m.keys().next().value as string)
+  const out = { re, im }
+  m.set(key, out)
+  return out
+}
+
+function mulInPlace(g: { re: Float64Array; im: Float64Array }, m: { re: Float64Array; im: Float64Array }): void {
+  for (let i = 0; i < g.re.length; i++) {
+    const mr = m.re[i], mi = m.im[i]
+    if (mr === 0 && mi === 0) { g.re[i] = 0; g.im[i] = 0; continue }
+    const r = g.re[i] * mr - g.im[i] * mi
+    g.im[i] = g.re[i] * mi + g.im[i] * mr
+    g.re[i] = r
   }
 }
 
@@ -47,28 +61,57 @@ function mulMaskOnGrid(g: { re: Float64Array; im: Float64Array }, u: Float64Arra
  * `deltaMask(u, v)` returns (m − 1) at λ0/D coordinates; it is averaged over sub-pixels for accurate edges.
  */
 export function babinetPropagate(E: Field, xIn: Float64Array, xOut: Float64Array, radius0: number,
-  deltaMask: MaskFn, scale: number, samples = 128): Field {
+  deltaMask: MaskFn, scale: number): Field {
+  const g = babinetGrid(E, xIn, xOut, xOut, radius0, deltaMask, scale)
+  return { n: xOut.length, re: g.re, im: g.im }
+}
+
+/** Babinet propagation to an arbitrary rectangular output grid (yOut rows × xOut columns, same spacing as xIn). */
+export function babinetGrid(E: Field, xIn: Float64Array, xOut: Float64Array, yOut: Float64Array, radius0: number,
+  deltaMask: MaskFn, scale: number): Grid2 {
   const R = radius0 * scale * 1.02
+  // About 10 samples per λ/D across the mask (each averaged over 4×4 sub-samples), at least 32 in total.
+  const samples = Math.min(128, Math.max(32, 2 * Math.ceil(R * 10)))
   const q = samples / (2 * R)
   const u = focalCoords(samples, q)
   const dx = xIn[1] - xIn[0]
   const F = mftGeneral(E.re, E.im, xIn, u, u, -1, dx * dx)
   const ss = 4
-  mulMaskOnGrid(F, u, u, (uu, vv) => {
+  const m = sampledMask(deltaMask, `b:${R}:${samples}`, samples, samples, (k, l) => {
     let sr = 0, si = 0
     for (let b = 0; b < ss; b++) {
       for (let a = 0; a < ss; a++) {
-        const [r, i] = deltaMask((uu + ((a + 0.5) / ss - 0.5) / q) / scale, (vv + ((b + 0.5) / ss - 0.5) / q) / scale)
+        const [r, i] = deltaMask((u[k] + ((a + 0.5) / ss - 0.5) / q) / scale, (u[l] + ((b + 0.5) / ss - 0.5) / q) / scale)
         sr += r; si += i
       }
     }
     return [sr / (ss * ss), si / (ss * ss)]
   })
-  const back = mftGeneral(F.re, F.im, u, xOut, xOut, 1, 1 / (q * q))
-  // E_A resampled on the output grid (same spacing, centred): copy, then add the mask term.
-  const out = embed(E, xOut.length)
-  for (let i = 0; i < out.re.length; i++) { out.re[i] += back.re[i]; out.im[i] += back.im[i] }
-  return out
+  mulInPlace(F, m)
+  const back = mftGeneral(F.re, F.im, u, xOut, yOut, 1, 1 / (q * q))
+  // Add E_A itself where the output samples coincide with input samples.
+  addAligned(back, E, xIn, xOut, yOut)
+  return back
+}
+
+/** Index of the input sample at coordinate x, or −1 if x is not on the input grid. */
+function alignedIndex(xIn: Float64Array, x: number): number {
+  const dx = xIn[1] - xIn[0]
+  const i = Math.round((x - xIn[0]) / dx)
+  return i >= 0 && i < xIn.length && Math.abs(xIn[i] - x) < 1e-6 * dx ? i : -1
+}
+
+function addAligned(out: Grid2, E: Field, xIn: Float64Array, xOut: Float64Array, yOut: Float64Array): void {
+  const ix = Array.from(xOut, (x) => alignedIndex(xIn, x))
+  for (let l = 0; l < yOut.length; l++) {
+    const iy = alignedIndex(xIn, yOut[l])
+    if (iy < 0) continue
+    for (let k = 0; k < xOut.length; k++) {
+      if (ix[k] < 0) continue
+      out.re[l * xOut.length + k] += E.re[iy * E.n + ix[k]]
+      out.im[l * xOut.length + k] += E.im[iy * E.n + ix[k]]
+    }
+  }
 }
 
 /** Copy an n×n field into the centre of an m×m grid (m ≥ n, same parity). */
@@ -84,7 +127,7 @@ export function embed(E: Field, m: number): Field {
 
 /** Levels of the multi-scale scheme: focal half-width (λ/D) and samples per λ/D, plus the window radii. */
 interface Level { readonly half: number; readonly q: number }
-const LEVELS: readonly Level[] = [{ half: 4, q: 16 }, { half: 1, q: 64 }, { half: 0.25, q: 256 }]
+const LEVELS: readonly Level[] = [{ half: 4, q: 8 }, { half: 1, q: 32 }, { half: 0.25, q: 128 }]
 const FFT_Q = 4
 
 /**
@@ -92,9 +135,15 @@ const FFT_Q = 4
  * focal samples (the FFT level uses a half-sample offset) so the singular point is never sampled.
  */
 export function multiscalePropagate(E: Field, xIn: Float64Array, xOut: Float64Array, mask: MaskFn, scale: number): Field {
+  const g = multiscaleGrid(E, xIn, xOut, xOut, mask, scale)
+  return { n: xOut.length, re: g.re, im: g.im }
+}
+
+/** Multi-scale propagation to an arbitrary rectangular output grid (yOut rows × xOut columns, same spacing). */
+export function multiscaleGrid(E: Field, xIn: Float64Array, xOut: Float64Array, yOut: Float64Array, mask: MaskFn, scale: number): Grid2 {
   const n = E.n
-  const m = xOut.length
-  const out = makeField(m)
+  const mx = xOut.length, my = yOut.length
+  const out: Grid2 = { nx: mx, ny: my, re: new Float64Array(mx * my), im: new Float64Array(mx * my) }
   const wOuter = (r: number) => radialWindow(r, 0.5 * LEVELS[0].half, LEVELS[0].half)
   // Level 0: FFT on an n·FFT_Q grid, mask · (1 − W0). Half-sample tilt keeps the axis between samples.
   {
@@ -117,31 +166,29 @@ export function multiscalePropagate(E: Field, xIn: Float64Array, xOut: Float64Ar
     fftshift2d(re, N); fftshift2d(im, N)
     fft2d(re, im, N, false)
     fftshift2d(re, N); fftshift2d(im, N)
-    for (let l = 0; l < N; l++) {
-      const v = (l - N / 2) * du - shift
-      for (let k = 0; k < N; k++) {
-        const u = (k - N / 2) * du - shift
-        const w = 1 - wOuter(Math.hypot(u, v))
-        const i = l * N + k
-        if (w === 0) { re[i] = 0; im[i] = 0; continue }
-        const [mr, mi] = mask(u / scale, v / scale)
-        const r = (re[i] * mr - im[i] * mi) * w
-        im[i] = (re[i] * mi + im[i] * mr) * w
-        re[i] = r
-      }
-    }
+    const m0 = sampledMask(mask, `fft:${N}:${scale}`, N, N, (k, l) => {
+      const u = (k - N / 2) * du - shift, v = (l - N / 2) * du - shift
+      const w = 1 - wOuter(Math.hypot(u, v))
+      if (w === 0) return [0, 0]
+      const [mr, mi] = mask(u / scale, v / scale)
+      return [mr * w, mi * w]
+    })
+    mulInPlace({ re, im }, m0)
     fftshift2d(re, N); fftshift2d(im, N)
     fft2d(re, im, N, true)
     fftshift2d(re, N); fftshift2d(im, N)
-    const o2 = (N - m) / 2
     const norm = 1 / (N * N)
-    for (let y = 0; y < m; y++) {
-      for (let x = 0; x < m; x++) {
-        const i = (y + o2) * N + x + o2
-        const ph = -2 * Math.PI * shift * (xOut[x] + xOut[y])
+    // Output sample at x sits at index x·n + N/2 − 1/2 of the periodic FFT grid.
+    const idx = (x: number) => (((Math.round(x * n + N / 2 - 0.5) % N) + N) % N)
+    const kx = Array.from(xOut, idx)
+    for (let l = 0; l < my; l++) {
+      const row = idx(yOut[l]) * N
+      for (let k = 0; k < mx; k++) {
+        const i = row + kx[k]
+        const ph = -2 * Math.PI * shift * (xOut[k] + yOut[l])
         const c = Math.cos(ph), s = Math.sin(ph)
-        out.re[y * m + x] += (re[i] * c - im[i] * s) * norm
-        out.im[y * m + x] += (re[i] * s + im[i] * c) * norm
+        out.re[l * mx + k] += (re[i] * c - im[i] * s) * norm
+        out.im[l * mx + k] += (re[i] * s + im[i] * c) * norm
       }
     }
   }
@@ -155,14 +202,15 @@ export function multiscalePropagate(E: Field, xIn: Float64Array, xOut: Float64Ar
     const F = mftGeneral(E.re, E.im, xIn, u, u, -1, dx * dx)
     const wPrev = (r: number) => radialWindow(r, 0.5 * L.half, L.half)
     const wNext = (r: number) => (next ? radialWindow(r, 0.5 * next.half, next.half) : 0)
-    mulMaskOnGrid(F, u, u, (uu, vv) => {
-      const r = Math.hypot(uu, vv)
+    const mk = sampledMask(mask, `lvl:${li}:${scale}`, M, M, (k, l) => {
+      const r = Math.hypot(u[k], u[l])
       const w = wPrev(r) - wNext(r)
       if (w === 0) return [0, 0]
-      const [mr, mi] = mask(uu / scale, vv / scale)
+      const [mr, mi] = mask(u[k] / scale, u[l] / scale)
       return [mr * w, mi * w]
     })
-    const back = mftGeneral(F.re, F.im, u, xOut, xOut, 1, 1 / (L.q * L.q))
+    mulInPlace(F, mk)
+    const back = mftGeneral(F.re, F.im, u, xOut, yOut, 1, 1 / (L.q * L.q))
     for (let i = 0; i < out.re.length; i++) { out.re[i] += back.re[i]; out.im[i] += back.im[i] }
   }
   return out

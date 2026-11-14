@@ -3,7 +3,8 @@
  * plane A, focal-plane mask in plane B, Lyot stop in plane C) and by how light goes from A to C.
  */
 import { type Field, cloneField, pupilCoords } from './field.ts'
-import { type MaskFn, babinetPropagate, embed, multiscalePropagate } from './focalMask.ts'
+import { type MaskFn, babinetGrid, babinetPropagate, embed, multiscaleGrid, multiscalePropagate } from './focalMask.ts'
+import type { Grid2 } from './mft.ts'
 import { aplcApodizer, appPhase, shapedPupil } from './designs.ts'
 import { type PupilSpec, makeLyotStop, makePupil } from './pupils.ts'
 
@@ -66,6 +67,11 @@ export interface Coronagraph {
    * With `withMask` false the focal-plane mask is removed (used for the off-axis reference PSF).
    */
   toLyot(EA: Field, scale: number, withMask: boolean): Field
+  /**
+   * Lyot-plane field (before the stop) on an arbitrary grid, in units of D, used for the self-coherent camera's
+   * reference hole outside the pupil. Null for designs without a focal-plane mask that sends light there.
+   */
+  readonly toLyotGrid: ((EA: Field, scale: number, xs: Float64Array, ys: Float64Array) => Grid2) | null
 }
 
 export function lyotPadding(n: number): number {
@@ -140,7 +146,9 @@ export function buildCoronagraph(spec: CoronagraphSpec, pupilSpec: PupilSpec, n:
   const inner = pupilSpec.kind === 'circular' ? spec.lyotInner : Math.max(spec.lyotInner, pupilSpec.kind === 'obscured' ? pupilSpec.obscuration * 1.1 : spec.lyotInner)
   const stop = () => makeLyotStop(pupilSpec, { outer: spec.lyotOuter, inner, spiderWidth: pupilSpec.spiderWidth * 2 }, n, nC)
   const none = (E: Field) => embed(E, nC)
-  const base = { spec, n, nC, pupil, apodizer: null, phasePlate: null, lyot: null, mask: null, info: {} }
+  const base = { spec, n, nC, pupil, apodizer: null, phasePlate: null, lyot: null, mask: null, info: {}, toLyotGrid: null }
+  const bab = (d: MaskFn) => (E: Field, s: number, xs: Float64Array, ys: Float64Array) => babinetGrid(E, xA, xs, ys, r, d, s)
+  const msc = (m: MaskFn) => (E: Field, s: number, xs: Float64Array, ys: Float64Array) => multiscaleGrid(E, xA, xs, ys, m, s)
   const r = spec.maskRadius
   const occ: MaskFn = (u, v) => (u * u + v * v <= r * r ? [-1, 0] : [0, 0])
   switch (spec.kind) {
@@ -149,13 +157,13 @@ export function buildCoronagraph(spec: CoronagraphSpec, pupilSpec: PupilSpec, n:
     case 'lyot':
       return {
         ...base, lyot: stop(), mask: (u, v) => (u * u + v * v <= r * r ? [0, 0] : [1, 0]),
-        toLyot: (E, s, m) => (m ? babinetPropagate(E, xA, xC, r, occ, s) : none(E)),
+        toLyot: (E, s, m) => (m ? babinetPropagate(E, xA, xC, r, occ, s) : none(E)), toLyotGrid: bab(occ),
       }
     case 'aplc': {
       const d = aplcApodizer(pupil, n, r, pkey)
       return {
         ...base, apodizer: d.apodizer, lyot: stop(), mask: (u, v) => (u * u + v * v <= r * r ? [0, 0] : [1, 0]),
-        info: { eigenvalue: d.eigenvalue },
+        info: { eigenvalue: d.eigenvalue }, toLyotGrid: bab(occ),
         toLyot: (E, s, m) => (m ? babinetPropagate(E, xA, xC, r, occ, s) : none(E)),
       }
     }
@@ -164,7 +172,7 @@ export function buildCoronagraph(spec: CoronagraphSpec, pupilSpec: PupilSpec, n:
       const rod: MaskFn = (u, v) => (u * u + v * v <= r * r ? [-2, 0] : [0, 0])
       return {
         ...base, lyot: stop(), mask: (u, v) => (u * u + v * v <= r * r ? [-1, 0] : [1, 0]),
-        toLyot: (E, s, m) => (m ? babinetPropagate(E, xA, xC, r, rod, s) : none(E)),
+        toLyot: (E, s, m) => (m ? babinetPropagate(E, xA, xC, r, rod, s) : none(E)), toLyotGrid: bab(rod),
       }
     }
     case 'bandlimited': {
@@ -184,13 +192,13 @@ export function buildCoronagraph(spec: CoronagraphSpec, pupilSpec: PupilSpec, n:
     case 'fqpm':
       return {
         ...base, lyot: stop(), mask: fqpmMask,
-        toLyot: (E, s, m) => (m ? multiscalePropagate(E, xA, xC, fqpmMask, s) : none(E)),
+        toLyot: (E, s, m) => (m ? multiscalePropagate(E, xA, xC, fqpmMask, s) : none(E)), toLyotGrid: msc(fqpmMask),
       }
     case 'vortex': {
       const vm = vortexMask(spec.charge)
       return {
         ...base, lyot: stop(), mask: vm,
-        toLyot: (E, s, m) => (m ? multiscalePropagate(E, xA, xC, vm, s) : none(E)),
+        toLyot: (E, s, m) => (m ? multiscalePropagate(E, xA, xC, vm, s) : none(E)), toLyotGrid: msc(vm),
       }
     }
     case 'app':
