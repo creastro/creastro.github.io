@@ -32,7 +32,10 @@
     #p-tour{grid-area:tour}#p-train{grid-area:train}#p-image{grid-area:image}#p-controls{grid-area:controls}#p-curves{grid-area:curves}#p-wfs{grid-area:wfs}#p-loop{grid-area:loop}#p-read{grid-area:read}#p-info{grid-area:info}#p-notes{grid-area:notes}#p-bib{grid-area:bib}
     body.mode-expert #p-tour{display:none}body.mode-beginner .expert-only{display:none!important}
     .tour{display:grid;grid-template-columns:1fr auto;gap:10px 20px;align-items:center}.tour h3{margin:0;font-size:1.1rem}.tour p{margin:4px 0 0;color:var(--text)}.tour .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tour .count{color:var(--muted);font-size:.85rem}
-    #presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .vars{margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}.vars-title{margin:0 0 8px;color:var(--text);font-weight:650;font-size:.92rem}.vars-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}.vars .note{margin:8px 0 0}
+    .seg.small label{padding:4px 12px;font-size:.85rem;font-weight:600}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border:1px solid var(--accent);border-radius:999px;background:transparent;color:var(--accent);font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}.chip .tick{width:13px;height:13px;border:1.5px solid currentColor;border-radius:3px;display:inline-grid;place-items:center;font-size:11px;line-height:1}
+    .chip[aria-pressed=true]{background:var(--accent);color:var(--bg)}.chip[aria-pressed=true] .tick:after{content:"✓"}.chip:hover{background:rgba(143,227,255,.12)}.chip[aria-pressed=true]:hover{background:#b6efff}
     #diagram svg{display:block;width:100%;height:auto;max-height:360px}
     #diagram .lens{fill:rgba(143,227,255,.18);stroke:var(--accent);stroke-width:1.2}#diagram .beam-star{fill:rgba(230,159,0,.28);stroke:#E69F00;stroke-width:.8}#diagram .beam-planet{fill:rgba(86,180,233,.18);stroke:#56B4E9;stroke-width:.8;stroke-dasharray:4 3}#diagram .beam-wfs{fill:rgba(230,159,0,.18)}
     #diagram .bs{stroke:#edf2ff;stroke-width:3}#diagram .occ{fill:#000;stroke:#b3bfd8;stroke-width:.8}#diagram .slit{fill:#edf2ff}#diagram .glass{stroke:rgba(143,227,255,.5);stroke-width:3}#diagram .glassfill{fill:rgba(143,227,255,.3)}#diagram .phase{fill:#d6935a}#diagram .edge{stroke:#edf2ff}#diagram .none{stroke:#b3bfd8;stroke-dasharray:3 3}
@@ -96,7 +99,15 @@
           <div><h3 id="tour-title">…</h3><p id="tour-text" aria-live="polite"></p></div>
           <div class="nav"><span class="count" id="tour-count"></span><button class="button small" type="button" id="tour-start">Start</button><button class="button small" type="button" id="tour-prev">← Back</button><button class="button small primary" type="button" id="tour-next">Next →</button></div>
         </div>
-        <div id="presets" aria-label="Presets"></div>
+        <div class="vars" role="group" aria-labelledby="var-title">
+          <p class="vars-title" id="var-title">Try a variation of this step</p>
+          <div class="vars-row">
+            <div class="seg small" id="var-pupil" role="radiogroup" aria-label="Telescope mirror"></div>
+            <div class="chips" id="var-toggles"></div>
+            <button class="button small" type="button" id="var-reset" disabled>Reset this step</button>
+          </div>
+          <p class="note" id="var-status" role="status">Showing this step as designed.</p>
+        </div>
       </section>
 
       <section class="panel" id="p-train" aria-labelledby="t-train">

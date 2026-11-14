@@ -16,7 +16,7 @@ import { contrastCsv, loopCsv, savePng, saveText, throughputCsv } from './files.
 import { type Content, renderBibliography, renderInfo } from './panels.ts'
 import { buildStrip, fillDialog, fillStrip, planePanels } from './planeView.ts'
 import { PALETTE, drawPlot } from './plots.ts'
-import { PRESETS, TOUR } from './tour.ts'
+import { PUPIL_CHOICES, TOGGLES, TOUR, withPupil } from './tour.ts'
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
 const content = (window as unknown as { CORONAGRAPH_LAB_CONTENT?: Content }).CORONAGRAPH_LAB_CONTENT
@@ -29,6 +29,8 @@ const state = {
   throughput: null as { curve: Curve; iwa: number; designIwa: number } | null,
   history: [] as readonly LoopPoint[], running: false,
   frames: 0, wfsCount: 0,
+  /** Configuration the current tour step started from, to show and undo the variations. */
+  tourBase: DEFAULT_CONFIG as LabConfig,
   tour: 0, highlight: [] as readonly PlaneId[], openPlane: null as PlaneId | null,
 }
 
@@ -97,6 +99,7 @@ function setConfig(c: LabConfig): void {
   state.config = c
   state.throughput = null
   refreshControls()
+  refreshVariations()
   renderDiagram()
   if (kindsChanged) renderInfoPanels()
   requestFrame()
@@ -268,19 +271,57 @@ function showTourStep(i: number, apply: boolean): void {
   state.highlight = s.highlight
   if (!apply) { renderDiagram(); return }
   const c = s.config(state.config)
+  state.tourBase = c
   if (s.resetDm) send({ type: 'loop', action: 'reset', config: c, iterations: 0 })
   setConfig(c)
   if (s.runLoop) send({ type: 'loop', action: 'run', config: c, iterations: s.runLoop })
 }
 
+/* ---------- variations of a tour step ---------- */
+
+function buildVariations(): void {
+  const pupils = $('var-pupil')
+  for (const p of PUPIL_CHOICES) {
+    const id = `var-pupil-${p.kind}`
+    const input = document.createElement('input')
+    input.type = 'radio'; input.name = 'var-pupil'; input.id = id; input.value = p.kind
+    input.addEventListener('change', () => setConfig(withPupil(state.config, p.kind)))
+    const label = document.createElement('label')
+    label.htmlFor = id; label.textContent = p.label; label.dataset.tip = p.tip
+    pupils.append(input, label)
+  }
+  const toggles = $('var-toggles')
+  for (const t of TOGGLES) {
+    const b = document.createElement('button')
+    b.type = 'button'; b.className = 'chip'; b.id = t.id; b.dataset.tip = t.tip
+    b.innerHTML = '<span class="tick" aria-hidden="true"></span><span></span>'
+    ;(b.lastElementChild as HTMLElement).textContent = t.label
+    b.addEventListener('click', () => setConfig(t.set(state.config, !t.isOn(state.config), state.tourBase)))
+    toggles.appendChild(b)
+  }
+  $('var-reset').addEventListener('click', () => showTourStep(state.tour, true))
+}
+
+/** Show which variations are active, and whether the step differs from how it started. */
+function refreshVariations(): void {
+  const c = state.config
+  for (const p of PUPIL_CHOICES) $<HTMLInputElement>(`var-pupil-${p.kind}`).checked = c.pupil.kind === p.kind
+  const on: string[] = []
+  for (const t of TOGGLES) {
+    const pressed = t.isOn(c)
+    $(t.id).setAttribute('aria-pressed', String(pressed))
+    if (pressed !== t.isOn(state.tourBase)) on.push(`${t.label.toLowerCase()} ${pressed ? 'on' : 'off'}`)
+  }
+  if (c.pupil.kind !== state.tourBase.pupil.kind) on.unshift(PUPIL_CHOICES.find((p) => p.kind === c.pupil.kind)?.label.toLowerCase() ?? '')
+  const changed = JSON.stringify(c) !== JSON.stringify(state.tourBase)
+  $<HTMLButtonElement>('var-reset').disabled = !changed
+  $('var-status').textContent = !changed ? 'Showing this step as designed.'
+    : on.length ? `Changed from this step: ${on.join(', ')}.` : 'Changed from this step by the parameters below.'
+}
+
 function wire(): void {
   refreshControls = buildControls(() => state.config, setConfig)
-  for (const p of PRESETS) {
-    const b = document.createElement('button')
-    b.type = 'button'; b.className = 'button small'; b.id = p.id; b.textContent = p.label
-    b.addEventListener('click', () => setConfig(p.config(state.config)))
-    $('presets').appendChild(b)
-  }
+  buildVariations()
   const cm = $<HTMLSelectElement>('cmap')
   for (const n of COLORMAP_NAMES) { const o = document.createElement('option'); o.value = n; o.textContent = n; cm.appendChild(o) }
   cm.value = state.cmap

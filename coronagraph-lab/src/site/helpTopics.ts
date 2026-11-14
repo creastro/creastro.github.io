@@ -178,7 +178,7 @@ export const TIPS: Record<string, string> = {
   nact: 'Number of DM actuators across the pupil.', coupling: 'Response of an actuator’s neighbour, a fraction of its own.',
   noise: 'Add photon (Poisson) and read noise to the science image.', photons: 'Photons in the peak of an unocculted off-axis source.',
   rn: 'Detector read noise in electrons.',
-  'mode-beginner': 'Guided tour, presets and a few controls.', 'mode-expert': 'Every parameter, phase maps, curves and data export.',
+  'mode-beginner': 'Guided tour with variations to try, and a few controls.', 'mode-expert': 'Every parameter, phase maps, curves and data export.',
   'loop-run': 'Run the control loop for the given number of iterations.', 'loop-stop': 'Stop the loop after the current iteration.',
   'loop-reset': 'Flatten the deformable mirror and clear the history.', 'tp-run': 'Compute planet throughput against separation and the inner working angle.',
   'save-image': 'Download the detector image as a PNG file.', 'save-curve': 'Download the contrast curve as CSV.',

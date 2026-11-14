@@ -174,6 +174,31 @@ describe('desktop', () => {
     assert.ok(h.at(-1)! < h[0] / 100, `contrast ${h[0]} → ${h.at(-1)}`)
   })
 
+  it('tour variations show their state, can be undone one by one, and the step can be reset', async () => {
+    const { page } = await open('desktop')
+    for (let i = 0; i < 3; i++) { const c = await counts(page); await page.click('#tour-next'); await waitFrames(page, c.frames + 1) }
+    assert.equal(await page.isChecked('#var-pupil-circular'), true)
+    assert.equal(await page.getAttribute('#var-errors', 'aria-pressed'), 'true')
+    assert.equal(await page.isDisabled('#var-reset'), true)
+    let c = await counts(page)
+    await page.click('label[for=var-pupil-obscured]')
+    await waitFrames(page, c.frames + 1)
+    assert.equal(await page.isChecked('#var-pupil-obscured'), true)
+    assert.match((await page.textContent('#var-status')) ?? '', /obscured/i)
+    c = await counts(page)
+    await page.click('#var-errors')
+    await waitFrames(page, c.frames + 1)
+    assert.equal(await page.getAttribute('#var-errors', 'aria-pressed'), 'false')
+    await page.click('#var-errors')
+    assert.equal(await page.getAttribute('#var-errors', 'aria-pressed'), 'true')
+    c = await counts(page)
+    await page.click('#var-reset')
+    await waitFrames(page, c.frames + 1)
+    assert.equal(await page.isChecked('#var-pupil-circular'), true)
+    assert.equal(await page.isDisabled('#var-reset'), true)
+    assert.match((await page.textContent('#var-status')) ?? '', /as designed/)
+  })
+
   it('planes open in a large view by keyboard, theory dialogs open from the info buttons', async () => {
     const { page } = await open('desktop')
     await page.focus('#diagram [data-plane="C"]')

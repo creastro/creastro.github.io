@@ -15,7 +15,7 @@ export interface TourStep {
 
 const corOf = (c: LabConfig, kind: LabConfig['coronagraph']['kind']) =>
   ({ ...c, coronagraph: { ...c.coronagraph, kind, charge: 2, lyotOuter: DEFAULT_LYOT_OUTER[kind], maskRadius: kind === 'aplc' ? 2 : 3 } })
-const perfect = (c: LabConfig): LabConfig => ({ ...c, aberrations: { ...c.aberrations, screenRmsNm: 0, zernikeNm: c.aberrations.zernikeNm.map(() => 0), ncpaRmsNm: 0, amplitudeRms: 0 } })
+const perfect = (c: LabConfig): LabConfig => ({ ...c, aberrations: { ...c.aberrations, screenRmsNm: 0, zernikeNm: c.aberrations.zernikeNm.map(() => 0), ncpaRmsNm: 0, ncpaZernikeNm: c.aberrations.ncpaZernikeNm.map(() => 0), amplitudeRms: 0 } })
 const base: LabConfig = { ...DEFAULT_CONFIG, planets: [{ sep: 4, pa: 30, contrast: 1e-5 }] }
 /** Mostly low-order errors (18 nm RMS), which a 30-mode AO loop can correct. */
 const rough = { ...DEFAULT_CONFIG.aberrations, zernikeNm: [0, 0, 10, -8, 6, 5, -4, 4, 0, 3], screenRmsNm: 4, screenSlope: 3.5 }
@@ -61,11 +61,43 @@ export const TOUR: readonly TourStep[] = [
   },
 ]
 
-export interface Preset { readonly id: string; readonly label: string; readonly config: (c: LabConfig) => LabConfig }
+/** True when the optics have any wavefront or amplitude error. */
+export function hasErrors(c: LabConfig): boolean {
+  const a = c.aberrations
+  return a.screenRmsNm > 0 || a.ncpaRmsNm > 0 || a.amplitudeRms > 0 || a.zernikeNm.some((z) => z !== 0) || a.ncpaZernikeNm.some((z) => z !== 0)
+}
 
-export const PRESETS: readonly Preset[] = [
-  { id: 'preset-perfect', label: 'Perfect telescope', config: (c) => perfect(c) },
-  { id: 'preset-elt', label: 'Obscured telescope', config: (c) => ({ ...c, pupil: { ...c.pupil, kind: 'obscured', obscuration: 0.14, spiders: 4, spiderWidth: 0.01 } }) },
-  { id: 'preset-seg', label: 'Segmented mirror', config: (c) => ({ ...c, pupil: { ...c.pupil, kind: 'segmented', rings: 2, gap: 0.02, obscuration: 0.15 } }) },
-  { id: 'preset-broad', label: '20 % bandwidth', config: (c) => ({ ...c, bandwidth: 0.2, nLambda: 5 }) },
+/** Telescope shapes offered as variations of a tour step (one is always selected). */
+export const PUPIL_CHOICES = [
+  { kind: 'circular', label: 'Clear circular', tip: 'A clear circular mirror: the vortex and four-quadrant masks reach a full null.' },
+  { kind: 'obscured', label: 'Obscured + spiders', tip: 'A secondary mirror and four spider vanes block part of the pupil, as on most large telescopes.' },
+  { kind: 'segmented', label: 'Segmented mirror', tip: 'A mirror made of hexagonal segments with gaps, like Keck or JWST.' },
+] as const
+
+export function withPupil(c: LabConfig, kind: LabConfig['pupil']['kind']): LabConfig {
+  if (kind === 'obscured') return { ...c, pupil: { ...c.pupil, kind, obscuration: 0.14, spiders: 4, spiderWidth: 0.01 } }
+  if (kind === 'segmented') return { ...c, pupil: { ...c.pupil, kind, rings: 2, gap: 0.02, obscuration: 0.15 } }
+  return { ...c, pupil: { ...c.pupil, kind } }
+}
+
+/** On/off variations of a tour step. Turning one off restores what the step itself uses. */
+export interface Toggle {
+  readonly id: string
+  readonly label: string
+  readonly tip: string
+  readonly isOn: (c: LabConfig) => boolean
+  readonly set: (c: LabConfig, on: boolean, step: LabConfig) => LabConfig
+}
+
+export const TOGGLES: readonly Toggle[] = [
+  {
+    id: 'var-errors', label: 'Optical errors', tip: 'Small wavefront errors in the optics. Off: a perfect telescope.',
+    isOn: hasErrors,
+    set: (c, on, step) => ({ ...c, aberrations: on ? (hasErrors(step) ? step.aberrations : rough) : perfect(c).aberrations }),
+  },
+  {
+    id: 'var-band', label: '20 % bandwidth', tip: 'Add up 5 wavelengths across a 20 % band instead of one wavelength.',
+    isOn: (c) => c.bandwidth > 0,
+    set: (c, on) => ({ ...c, bandwidth: on ? 0.2 : 0, nLambda: 5 }),
+  },
 ]

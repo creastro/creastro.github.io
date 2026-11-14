@@ -1192,7 +1192,7 @@
 		noise: "Add photon (Poisson) and read noise to the science image.",
 		photons: "Photons in the peak of an unocculted off-axis source.",
 		rn: "Detector read noise in electrons.",
-		"mode-beginner": "Guided tour, presets and a few controls.",
+		"mode-beginner": "Guided tour with variations to try, and a few controls.",
 		"mode-expert": "Every parameter, phase maps, curves and data export.",
 		"loop-run": "Run the control loop for the given number of iterations.",
 		"loop-stop": "Stop the loop after the current iteration.",

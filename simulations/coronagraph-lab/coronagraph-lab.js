@@ -5209,6 +5209,7 @@
 			screenRmsNm: 0,
 			zernikeNm: c.aberrations.zernikeNm.map(() => 0),
 			ncpaRmsNm: 0,
+			ncpaZernikeNm: c.aberrations.ncpaZernikeNm.map(() => 0),
 			amplitudeRms: 0
 		}
 	});
@@ -5336,50 +5337,78 @@
 			}, "vortex")
 		}
 	];
-	var PRESETS = [
+	/** True when the optics have any wavefront or amplitude error. */
+	function hasErrors(c) {
+		const a = c.aberrations;
+		return a.screenRmsNm > 0 || a.ncpaRmsNm > 0 || a.amplitudeRms > 0 || a.zernikeNm.some((z) => z !== 0) || a.ncpaZernikeNm.some((z) => z !== 0);
+	}
+	/** Telescope shapes offered as variations of a tour step (one is always selected). */
+	var PUPIL_CHOICES = [
 		{
-			id: "preset-perfect",
-			label: "Perfect telescope",
-			config: (c) => perfect(c)
+			kind: "circular",
+			label: "Clear circular",
+			tip: "A clear circular mirror: the vortex and four-quadrant masks reach a full null."
 		},
 		{
-			id: "preset-elt",
-			label: "Obscured telescope",
-			config: (c) => ({
-				...c,
-				pupil: {
-					...c.pupil,
-					kind: "obscured",
-					obscuration: .14,
-					spiders: 4,
-					spiderWidth: .01
-				}
-			})
+			kind: "obscured",
+			label: "Obscured + spiders",
+			tip: "A secondary mirror and four spider vanes block part of the pupil, as on most large telescopes."
 		},
 		{
-			id: "preset-seg",
+			kind: "segmented",
 			label: "Segmented mirror",
-			config: (c) => ({
-				...c,
-				pupil: {
-					...c.pupil,
-					kind: "segmented",
-					rings: 2,
-					gap: .02,
-					obscuration: .15
-				}
-			})
-		},
-		{
-			id: "preset-broad",
-			label: "20 % bandwidth",
-			config: (c) => ({
-				...c,
-				bandwidth: .2,
-				nLambda: 5
-			})
+			tip: "A mirror made of hexagonal segments with gaps, like Keck or JWST."
 		}
 	];
+	function withPupil(c, kind) {
+		if (kind === "obscured") return {
+			...c,
+			pupil: {
+				...c.pupil,
+				kind,
+				obscuration: .14,
+				spiders: 4,
+				spiderWidth: .01
+			}
+		};
+		if (kind === "segmented") return {
+			...c,
+			pupil: {
+				...c.pupil,
+				kind,
+				rings: 2,
+				gap: .02,
+				obscuration: .15
+			}
+		};
+		return {
+			...c,
+			pupil: {
+				...c.pupil,
+				kind
+			}
+		};
+	}
+	var TOGGLES = [{
+		id: "var-errors",
+		label: "Optical errors",
+		tip: "Small wavefront errors in the optics. Off: a perfect telescope.",
+		isOn: hasErrors,
+		set: (c, on, step) => ({
+			...c,
+			aberrations: on ? hasErrors(step) ? step.aberrations : rough : perfect(c).aberrations
+		})
+	}, {
+		id: "var-band",
+		label: "20 % bandwidth",
+		tip: "Add up 5 wavelengths across a 20 % band instead of one wavelength.",
+		isOn: (c) => c.bandwidth > 0,
+		set: (c, on) => ({
+			...c,
+			bandwidth: on ? .2 : 0,
+			nLambda: 5
+		})
+	}];
 	// src/site/main.ts
 	/**
 	* Coronagraph Lab page: state, worker messages and rendering. The physics runs in coronagraph-worker.js
@@ -5401,6 +5430,8 @@
 		running: false,
 		frames: 0,
 		wfsCount: 0,
+		/** Configuration the current tour step started from, to show and undo the variations. */
+		tourBase: DEFAULT_CONFIG,
 		tour: 0,
 		highlight: [],
 		openPlane: null
@@ -5485,6 +5516,7 @@
 		state.config = c;
 		state.throughput = null;
 		refreshControls();
+		refreshVariations();
 		renderDiagram();
 		if (kindsChanged) renderInfoPanels();
 		requestFrame();
@@ -5778,6 +5810,7 @@
 			return;
 		}
 		const c = s.config(state.config);
+		state.tourBase = c;
 		if (s.resetDm) send({
 			type: "loop",
 			action: "reset",
@@ -5792,17 +5825,54 @@
 			iterations: s.runLoop
 		});
 	}
-	function wire() {
-		refreshControls = buildControls(() => state.config, setConfig);
-		for (const p of PRESETS) {
+	function buildVariations() {
+		const pupils = $("var-pupil");
+		for (const p of PUPIL_CHOICES) {
+			const id = `var-pupil-${p.kind}`;
+			const input = document.createElement("input");
+			input.type = "radio";
+			input.name = "var-pupil";
+			input.id = id;
+			input.value = p.kind;
+			input.addEventListener("change", () => setConfig(withPupil(state.config, p.kind)));
+			const label = document.createElement("label");
+			label.htmlFor = id;
+			label.textContent = p.label;
+			label.dataset.tip = p.tip;
+			pupils.append(input, label);
+		}
+		const toggles = $("var-toggles");
+		for (const t of TOGGLES) {
 			const b = document.createElement("button");
 			b.type = "button";
-			b.className = "button small";
-			b.id = p.id;
-			b.textContent = p.label;
-			b.addEventListener("click", () => setConfig(p.config(state.config)));
-			$("presets").appendChild(b);
+			b.className = "chip";
+			b.id = t.id;
+			b.dataset.tip = t.tip;
+			b.innerHTML = "<span class=\"tick\" aria-hidden=\"true\"></span><span></span>";
+			b.lastElementChild.textContent = t.label;
+			b.addEventListener("click", () => setConfig(t.set(state.config, !t.isOn(state.config), state.tourBase)));
+			toggles.appendChild(b);
 		}
+		$("var-reset").addEventListener("click", () => showTourStep(state.tour, true));
+	}
+	/** Show which variations are active, and whether the step differs from how it started. */
+	function refreshVariations() {
+		const c = state.config;
+		for (const p of PUPIL_CHOICES) $(`var-pupil-${p.kind}`).checked = c.pupil.kind === p.kind;
+		const on = [];
+		for (const t of TOGGLES) {
+			const pressed = t.isOn(c);
+			$(t.id).setAttribute("aria-pressed", String(pressed));
+			if (pressed !== t.isOn(state.tourBase)) on.push(`${t.label.toLowerCase()} ${pressed ? "on" : "off"}`);
+		}
+		if (c.pupil.kind !== state.tourBase.pupil.kind) on.unshift(PUPIL_CHOICES.find((p) => p.kind === c.pupil.kind)?.label.toLowerCase() ?? "");
+		const changed = JSON.stringify(c) !== JSON.stringify(state.tourBase);
+		$("var-reset").disabled = !changed;
+		$("var-status").textContent = !changed ? "Showing this step as designed." : on.length ? `Changed from this step: ${on.join(", ")}.` : "Changed from this step by the parameters below.";
+	}
+	function wire() {
+		refreshControls = buildControls(() => state.config, setConfig);
+		buildVariations();
 		const cm = $("cmap");
 		for (const n of COLORMAP_NAMES) {
 			const o = document.createElement("option");
