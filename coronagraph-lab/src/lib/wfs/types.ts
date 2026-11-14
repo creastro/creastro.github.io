@@ -14,6 +14,10 @@ export interface Measurement {
 export const PUPIL_WFS_KINDS = ['shack-hartmann', 'pyramid', 'zernike', 'curvature'] as const
 export type PupilWfsKind = (typeof PUPIL_WFS_KINDS)[number]
 
+export const FOCAL_WFS_KINDS = ['pairwise', 'phase-diversity', 'scc'] as const
+export type FocalWfsKind = (typeof FOCAL_WFS_KINDS)[number]
+export type WfsKind = PupilWfsKind | FocalWfsKind
+
 export interface PupilSensor {
   readonly kind: PupilWfsKind
   measure(E: Field): Measurement
