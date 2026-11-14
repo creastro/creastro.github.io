@@ -159,3 +159,23 @@ Injected aberration for the sensor tests: Noll 4, 5, 7, 11 = 10, −8, 6, −5 n
 | EFC, perfect knowledge, one-sided hole 3–7 λ/D, 16×16 DM | contrast improves ≥ 10× in 5 iterations | requirement; measured ≈ 1000× |
 | EFC with pairwise probing | ≥ 10× in 6 iterations | requirement |
 | Speckle nulling | ≥ 10× in 15 iterations | Bordé & Traub (2006) |
+
+### Page and end-to-end checks
+
+- `src/site/content.test.ts`: every topic cross-reference resolves, every control has a tooltip, every control group
+  exists in the page, the tour is complete, all user-facing text is English.
+- `e2e/site.e2e.ts` (Chromium, desktop 1400 × 1000 and iPhone 13): no console errors; diagram planes A, DM, B, C, D,
+  WFS present; non-empty detector image; bibliography rendered and every panel citation resolves; every help formula
+  compiles in KaTeX strict mode; Beginner/Expert toggle hides/shows expert controls, phase maps and equations;
+  a parameter change updates the image and thumbnails; all 9 coronagraphs × {Shack–Hartmann, pairwise probing}
+  render the diagram, images and sensor views (APLC shows its apodizer, APP/shaped pupil/baseline show "no mask");
+  an EFC loop with pairwise probing improves the dark-hole contrast ≥ 10× in 4 iterations; clicking quickly through
+  the tour still runs the last step's loop (≥ 100×); planes open by keyboard and close with Escape; theory dialogs
+  open; no horizontal scrolling on the phone viewport.
+
+### Performance (npup = 64, measured in Node on the build machine)
+
+Frame (image + planet + plane thumbnails + bare-telescope curve): 33–50 ms for most designs, ~105–130 ms for the
+vortex and four-quadrant masks (multi-scale propagation). Sensor calibrations are cached (Shack–Hartmann 0.35 s,
+pyramid ~2 s once); the EFC Jacobian (one propagation per actuator) takes 1–6 s once per configuration, with a
+progress indicator, and each EFC iteration ~0.2–0.3 s.

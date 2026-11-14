@@ -7,11 +7,11 @@
     "test": "vitest run",
     "lint": "oxlint",
     "typecheck": "tsc -b",
-    "check:citations": "node --experimental-strip-types scripts/check-citations.ts",
+    "check:citations": "node --experimental-strip-types --no-warnings scripts/check-citations.ts",
     "build:site": "vite build -c vite.site.main.config.ts && vite build -c vite.site.worker.config.ts && vite build -c vite.site.help.config.ts",
     "build": "tsc -b && npm run build:site",
-    "e2e": "node --experimental-strip-types --test e2e/site.e2e.ts",
-    "verify": "node --experimental-strip-types scripts/verify.ts"
+    "e2e": "node --experimental-strip-types --no-warnings --test e2e/site.e2e.ts",
+    "verify": "node --experimental-strip-types --no-warnings scripts/verify.ts"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

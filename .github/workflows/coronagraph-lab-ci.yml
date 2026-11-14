@@ -1,0 +1,51 @@
+name: Coronagraph Lab CI
+
+on:
+  pull_request:
+    paths:
+      - 'coronagraph-lab/**'
+      - 'simulations/coronagraph-lab/**'
+      - 'simulations/shared/**'
+      - '.github/workflows/coronagraph-lab-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'coronagraph-lab/**'
+      - 'simulations/coronagraph-lab/**'
+      - 'simulations/shared/**'
+      - '.github/workflows/coronagraph-lab-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: coronagraph-lab
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: coronagraph-lab/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Chromium for the end-to-end tests
+        run: npx playwright install --with-deps chromium
+
+      # Type check and lint, physics tests, citation check, production build, end-to-end tests.
+      - name: Verify
+        run: npm run verify
+
+      # The generated scripts are committed, so they must match what the sources produce.
+      - name: Check that the generated scripts are up to date
+        run: git diff --exit-code -- ../simulations/coronagraph-lab

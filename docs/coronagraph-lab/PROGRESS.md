@@ -10,9 +10,23 @@ Living checklist. Update after every milestone. See `SPEC.md` for the requiremen
   suppression and throughput tests.
 - [x] **M3 Wavefront sensors and control** — SH, pyramid, Zernike, curvature, pairwise probing, phase diversity,
   SCC; AO integrator, speckle nulling, EFC.
-- [ ] **M4 Diagram and UI** — page, worker, SVG diagram, plane thumbnails, outputs, Beginner/Expert, export.
-- [ ] **M5 Explanations and citations** — verified references ✔, info panels ✔, citation check ✔; bibliography rendering (with M4).
-- [ ] **M6 End-to-end tests and polish** — Playwright, `npm run verify`, screenshots, preview, CI.
+- [x] **M4 Diagram and UI** — page, worker, SVG diagram, plane thumbnails, outputs, Beginner/Expert, export.
+- [x] **M5 Explanations and citations** — verified references, info panels, help topics, bibliography, citation check.
+- [x] **M6 End-to-end tests and polish** — Playwright, `npm run verify`, screenshots, preview, card, CI.
+- [ ] Stretch goals (not started): PIAA, hybrid Lyot.
+
+## Visual checks done (browser screenshots)
+
+- Bare telescope: Airy rings; planet at 4 λ/D buried under rings ~100× brighter.
+- Classical Lyot, plane C: bright ring on the pupil edge, fainter ringing inside, removed by the stop.
+- Vortex, plane C: dark pupil interior, light outside; detector: planet stands out.
+- Aberrated vortex: speckle halo; AO (SH, 10 iterations): 1.5e-6 → 1.6e-7; NCPA leave a halo the AO cannot remove.
+- EFC + pairwise probing: one-sided dark hole 3–7 λ/D, ~4e-6 → ~2e-10 in 8 iterations, planet revealed.
+
+## Bugs found by the visual and end-to-end checks (fixed)
+
+- A loop requested while another was running was silently dropped (fast clicks through the tour); runs now queue.
+- Pupil-plane grid spacing was wrong for the padded Lyot plane (caught by the first coronagraph tests).
 
 ## Notes
 

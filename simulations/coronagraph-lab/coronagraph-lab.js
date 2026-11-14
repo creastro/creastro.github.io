@@ -3199,6 +3199,8 @@
 		let generation = 0;
 		let running = false;
 		let latest = null;
+		let looping = false;
+		let queued = null;
 		const tick = () => new Promise((r) => setTimeout(r, 0));
 		const ensureDm = (c) => {
 			const k = c.dm.nact * c.dm.nact;
@@ -3242,6 +3244,17 @@
 			});
 		}
 		async function runLoop(c, iterations) {
+			looping = true;
+			try {
+				await loopBody(c, iterations);
+			} finally {
+				looping = false;
+			}
+			const next = queued;
+			queued = null;
+			if (next) runLoop(next.config, next.iterations);
+		}
+		async function loopBody(c, iterations) {
 			ensureDm(c);
 			running = true;
 			latest = c;
@@ -3302,9 +3315,12 @@
 						iwa: innerWorkingAngle(curve),
 						designIwa: designIwa(o.cor.spec)
 					});
-				} else if (req.action === "stop") running = false;
-				else if (req.action === "reset") {
+				} else if (req.action === "stop") {
 					running = false;
+					queued = null;
+				} else if (req.action === "reset") {
+					running = false;
+					queued = null;
 					ensureDm(req.config);
 					loop.reset(nAct);
 					post({
@@ -3314,7 +3330,13 @@
 						message: "Deformable mirror flattened."
 					});
 					frame(-1, req.config);
-				} else if (!running) runLoop(req.config, req.iterations);
+				} else if (looping) {
+					running = false;
+					queued = {
+						config: req.config,
+						iterations: req.iterations
+					};
+				} else runLoop(req.config, req.iterations);
 			} catch (e) {
 				post({
 					type: "error",

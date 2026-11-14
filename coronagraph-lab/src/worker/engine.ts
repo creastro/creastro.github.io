@@ -18,6 +18,8 @@ export function createEngine(post: (r: Reply) => void): (req: Request) => void {
   let generation = 0
   let running = false
   let latest: LabConfig | null = null
+  let looping = false
+  let queued: { config: LabConfig; iterations: number } | null = null
   const tick = () => new Promise<void>((r) => setTimeout(r, 0))
 
   const ensureDm = (c: LabConfig) => {
@@ -41,6 +43,15 @@ export function createEngine(post: (r: Reply) => void): (req: Request) => void {
   }
 
   async function runLoop(c: LabConfig, iterations: number) {
+    looping = true
+    try { await loopBody(c, iterations) } finally { looping = false }
+    // A run requested while this one was busy starts now.
+    const next = queued
+    queued = null
+    if (next) void runLoop(next.config, next.iterations)
+  }
+
+  async function loopBody(c: LabConfig, iterations: number) {
     ensureDm(c)
     running = true
     latest = c
@@ -71,14 +82,16 @@ export function createEngine(post: (r: Reply) => void): (req: Request) => void {
         const o = opticsFor(req.config, memo)
         const curve = throughputCurve(o, SEPS.filter((s) => s <= req.config.fov))
         post({ type: 'throughput', id: req.id, curve, iwa: innerWorkingAngle(curve), designIwa: designIwa(o.cor.spec) })
-      } else if (req.action === 'stop') running = false
+      } else if (req.action === 'stop') { running = false; queued = null }
       else if (req.action === 'reset') {
         running = false
+        queued = null
         ensureDm(req.config)
         loop.reset(nAct)
         post({ type: 'loop', history: [], running: false, message: 'Deformable mirror flattened.' })
         void frame(-1, req.config)
-      } else if (!running) void runLoop(req.config, req.iterations)
+      } else if (looping) { running = false; queued = { config: req.config, iterations: req.iterations } }
+      else void runLoop(req.config, req.iterations)
     } catch (e) {
       post({ type: 'error', message: e instanceof Error ? e.message : String(e) })
     }
