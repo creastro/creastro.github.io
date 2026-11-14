@@ -5,7 +5,7 @@
  * one propagation per actuator.
  */
 import { type Dm, activeActuators } from '../dm.ts'
-import { makeField } from '../field.ts'
+import { type Field, makeField } from '../field.ts'
 import { entranceField } from '../optics.ts'
 import type { Optics } from '../train.ts'
 import { type DarkHole, fieldInHole } from './darkHole.ts'
@@ -19,27 +19,52 @@ export interface Jacobian {
   readonly cols: number
 }
 
-export function computeJacobian(model: Optics, dm: Dm, dh: DarkHole, onProgress?: (f: number) => void): Jacobian {
+/** Column of the Jacobian for actuator a: dark-hole field per nm of command. */
+export function jacobianColumn(model: Optics, dm: Dm, dh: DarkHole, a: number, E0: Field): { re: Float64Array; im: Float64Array } {
   const n = model.spec.npup
-  const lam = model.spec.wavelengthNm
-  const E0 = entranceField(model.pupil, new Float64Array(n * n), n, lam, 1)
+  const k0 = (2 * Math.PI) / model.spec.wavelengthNm
+  const f = makeField(n)
+  const ids = dm.idx[a], vs = dm.val[a]
+  for (let t = 0; t < ids.length; t++) {
+    const i = ids[t], w = k0 * vs[t]
+    // i·w·E0
+    f.re[i] = -w * E0.im[i]
+    f.im[i] = w * E0.re[i]
+  }
+  return fieldInHole(model, f, dh)
+}
+
+/** Unaberrated model field at plane A (before the apodizer), the point the Jacobian is linearised about. */
+export function modelField(model: Optics): Field {
+  const n = model.spec.npup
+  return entranceField(model.pupil, new Float64Array(n * n), n, model.spec.wavelengthNm, 1)
+}
+
+export function computeJacobian(model: Optics, dm: Dm, dh: DarkHole, onProgress?: (f: number) => void): Jacobian {
+  const E0 = modelField(model)
   const actuators = activeActuators(dm)
   const rows = dh.pixels.length, cols = actuators.length
   const re = new Float64Array(rows * cols), im = new Float64Array(rows * cols)
-  const k0 = (2 * Math.PI) / lam
   actuators.forEach((a, c) => {
-    const f = makeField(n)
-    const ids = dm.idx[a], vs = dm.val[a]
-    for (let t = 0; t < ids.length; t++) {
-      const i = ids[t], w = k0 * vs[t]
-      // i·w·E0
-      f.re[i] = -w * E0.im[i]
-      f.im[i] = w * E0.re[i]
-    }
-    const g = fieldInHole(model, f, dh)
+    const g = jacobianColumn(model, dm, dh, a, E0)
     for (let r = 0; r < rows; r++) { re[r * cols + c] = g.re[r]; im[r * cols + c] = g.im[r] }
     if (onProgress && c % 16 === 0) onProgress(c / cols)
   })
+  return { actuators, re, im, rows, cols }
+}
+
+/** Same as computeJacobian, yielding to the event loop every few columns so the worker stays responsive. */
+export async function computeJacobianAsync(model: Optics, dm: Dm, dh: DarkHole, onProgress: (f: number) => void,
+  pause: () => Promise<boolean>): Promise<Jacobian | null> {
+  const E0 = modelField(model)
+  const actuators = activeActuators(dm)
+  const rows = dh.pixels.length, cols = actuators.length
+  const re = new Float64Array(rows * cols), im = new Float64Array(rows * cols)
+  for (let c = 0; c < cols; c++) {
+    const g = jacobianColumn(model, dm, dh, actuators[c], E0)
+    for (let r = 0; r < rows; r++) { re[r * cols + c] = g.re[r]; im[r * cols + c] = g.im[r] }
+    if (c % 8 === 7) { onProgress((c + 1) / cols); if (!(await pause())) return null }
+  }
   return { actuators, re, im, rows, cols }
 }
 

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive coronagraphy simulator: nine coronagraphs, seven wavefront sensors, adaptive optics and dark-hole control, with a live optical-train diagram and cited explanations.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23080d1c'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%23000' stroke='%23ffcf6b' stroke-width='6'/%3E%3Ccircle cx='76' cy='34' r='5' fill='%2356B4E9'/%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Coronagraph Lab | Tin Mai (Mai Như Tín)">
+  <meta property="og:description" content="Interactive coronagraphy simulator: nine coronagraphs, seven wavefront sensors, adaptive optics and dark-hole control, with a live optical-train diagram and cited explanations.">
+  <meta property="og:url" content="https://creastro.github.io/simulations/coronagraph-lab/">
+  <meta property="og:image" content="https://creastro.github.io/simulations/coronagraph-lab/preview.jpg">
+  <title>Coronagraph Lab | Tin Mai (Mai Như Tín)</title>
+  <link rel="stylesheet" href="../shared/katex/katex.min.css">
+  <link rel="stylesheet" href="../shared/explain.css">
+  <style>
+    :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--warm:#ffcf6b;--border:rgba(255,255,255,.14);--panel:#111b30e0}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 system-ui,sans-serif}
+    .sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 80% 20%,#18345a55,transparent 55%),radial-gradient(ellipse at 20% 70%,#41266344,transparent 50%)}
+    .sky:before,.sky:after{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20px 30px,#fff 99%,transparent),radial-gradient(2px 2px at 90px 110px,#b5d9ff 99%,transparent),radial-gradient(1px 1px at 160px 60px,#fff 99%,transparent),radial-gradient(1px 1px at 220px 170px,#fff 99%,transparent);background-size:260px 220px;animation:twinkle 5s ease-in-out infinite alternate}.sky:after{transform:translate(65px,85px);opacity:.4;animation-delay:-3s;animation-duration:7s}@keyframes twinkle{from{opacity:.25}to{opacity:.85}}
+    a{color:var(--accent)}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.container{width:min(1240px,92%);margin:auto}
+    nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}.brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:12px}.nav-links a{padding:5px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;transition:background .2s,color .2s}.nav-links a:hover,.nav-links a:focus-visible,.nav-links .active{background:var(--accent);color:var(--bg)!important}.home-link{color:var(--accent)!important}
+    main{padding:70px 0 100px}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}.back{display:inline-block;margin-bottom:26px;font-size:.92rem;text-decoration:none}.back:hover,.back:focus-visible{text-decoration:underline}
+    h1{max-width:900px;font-size:clamp(2.2rem,5.5vw,4.4rem);line-height:1.06;letter-spacing:-.05em;margin:16px 0 22px}p{color:var(--muted)}.intro{max-width:860px;font-size:1.1rem}
+    .button{display:inline-block;padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover:not(:disabled){transform:translateY(-2px);background:#25405b;color:#fff}.button.primary:hover:not(:disabled){background:#b6efff;color:var(--bg)}.button.small{padding:5px 12px;font-size:.85rem}.button:disabled{opacity:.45;cursor:not-allowed}
+    [hidden]{display:none!important}
+    .modebar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:18px 0 0}
+    .seg{display:inline-flex;border:1px solid var(--accent);border-radius:999px;overflow:hidden}.seg input{position:absolute;opacity:0;pointer-events:none}.seg label{padding:6px 16px;color:var(--accent);cursor:pointer;font-weight:650;font-size:.92rem}.seg input:checked+label{background:var(--accent);color:var(--bg)}.seg input:focus-visible+label{outline:3px solid var(--warm);outline-offset:-3px}
+    .layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:"tour tour" "train train" "image controls" "curves controls" "wfs loop" "read info" "notes notes" "bib bib";gap:18px;margin-top:30px;align-items:start}
+    .panel{padding:18px 20px 20px;background:var(--panel);border:1px solid var(--border);border-radius:14px;min-width:0}
+    .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
+    #p-tour{grid-area:tour}#p-train{grid-area:train}#p-image{grid-area:image}#p-controls{grid-area:controls}#p-curves{grid-area:curves}#p-wfs{grid-area:wfs}#p-loop{grid-area:loop}#p-read{grid-area:read}#p-info{grid-area:info}#p-notes{grid-area:notes}#p-bib{grid-area:bib}
+    body.mode-expert #p-tour{display:none}body.mode-beginner .expert-only{display:none!important}
+    .tour{display:grid;grid-template-columns:1fr auto;gap:10px 20px;align-items:center}.tour h3{margin:0;font-size:1.1rem}.tour p{margin:4px 0 0;color:var(--text)}.tour .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tour .count{color:var(--muted);font-size:.85rem}
+    #presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    #diagram svg{display:block;width:100%;height:auto;max-height:360px}
+    #diagram .lens{fill:rgba(143,227,255,.18);stroke:var(--accent);stroke-width:1.2}#diagram .beam-star{fill:rgba(230,159,0,.28);stroke:#E69F00;stroke-width:.8}#diagram .beam-planet{fill:rgba(86,180,233,.18);stroke:#56B4E9;stroke-width:.8;stroke-dasharray:4 3}#diagram .beam-wfs{fill:rgba(230,159,0,.18)}
+    #diagram .bs{stroke:#edf2ff;stroke-width:3}#diagram .occ{fill:#000;stroke:#b3bfd8;stroke-width:.8}#diagram .slit{fill:#edf2ff}#diagram .glass{stroke:rgba(143,227,255,.5);stroke-width:3}#diagram .glassfill{fill:rgba(143,227,255,.3)}#diagram .phase{fill:#d6935a}#diagram .edge{stroke:#edf2ff}#diagram .none{stroke:#b3bfd8;stroke-dasharray:3 3}
+    #diagram .dm{fill:#2a3d63;stroke:var(--accent)}#diagram .act{fill:var(--warm)}#diagram .det{fill:#26314f;stroke:#edf2ff}#diagram .wfsbox{fill:#14213d;stroke:var(--accent)}#diagram .link{stroke:var(--accent);stroke-dasharray:4 3;fill:none}
+    #diagram text{fill:var(--text);font:12px system-ui,sans-serif}#diagram .lbl{text-anchor:middle;font-weight:700}#diagram .tiny{font-size:10.5px;fill:var(--muted)}#diagram .mid{text-anchor:middle}
+    #diagram .plane{cursor:pointer}#diagram .plane .hit{fill:transparent;stroke:transparent}#diagram .plane:hover .hit,#diagram .plane:focus-visible .hit{stroke:var(--accent);fill:rgba(143,227,255,.06)}#diagram .plane:focus{outline:none}#diagram .plane.hl .hit{stroke:var(--warm);stroke-width:2;fill:rgba(255,207,107,.08)}
+    .strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:10px}
+    .pcard{padding:8px;border:1px solid var(--border);border-radius:10px;background:#0b1326;cursor:pointer;min-width:0}.pcard:hover,.pcard:focus-visible{border-color:var(--accent)}.pcard.empty{opacity:.5}
+    .pname{font-size:.78rem;font-weight:650;margin-bottom:6px}.thumbs{display:flex;flex-wrap:wrap;gap:6px}.thumbs figure{margin:0;width:72px}.thumbs canvas{width:72px;height:auto;border-radius:4px;background:#05070f}.thumbs figcaption{font-size:.66rem;color:var(--muted);line-height:1.2;margin-top:2px}
+    canvas{display:block;width:100%}#image{aspect-ratio:1/1;border-radius:8px}#curve,#tp,#loop-c,#loop-r{height:240px}
+    .cbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;font:12px ui-monospace,monospace;color:var(--muted)}.cbar i{display:block;width:min(260px,50%);height:10px;border:1px solid rgba(255,255,255,.25);border-radius:5px}
+    .bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:8px 0 6px}.bar label{font-size:.88rem;color:var(--muted)}
+    .stats{margin:10px 0 0;font:13px/1.6 ui-monospace,monospace;color:var(--text)}
+    .field{display:grid;grid-template-columns:minmax(130px,190px) 1fr 96px;align-items:center;gap:10px;margin:7px 0}.field label{font-size:.88rem;color:var(--muted)}.field output{font:12px ui-monospace,monospace;color:var(--accent);text-align:right}.chk-field input{justify-self:start;width:18px;height:18px;accent-color:var(--accent)}
+    input[type=range]{width:100%;accent-color:var(--accent);margin:0}select,input[type=number]{padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#0d1730;color:var(--text);font:inherit;font-size:.9rem;max-width:100%}
+    fieldset{margin:0 0 14px;padding:4px 14px 8px;border:1px solid var(--border);border-radius:10px;min-width:0}legend{padding:0 8px;color:var(--text);font-weight:650;font-size:.92rem}
+    dl.read{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:4px 16px;margin:0;font-size:.88rem}dl.read dt{color:var(--muted)}dl.read dd{margin:0;text-align:right;font:12.5px ui-monospace,monospace;color:var(--accent)}
+    .views{display:flex;flex-wrap:wrap;gap:10px}.views figure{margin:0;width:calc(33% - 7px);min-width:120px}.views canvas{border-radius:6px;background:#05070f}.views figcaption{font-size:.78rem;color:var(--muted);margin-top:3px}
+    .note{font-size:.85rem;color:var(--muted)}.progress{font:13px ui-monospace,monospace;color:var(--warm)}
+    .info-block{border-top:1px solid var(--border);padding-top:10px;margin-top:10px}.info-block:first-of-type{border-top:0;margin-top:0;padding-top:0}
+    .info-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}.info-head h3{margin:0;font-size:1.02rem}.tag{color:var(--accent);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
+    .info-beginner{color:var(--text)}.info-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.info-list h4{margin:6px 0 2px;font-size:.82rem;color:var(--accent)}.info-list ul{margin:0;padding-left:18px;font-size:.86rem;color:var(--muted)}.info-sim,.info-refs{font-size:.86rem}
+    .formula-box{margin:8px 0;padding:6px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(143,227,255,.05);overflow-x:auto}.formula-box .f-note{display:block;color:var(--muted);font-size:.78rem}
+    #p-notes ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.93rem}#p-notes li{margin:7px 0}#p-notes strong{color:var(--text)}
+    @media(min-width:901px){#p-notes ul{columns:2;column-gap:40px}#p-notes li{break-inside:avoid}}
+    #bib{padding-left:22px;color:var(--muted);font-size:.88rem}#bib li{margin:5px 0}#bib a{word-break:break-word}#bib li:target{color:var(--text);background:rgba(255,207,107,.08)}.conf{color:var(--warm)}
+    dialog.plane-dlg{width:min(1000px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;border:1px solid var(--accent);border-radius:14px;background:#0f182c;color:var(--text)}dialog.plane-dlg::backdrop{background:rgba(4,8,18,.74)}
+    .pd-head{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border)}.pd-head h2{flex:1;margin:0;font-size:1.15rem}.pd-head button{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font-size:1.3rem;cursor:pointer}
+    #plane-body{padding:16px 18px;overflow:auto;max-height:calc(100vh - 110px)}#plane-body figure{width:calc(33% - 7px);min-width:200px}
+    noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
+    footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+    @media(max-width:1000px){.strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"tour" "train" "image" "controls" "curves" "wfs" "loop" "read" "info" "notes" "bib"}.info-cols{grid-template-columns:1fr}.views figure,#plane-body figure{width:calc(50% - 5px);min-width:0}}
+    @media(max-width:560px){main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 96px}.field label{grid-column:1/-1}.strip{grid-template-columns:repeat(2,minmax(0,1fr))}.tour{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body class="mode-beginner">
+  <div class="sky" aria-hidden="true"></div>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="../../">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="../../">Home</a><a href="../../#education">Education</a><a href="../../research">Research</a><a class="active" href="../../simulations">Simulations</a><a href="../../story">My story</a><a href="../../contact">Contact</a></div></nav></header>
+  <main class="container">
+    <a class="back" href="../">← All simulations</a><br>
+    <span class="eyebrow">Simulation · High-contrast imaging</span>
+    <h1>Coronagraph Lab</h1>
+    <p class="intro">Planets are billions of times fainter than the stars they orbit and sit only a fraction of an arcsecond away. A coronagraph removes the starlight so that the planet can be seen, and a deformable mirror, steered by a wavefront sensor, cleans up what the optics leave behind. Follow the light through the instrument, try nine coronagraphs and seven wavefront sensors, and close the loop to dig a dark hole.</p>
+    <div class="modebar">
+      <div class="seg" role="radiogroup" aria-label="Level of detail">
+        <input type="radio" name="mode" id="mode-beginner" checked><label for="mode-beginner">Beginner</label>
+        <input type="radio" name="mode" id="mode-expert"><label for="mode-expert">Expert</label>
+      </div>
+      <button class="button small" type="button" data-topic="basics" aria-haspopup="dialog">Basics: how to read this lab</button>
+      <span class="progress" id="progress" role="status" hidden></span>
+    </div>
+
+    <noscript><p>This simulation needs JavaScript. Please enable it to compute the images.</p></noscript>
+
+    <div class="layout">
+      <section class="panel" id="p-tour" aria-labelledby="t-tour">
+        <h2 id="t-tour">Guided tour</h2>
+        <div class="tour">
+          <div><h3 id="tour-title">…</h3><p id="tour-text" aria-live="polite"></p></div>
+          <div class="nav"><span class="count" id="tour-count"></span><button class="button small" type="button" id="tour-start">Start</button><button class="button small" type="button" id="tour-prev">← Back</button><button class="button small primary" type="button" id="tour-next">Next →</button></div>
+        </div>
+        <div id="presets" aria-label="Presets"></div>
+      </section>
+
+      <section class="panel" id="p-train" aria-labelledby="t-train">
+        <h2 id="t-train">Optical train</h2>
+        <p class="sub">Click a plane, or a card below, to see the light before and after it. Orange: starlight; blue: planet light.</p>
+        <div id="diagram"></div>
+        <div class="strip" id="strip"></div>
+      </section>
+
+      <section class="panel" id="p-image" aria-labelledby="t-image">
+        <h2 id="t-image">Detector image</h2>
+        <p class="sub">Star and planets in raw-contrast units (1 = peak of an unocculted off-axis source). Circles mark the planets.</p>
+        <div class="bar">
+          <span class="expert-only"><label for="scale">Scale</label> <select id="scale"><option value="log">Logarithmic</option><option value="linear">Linear</option></select></span>
+          <label for="cmap">Colour map</label><select id="cmap"></select>
+          <span class="expert-only"><label for="range">Dynamic range</label> <input type="range" id="range" min="3" max="11" step="1" value="8" style="width:110px;vertical-align:middle"> <output id="range-out" for="range">8 decades</output></span>
+        </div>
+        <canvas id="image" role="img" aria-label="Simulated detector image of the star after the coronagraph, with the planets marked by circles."></canvas>
+        <div class="cbar"><span id="cbar-min">10⁻⁸</span><i id="cbar-grad"></i><span id="cbar-max">1</span></div>
+        <p class="stats" id="stats" aria-live="off">…</p>
+        <div class="bar"><button class="button small" type="button" id="save-image">Save image (PNG)</button></div>
+      </section>
+
+      <section class="panel" id="p-controls" aria-labelledby="t-controls">
+        <h2 id="t-controls">Parameters</h2>
+        <form id="controls" autocomplete="off" onsubmit="return false">
+          <fieldset id="g-cor"><legend>Coronagraph</legend></fieldset>
+          <fieldset id="g-tel"><legend>Telescope and light</legend></fieldset>
+          <fieldset id="g-ab"><legend>Aberrations</legend></fieldset>
+          <fieldset id="g-ncpa"><legend>Non-common-path aberrations</legend></fieldset>
+          <fieldset id="g-planet"><legend>Planets</legend></fieldset>
+          <fieldset id="g-wfs"><legend>Wavefront sensor</legend></fieldset>
+          <fieldset id="g-ctl" class="expert-only"><legend>Deformable mirror and control</legend></fieldset>
+          <fieldset id="g-det" class="expert-only"><legend>Detector</legend></fieldset>
+        </form>
+      </section>
+
+      <section class="panel" id="p-curves" aria-labelledby="t-curves">
+        <h2 id="t-curves">Contrast and throughput</h2>
+        <p class="sub">Leftover starlight against separation, in the region the design darkens, compared with the bare telescope. Dots: the planets.</p>
+        <canvas id="curve" role="img" aria-label="Radial raw-contrast curve of the coronagraph compared with the bare telescope."></canvas>
+        <div class="bar"><button class="button small" type="button" id="save-curve">Save curve (CSV)</button></div>
+        <div class="expert-only">
+          <canvas id="tp" role="img" aria-label="Planet core throughput against separation, with the inner working angle marked."></canvas>
+          <div class="bar"><button class="button small" type="button" id="tp-run">Compute throughput</button><button class="button small" type="button" id="save-tp">Save throughput (CSV)</button></div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-wfs" aria-labelledby="t-wfs">
+        <h2 id="t-wfs">Wavefront sensor</h2>
+        <p class="sub note" id="wfs-note">…</p>
+        <div class="views" id="wfs-views"></div>
+        <p class="stats" id="wfs-err"></p>
+      </section>
+
+      <section class="panel" id="p-loop" aria-labelledby="t-loop">
+        <h2 id="t-loop">Closed loop</h2>
+        <p class="sub">Measure, correct with the deformable mirror, repeat. Contrast is the mean in the dark hole (3–7 λ/D, one side, by default).</p>
+        <div class="bar">
+          <label for="loop-n">Iterations</label><input type="number" id="loop-n" min="1" max="30" value="10" style="width:70px">
+          <button class="button small primary" type="button" id="loop-run">Run loop</button>
+          <button class="button small" type="button" id="loop-stop" disabled>Stop</button>
+          <button class="button small" type="button" id="loop-reset">Flatten DM</button>
+        </div>
+        <p class="note" id="loop-status" role="status">Loop idle.</p>
+        <canvas id="loop-c" role="img" aria-label="Dark-hole contrast against loop iteration."></canvas>
+        <canvas id="loop-r" class="expert-only" role="img" aria-label="Residual wavefront error against loop iteration in the science and sensor arms."></canvas>
+        <div class="bar expert-only"><button class="button small" type="button" id="save-loop">Save history (CSV)</button></div>
+      </section>
+
+      <section class="panel" id="p-read" aria-labelledby="t-read">
+        <h2 id="t-read">Derived quantities</h2>
+        <dl class="read" id="read" aria-label="Derived quantities"></dl>
+      </section>
+
+      <section class="panel" id="p-info" aria-labelledby="t-info">
+        <h2 id="t-info">How it works</h2>
+        <p class="sub">The selected coronagraph, wavefront sensor and control law. Switch to Expert for the equations.</p>
+        <div class="info-block" id="info-cor"></div>
+        <div class="info-block" id="info-wfs"></div>
+        <div class="info-block" id="info-ctl"></div>
+      </section>
+
+      <section class="panel" id="p-notes" aria-labelledby="t-notes">
+        <h2 id="t-notes">What to look for</h2>
+        <ul>
+          <li><strong>Lyot plane.</strong> Open plane C with the classical Lyot coronagraph: the starlight that leaks past the spot gathers in a bright ring on the pupil edge, and the stop cuts it away. With the vortex the inside of the pupil goes completely dark.</li>
+          <li><strong>Perfect nulls need perfect pupils.</strong> The vortex and four-quadrant masks cancel the star of a clear circular telescope almost completely. Add a central obstruction or segments and the null is lost; the APLC and APP are designed for any shape.</li>
+          <li><strong>Inner working angle.</strong> Move a planet towards the star: the mask dims it below about 1 λ/D for the vortex of charge 2, 3 λ/D for a 3 λ/D Lyot spot. Higher vortex charges reject more aberrations but push the IWA outwards (Expert: compute the throughput).</li>
+          <li><strong>Speckles.</strong> A few nanometres of wavefront error leave a speckle halo far above 10⁻⁸. Each spatial frequency of the error makes a pair of speckles at the matching separation.</li>
+          <li><strong>Blind spots of the AO loop.</strong> The pupil-plane sensor flattens its own arm. Non-common-path errors stay; focal-plane sensing (pairwise probing, SCC, phase diversity) sees them.</li>
+          <li><strong>Dark hole.</strong> EFC with pairwise probing digs a one-sided hole between 3 and 7 λ/D by 2–3 orders of magnitude in a few iterations; speckle nulling gets there more slowly.</li>
+          <li><strong>Bandwidth.</strong> At 20 % bandwidth the band-limited and Lyot masks leak more light (their size is fixed in λ0/D) while the vortex, an achromatic phase in this model, keeps its null.</li>
+          <li><strong>Limits of the model.</strong> Scalar Fraunhofer optics; monochromatic control at λ0; no polarisation, no time-varying turbulence, no Fresnel propagation between optics; noiseless wavefront sensors; a pixelated pupil edge that limits the phase-mask nulls near 10⁻⁸; 64 or 128 samples across the pupil. Interaction matrices and Jacobians come from the unaberrated model, as on real instruments.</li>
+        </ul>
+      </section>
+
+      <section class="panel" id="p-bib" aria-labelledby="t-bib">
+        <h2 id="t-bib">Bibliography</h2>
+        <p class="sub">Peer-reviewed sources for every coronagraph and sensor, each checked against its DOI record. Conference papers are marked.</p>
+        <ol id="bib"></ol>
+      </section>
+    </div>
+  </main>
+  <dialog class="plane-dlg" id="plane-dlg" aria-labelledby="plane-title">
+    <div class="pd-head"><h2 id="plane-title">Plane</h2><button type="button" id="plane-close" aria-label="Close the large view">×</button></div>
+    <div class="views" id="plane-body"></div>
+  </dialog>
+  <footer class="container">© Tin Mai (Mai Như Tín) · <a href="../../">Return home</a> · <a href="../">All simulations</a> · <a href="../../research">Research</a></footer>
+  <script src="help.js"></script>
+  <script src="coronagraph-lab.js"></script>
+  <script src="../shared/katex/katex.min.js"></script>
+  <script src="../shared/explain.js"></script>
+</body>
+</html>

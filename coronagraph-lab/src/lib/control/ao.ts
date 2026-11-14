@@ -5,7 +5,7 @@
  * with M the DM commands that best fit each mode. The loop flattens the wavefront seen by the sensor; the
  * non-common-path aberrations of the science arm are invisible to it.
  */
-import { type Dm, activeActuators, dmSurface, fitDm } from '../dm.ts'
+import { type Dm, activeActuators, dmFitter, dmSurface } from '../dm.ts'
 import { fieldFromAmpPhase } from '../field.ts'
 import { choleskySolve } from '../linalg.ts'
 import { rmsOverPupil } from '../optics.ts'
@@ -22,10 +22,10 @@ export interface DmModes {
 
 /** Zernike modes Noll 2 … nModes+1 as fitted by the DM. */
 export function dmZernikeModes(dm: Dm, pupil: Float64Array, nModes: number): DmModes {
-  const act = activeActuators(dm)
+  const fit = dmFitter(dm, pupil, activeActuators(dm))
   const commands: Float64Array[] = [], shapes: Float64Array[] = []
   for (let j = 2; j < nModes + 2; j++) {
-    const c = fitDm(dm, zernikeMap(j, dm.n), pupil, act)
+    const c = fit(zernikeMap(j, dm.n))
     commands.push(c)
     shapes.push(dmSurface(dm, c))
   }

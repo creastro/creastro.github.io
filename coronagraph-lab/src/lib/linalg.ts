@@ -5,6 +5,12 @@ export function choleskySolve(A: Float64Array, b: Float64Array, m: number): Floa
   return choleskyBack(choleskyFactor(A, m), b, m)
 }
 
+/** Factorise A once and return a solver for any right-hand side. */
+export function choleskySolver(A: Float64Array, m: number): (b: Float64Array) => Float64Array {
+  const L = choleskyFactor(A, m)
+  return (b) => choleskyBack(L, b, m)
+}
+
 /**
  * Regularised least squares (Tikhonov): x = (GᵀG + α·s·I)⁻¹ Gᵀ b, where G is rows×cols (row-major) and
  * s is the largest diagonal element of GᵀG, so that α is a relative regularisation.

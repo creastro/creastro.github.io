@@ -6,7 +6,7 @@
  * i.e. the factor of 2 of a reflection is included in the command.
  * An N-actuator mirror controls spatial frequencies up to N/2 cycles per pupil, i.e. a dark hole out to N/2 λ/D.
  */
-import { choleskySolve } from './linalg.ts'
+import { choleskySolver } from './linalg.ts'
 
 export interface DmSpec {
   readonly nact: number
@@ -74,33 +74,45 @@ export function dmSurface(dm: Dm, commandsNm: ArrayLike<number>): Float64Array {
   return out
 }
 
-/** Least-squares fit of DM commands to a target OPD over the pupil (normal equations, Cholesky). */
-export function fitDm(dm: Dm, targetNm: Float64Array, pupil: Float64Array, active: readonly number[]): Float64Array {
+/**
+ * Least-squares fitter of DM commands to target OPD maps over the pupil (normal equations, factorised once).
+ * Returns a function mapping a target OPD (nm) to the full actuator command vector (nm).
+ */
+export function dmFitter(dm: Dm, pupil: Float64Array, active: readonly number[]): (targetNm: Float64Array) => Float64Array {
   const m = active.length
   const A = new Float64Array(m * m)
-  const b = new Float64Array(m)
-  // Dense maps of the active influence functions on the pupil.
   const dense = active.map((k) => {
-    const d = new Map<number, number>()
-    const ids = dm.idx[k], vs = dm.val[k]
-    for (let t = 0; t < ids.length; t++) if (pupil[ids[t]] > 0) d.set(ids[t], vs[t] * pupil[ids[t]])
-    return d
+    const ids: number[] = [], ws: number[] = []
+    for (let t = 0; t < dm.idx[k].length; t++) { const i = dm.idx[k][t]; if (pupil[i] > 0) { ids.push(i); ws.push(dm.val[k][t] * pupil[i]) } }
+    return { ids: Int32Array.from(ids), ws: Float64Array.from(ws) }
   })
+  const tmp = new Float64Array(dm.n * dm.n)
   for (let a = 0; a < m; a++) {
-    for (const [i, v] of dense[a]) b[a] += v * targetNm[i]
+    const da = dense[a]
+    for (let t = 0; t < da.ids.length; t++) tmp[da.ids[t]] = da.ws[t]
     for (let c = a; c < m; c++) {
+      const dc = dense[c]
       let s = 0
-      const [small, big] = dense[a].size < dense[c].size ? [dense[a], dense[c]] : [dense[c], dense[a]]
-      for (const [i, v] of small) { const w = big.get(i); if (w !== undefined) s += v * w }
-      A[a * m + c] = s
-      A[c * m + a] = s
+      for (let t = 0; t < dc.ids.length; t++) s += tmp[dc.ids[t]] * dc.ws[t]
+      A[a * m + c] = s; A[c * m + a] = s
     }
+    for (let t = 0; t < da.ids.length; t++) tmp[da.ids[t]] = 0
   }
   for (let a = 0; a < m; a++) A[a * m + a] += 1e-6 * A[a * m + a] + 1e-12
-  const x = choleskySolve(A, b, m)
-  const out = new Float64Array(dm.idx.length)
-  active.forEach((k, a) => { out[k] = x[a] })
-  return out
+  const solve = choleskySolver(A, m)
+  return (target) => {
+    const b = new Float64Array(m)
+    for (let a = 0; a < m; a++) { const d = dense[a]; let s = 0; for (let t = 0; t < d.ids.length; t++) s += d.ws[t] * target[d.ids[t]]; b[a] = s }
+    const x = solve(b)
+    const out = new Float64Array(dm.idx.length)
+    active.forEach((k, a) => { out[k] = x[a] })
+    return out
+  }
+}
+
+/** Least-squares fit of DM commands to one target OPD over the pupil. */
+export function fitDm(dm: Dm, targetNm: Float64Array, pupil: Float64Array, active: readonly number[]): Float64Array {
+  return dmFitter(dm, pupil, active)(targetNm)
 }
 
 /** Actuators whose centre lies within the pupil radius plus half a pitch. */
