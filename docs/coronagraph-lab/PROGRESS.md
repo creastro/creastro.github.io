@@ -27,7 +27,7 @@ Living checklist. Update after every milestone. See `SPEC.md` for the requiremen
 
 - Tour presets replaced by reversible variations (pupil choice, optical errors, bandwidth) with a status line and
   "Reset this step".
-- Streamlined page: image and parameters side by side (image sticky); parameters in tabs (Instrument / Sensing &
+- Streamlined page: image and parameters side by side (the image scrolls with the page); parameters in tabs (Instrument / Sensing &
   control / Detector) with foldable groups; results in tabs (Contrast / Wavefront sensor / Closed loop / All numbers);
   "How it works" as three short cards whose full theory opens in a dialog; "What to look for" and the bibliography
   folded at the end. Desktop page height went from about 6600 px to 3500 px.
