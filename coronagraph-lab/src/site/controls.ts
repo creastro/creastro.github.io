@@ -54,7 +54,7 @@ export const CORONAGRAPH_LABELS: Readonly<Record<string, string>> = {
 function zern(j: number, name: string, ncpa = false): ControlSpec {
   const key = ncpa ? 'ncpaZernikeNm' : 'zernikeNm'
   return {
-    id: `${ncpa ? 'ncpa' : 'z'}${j}`, group: ncpa ? 'g-ncpa' : 'g-ab', label: `${name} (Z${j})`, type: 'range', expert: true,
+    id: `${ncpa ? 'ncpa' : 'z'}${j}`, group: ncpa ? 'g-ncpa' : 'g-zern', label: `${name} (Z${j})`, type: 'range', expert: true,
     min: -40, max: 40, step: 1, fmt: f(0, ' nm'),
     get: (c) => c.aberrations[key][j - 2],
     set: (c, v) => ab(c, { [key]: c.aberrations[key].map((x, i) => (i === j - 2 ? num(v) : x)) }),

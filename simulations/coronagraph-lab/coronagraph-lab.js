@@ -3619,7 +3619,7 @@
 		const key = ncpa ? "ncpaZernikeNm" : "zernikeNm";
 		return {
 			id: `${ncpa ? "ncpa" : "z"}${j}`,
-			group: ncpa ? "g-ncpa" : "g-ab",
+			group: ncpa ? "g-ncpa" : "g-zern",
 			label: `${name} (Z${j})`,
 			type: "range",
 			expert: true,
@@ -5757,6 +5757,9 @@
 			`${r.timeMs.toFixed(0)} ms`
 		]);
 		readout($("read"), rows);
+		$("key-contrast").textContent = sci(r.meanContrast);
+		$("key-gain").textContent = r.meanContrast > 0 ? `${(r.baselineContrast / r.meanContrast).toPrecision(3)}×` : "∞";
+		$("key-strehl").textContent = r.strehl.toFixed(2);
 		$("stats").textContent = `Contrast ${sci(r.meanContrast)} · ${r.meanContrast > 0 ? (r.baselineContrast / r.meanContrast).toPrecision(3) : "∞"}× below the bare telescope · Strehl ${r.strehl.toFixed(2)}`;
 	}
 	function renderFrame() {
@@ -5766,16 +5769,92 @@
 		if (state.frame) fillStrip($("strip"), state.frame, state.wfs, state.cmap, state.decades, state.expert);
 		if (state.openPlane && state.openPlane !== "WFS") openPlane(state.openPlane);
 	}
-	function renderInfoPanels() {
-		if (!content) return;
+	var INFO_SLOTS = [
+		["info-cor", "Coronagraph"],
+		["info-wfs", "Wavefront sensor"],
+		["info-ctl", "Control law"]
+	];
+	function selectedInfo(slot) {
+		if (!content) return void 0;
 		const c = state.config;
-		const pick = (list, id) => list.find((e) => e.id === id);
-		const cor = pick(content.coronagraphs, c.coronagraph.kind);
-		const wfs = pick(content.sensors, c.wfs.kind);
-		const ctl = pick(content.control, c.control.kind);
-		if (cor) renderInfo($("info-cor"), cor, content, state.expert);
-		if (wfs) renderInfo($("info-wfs"), wfs, content, state.expert);
-		if (ctl) renderInfo($("info-ctl"), ctl, content, state.expert);
+		if (slot === "info-cor") return content.coronagraphs.find((e) => e.id === c.coronagraph.kind);
+		if (slot === "info-wfs") return content.sensors.find((e) => e.id === c.wfs.kind);
+		return content.control.find((e) => e.id === c.control.kind);
+	}
+	/** Compact cards; the full theory opens in a dialog. */
+	function renderInfoPanels() {
+		for (const [slot, role] of INFO_SLOTS) {
+			const e = selectedInfo(slot);
+			const card = $(slot);
+			card.textContent = "";
+			if (!e) continue;
+			const tag = document.createElement("span");
+			tag.className = "tag";
+			tag.textContent = `${role} · ${e.family}`;
+			const h = document.createElement("h3");
+			h.textContent = e.name;
+			const p = document.createElement("p");
+			p.textContent = e.beginner;
+			const b = document.createElement("button");
+			b.type = "button";
+			b.className = "button small info-more";
+			b.textContent = "Theory, equations and sources";
+			b.setAttribute("aria-haspopup", "dialog");
+			b.addEventListener("click", () => openInfo(slot));
+			card.append(tag, h, p, b);
+		}
+	}
+	function openInfo(slot) {
+		const e = selectedInfo(slot);
+		if (!e || !content) return;
+		const dlg = $("info-dlg");
+		$("info-dlg-title").textContent = e.name;
+		renderInfo($("info-dlg-body"), e, content, true);
+		if (!dlg.open) dlg.showModal();
+	}
+	var tabRedraw = {
+		"res-contrast": () => renderCurves(),
+		"res-wfs": () => renderWfs(),
+		"res-loop": () => renderLoop()
+	};
+	function selectTab(panelId) {
+		const tab = document.querySelector(`[role=tab][aria-controls="${panelId}"]`);
+		const list = tab?.closest("[role=tablist]");
+		if (!tab || !list) return;
+		for (const t of Array.from(list.querySelectorAll("[role=tab]"))) {
+			const on = t === tab;
+			t.setAttribute("aria-selected", String(on));
+			t.tabIndex = on ? 0 : -1;
+			const panel = document.getElementById(t.getAttribute("aria-controls") ?? "");
+			if (panel) panel.hidden = !on;
+		}
+		tabRedraw[panelId]?.();
+	}
+	function setupTabs() {
+		for (const list of Array.from(document.querySelectorAll("[role=tablist]"))) {
+			const tabs = Array.from(list.querySelectorAll("[role=tab]"));
+			for (const t of tabs) {
+				t.addEventListener("click", () => selectTab(t.getAttribute("aria-controls") ?? ""));
+				t.addEventListener("keydown", (e) => {
+					const visible = tabs.filter((x) => x.offsetParent !== null);
+					const k = visible.indexOf(t);
+					const next = e.key === "ArrowRight" ? visible[(k + 1) % visible.length] : e.key === "ArrowLeft" ? visible[(k - 1 + visible.length) % visible.length] : null;
+					if (next) {
+						e.preventDefault();
+						next.focus();
+						selectTab(next.getAttribute("aria-controls") ?? "");
+					}
+				});
+			}
+		}
+		for (const b of Array.from(document.querySelectorAll("[data-goto]"))) b.addEventListener("click", () => {
+			const id = b.dataset.goto ?? "";
+			selectTab(id);
+			document.getElementById(id)?.closest("section")?.scrollIntoView({
+				behavior: "smooth",
+				block: "start"
+			});
+		});
 	}
 	function openPlane(id) {
 		const f = state.frame;
@@ -5792,6 +5871,7 @@
 		document.body.classList.toggle("mode-beginner", !expert);
 		$("mode-expert").checked = expert;
 		$("mode-beginner").checked = !expert;
+		if (!expert && $("par-det").hidden === false) selectTab("par-inst");
 		renderInfoPanels();
 		renderFrame();
 		renderWfs();
@@ -5818,12 +5898,15 @@
 			iterations: 0
 		});
 		setConfig(c);
-		if (s.runLoop) send({
-			type: "loop",
-			action: "run",
-			config: c,
-			iterations: s.runLoop
-		});
+		if (s.runLoop) {
+			selectTab("res-loop");
+			send({
+				type: "loop",
+				action: "run",
+				config: c,
+				iterations: s.runLoop
+			});
+		}
 	}
 	function buildVariations() {
 		const pupils = $("var-pupil");
@@ -5914,6 +5997,27 @@
 			config: state.config,
 			iterations: Number(iters.value) || 10
 		}));
+		setupTabs();
+		const idlg = $("info-dlg");
+		$("info-close").addEventListener("click", () => idlg.close());
+		idlg.addEventListener("click", (e) => {
+			if (e.target === idlg) {
+				idlg.close();
+				return;
+			}
+			const a = e.target.closest?.("a[href^=\"#ref-\"]");
+			if (a) {
+				e.preventDefault();
+				idlg.close();
+				const bib = $("p-bib");
+				bib.open = true;
+				document.querySelector(a.getAttribute("href") ?? "")?.scrollIntoView({
+					behavior: "smooth",
+					block: "center"
+				});
+				history.replaceState(null, "", a.getAttribute("href"));
+			}
+		});
 		$("loop-stop").addEventListener("click", () => send({
 			type: "loop",
 			action: "stop",
@@ -5951,6 +6055,7 @@
 			if (e.target === dlg) dlg.close();
 		});
 		buildStrip($("strip"), openPlane);
+		if (window.matchMedia("(max-width: 700px)").matches) $("strip-box").open = false;
 		let resize = 0;
 		window.addEventListener("resize", () => {
 			clearTimeout(resize);

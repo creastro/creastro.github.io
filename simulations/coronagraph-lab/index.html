@@ -26,10 +26,22 @@
     [hidden]{display:none!important}
     .modebar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:18px 0 0}
     .seg{display:inline-flex;border:1px solid var(--accent);border-radius:999px;overflow:hidden}.seg input{position:absolute;opacity:0;pointer-events:none}.seg label{padding:6px 16px;color:var(--accent);cursor:pointer;font-weight:650;font-size:.92rem}.seg input:checked+label{background:var(--accent);color:var(--bg)}.seg input:focus-visible+label{outline:3px solid var(--warm);outline-offset:-3px}
-    .layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:"tour tour" "train train" "image controls" "curves controls" "wfs loop" "read info" "notes notes" "bib bib";gap:18px;margin-top:30px;align-items:start}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"tour tour" "train train" "image controls" "results results" "info info" "notes notes" "bib bib";gap:18px;margin-top:30px;align-items:start}
     .panel{padding:18px 20px 20px;background:var(--panel);border:1px solid var(--border);border-radius:14px;min-width:0}
     .panel h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}.panel .sub{margin:0 0 12px;font-size:.85rem}
-    #p-tour{grid-area:tour}#p-train{grid-area:train}#p-image{grid-area:image}#p-controls{grid-area:controls}#p-curves{grid-area:curves}#p-wfs{grid-area:wfs}#p-loop{grid-area:loop}#p-read{grid-area:read}#p-info{grid-area:info}#p-notes{grid-area:notes}#p-bib{grid-area:bib}
+    #p-tour{grid-area:tour}#p-train{grid-area:train}#p-image{grid-area:image;position:sticky;top:12px}#p-controls{grid-area:controls}#p-results{grid-area:results}#p-info{grid-area:info}#p-notes{grid-area:notes}#p-bib{grid-area:bib}
+    .head-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin-bottom:10px}.head-row h2{margin:0}
+    .keys{display:flex;flex-wrap:wrap;gap:8px}.key{display:flex;flex-direction:column;align-items:flex-end;padding:3px 10px;border:1px solid var(--border);border-radius:8px;background:#0b1326;line-height:1.25}.key small{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.key b{font:600 .9rem ui-monospace,monospace;color:var(--accent);font-variant-numeric:tabular-nums}
+    .tabs{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 14px;border-bottom:1px solid var(--border)}.tabs [role=tab]{padding:7px 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);font:inherit;font-size:.92rem;font-weight:600;cursor:pointer;margin-bottom:-1px}.tabs [role=tab]:hover{color:var(--text)}.tabs [role=tab][aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+    [role=tabpanel] h3{margin:0 0 2px;font-size:1rem}
+    details.group{margin:0 0 10px;border:1px solid var(--border);border-radius:10px;padding:2px 12px}details.group>summary{padding:7px 0;cursor:pointer;font-weight:650;font-size:.92rem;color:var(--text)}details.group[open]>summary{border-bottom:1px solid var(--border);margin-bottom:4px}
+    details.drawer{margin-top:10px}details.drawer>summary{cursor:pointer;color:var(--accent);font-size:.88rem;font-weight:600;padding:4px 0}
+    .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .info-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.info-card{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--border);border-radius:12px;background:#0b1326}.info-card h3{margin:0;font-size:1rem}.info-card p{margin:0;font-size:.9rem;color:var(--muted)}.info-card .button{align-self:flex-start;margin-top:auto}
+    details.fold>summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;cursor:pointer;list-style:none}details.fold>summary::-webkit-details-marker{display:none}details.fold>summary h2{margin:0}details.fold>summary:before{content:"▸";color:var(--accent);transition:transform .15s}details.fold[open]>summary:before{transform:rotate(90deg)}.hint{color:var(--muted);font-size:.85rem}
+    .linkish{padding:0;border:0;background:none;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer}
+    #info-dlg-body .info-head h3{display:none}
+    #info-dlg-body{padding:6px 22px 22px;overflow:auto;max-height:calc(100vh - 110px)}
     body.mode-expert #p-tour{display:none}body.mode-beginner .expert-only{display:none!important}
     .tour{display:grid;grid-template-columns:1fr auto;gap:10px 20px;align-items:center}.tour h3{margin:0;font-size:1.1rem}.tour p{margin:4px 0 0;color:var(--text)}.tour .nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tour .count{color:var(--muted);font-size:.85rem}
     .vars{margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}.vars-title{margin:0 0 8px;color:var(--text);font-weight:650;font-size:.92rem}.vars-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}.vars .note{margin:8px 0 0}
@@ -68,8 +80,8 @@
     noscript p{padding:16px;border:1px solid var(--border);border-radius:10px}
     footer{padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
     @media(max-width:1000px){.strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"tour" "train" "image" "controls" "curves" "wfs" "loop" "read" "info" "notes" "bib"}.info-cols{grid-template-columns:1fr}.views figure,#plane-body figure{width:calc(50% - 5px);min-width:0}}
-    @media(max-width:560px){main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 96px}.field label{grid-column:1/-1}.strip{grid-template-columns:repeat(2,minmax(0,1fr))}.tour{grid-template-columns:1fr}}
+    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"tour" "train" "image" "controls" "results" "info" "notes" "bib"}#p-image{position:static}.info-cols,.info-cards{grid-template-columns:1fr}.views figure,#plane-body figure{width:calc(50% - 5px);min-width:0}}
+    @media(max-width:560px){#diagram{overflow-x:auto}#diagram svg{min-width:640px}main{padding:50px 0 80px}.panel{padding:16px 14px 18px}.field{grid-template-columns:1fr 96px}.field label{grid-column:1/-1}.strip{grid-template-columns:repeat(2,minmax(0,1fr))}.tour{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
   </style>
 </head>
@@ -112,87 +124,121 @@
 
       <section class="panel" id="p-train" aria-labelledby="t-train">
         <h2 id="t-train">Optical train</h2>
-        <p class="sub">Click a plane, or a card below, to see the light before and after it. Orange: starlight; blue: planet light.</p>
+        <p class="sub">Click a plane to see the light before and after it. Orange: starlight; blue: planet light.</p>
         <div id="diagram"></div>
-        <div class="strip" id="strip"></div>
+        <details class="drawer" id="strip-box" open>
+          <summary>Plane thumbnails</summary>
+          <div class="strip" id="strip"></div>
+        </details>
       </section>
 
       <section class="panel" id="p-image" aria-labelledby="t-image">
-        <h2 id="t-image">Detector image</h2>
-        <p class="sub">Star and planets in raw-contrast units (1 = peak of an unocculted off-axis source). Circles mark the planets.</p>
-        <div class="bar">
-          <span class="expert-only"><label for="scale">Scale</label> <select id="scale"><option value="log">Logarithmic</option><option value="linear">Linear</option></select></span>
-          <label for="cmap">Colour map</label><select id="cmap"></select>
-          <span class="expert-only"><label for="range">Dynamic range</label> <input type="range" id="range" min="3" max="11" step="1" value="8" style="width:110px;vertical-align:middle"> <output id="range-out" for="range">8 decades</output></span>
+        <div class="head-row">
+          <h2 id="t-image">Detector image</h2>
+          <div class="keys" aria-label="Key numbers">
+            <span class="key" data-tip="Mean leftover starlight in the region the coronagraph darkens (1 = peak of an off-axis source)."><small>Contrast</small><b id="key-contrast">…</b></span>
+            <span class="key" data-tip="How much darker than the bare telescope in the same region."><small>Gain</small><b id="key-gain">…</b></span>
+            <span class="key" data-tip="Peak of the image compared with a perfect telescope (science arm)."><small>Strehl</small><b id="key-strehl">…</b></span>
+          </div>
         </div>
         <canvas id="image" role="img" aria-label="Simulated detector image of the star after the coronagraph, with the planets marked by circles."></canvas>
         <div class="cbar"><span id="cbar-min">10⁻⁸</span><i id="cbar-grad"></i><span id="cbar-max">1</span></div>
         <p class="stats" id="stats" aria-live="off">…</p>
-        <div class="bar"><button class="button small" type="button" id="save-image">Save image (PNG)</button></div>
+        <details class="drawer">
+          <summary>Display and export</summary>
+          <div class="bar">
+            <span class="expert-only"><label for="scale">Scale</label> <select id="scale"><option value="log">Logarithmic</option><option value="linear">Linear</option></select></span>
+            <label for="cmap">Colour map</label><select id="cmap"></select>
+            <span class="expert-only"><label for="range">Dynamic range</label> <input type="range" id="range" min="3" max="11" step="1" value="8" style="width:110px;vertical-align:middle"> <output id="range-out" for="range">8 decades</output></span>
+            <button class="button small" type="button" id="save-image">Save image (PNG)</button>
+          </div>
+        </details>
       </section>
 
       <section class="panel" id="p-controls" aria-labelledby="t-controls">
         <h2 id="t-controls">Parameters</h2>
+        <div class="tabs" role="tablist" aria-label="Parameter groups" data-tabs="par">
+          <button type="button" role="tab" id="tab-inst" aria-controls="par-inst" aria-selected="true">Instrument</button>
+          <button type="button" role="tab" id="tab-sense" aria-controls="par-sense" aria-selected="false" tabindex="-1">Sensing &amp; control</button>
+          <button type="button" role="tab" id="tab-det" aria-controls="par-det" aria-selected="false" tabindex="-1" class="expert-only">Detector</button>
+        </div>
         <form id="controls" autocomplete="off" onsubmit="return false">
-          <fieldset id="g-cor"><legend>Coronagraph</legend></fieldset>
-          <fieldset id="g-tel"><legend>Telescope and light</legend></fieldset>
-          <fieldset id="g-ab"><legend>Aberrations</legend></fieldset>
-          <fieldset id="g-ncpa"><legend>Non-common-path aberrations</legend></fieldset>
-          <fieldset id="g-planet"><legend>Planets</legend></fieldset>
-          <fieldset id="g-wfs"><legend>Wavefront sensor</legend></fieldset>
-          <fieldset id="g-ctl" class="expert-only"><legend>Deformable mirror and control</legend></fieldset>
-          <fieldset id="g-det" class="expert-only"><legend>Detector</legend></fieldset>
+          <div role="tabpanel" id="par-inst" aria-labelledby="tab-inst">
+            <details class="group" open><summary>Coronagraph</summary><div id="g-cor"></div></details>
+            <details class="group" open><summary>Telescope and light</summary><div id="g-tel"></div></details>
+            <details class="group" open><summary>Aberrations</summary><div id="g-ab"></div></details>
+            <details class="group expert-only"><summary>Zernike modes</summary><div id="g-zern"></div></details>
+            <details class="group"><summary>Non-common-path aberrations</summary><div id="g-ncpa"></div></details>
+            <details class="group" open><summary>Planets</summary><div id="g-planet"></div></details>
+          </div>
+          <div role="tabpanel" id="par-sense" aria-labelledby="tab-sense" hidden>
+            <details class="group" open><summary>Wavefront sensor</summary><div id="g-wfs"></div></details>
+            <details class="group expert-only" open><summary>Deformable mirror and control</summary><div id="g-ctl"></div></details>
+            <p class="note">Run the loop from <button type="button" class="linkish" data-goto="res-loop">Results › Closed loop</button>.</p>
+          </div>
+          <div role="tabpanel" id="par-det" aria-labelledby="tab-det" hidden>
+            <details class="group" open><summary>Detector</summary><div id="g-det"></div></details>
+          </div>
         </form>
       </section>
 
-      <section class="panel" id="p-curves" aria-labelledby="t-curves">
-        <h2 id="t-curves">Contrast and throughput</h2>
-        <p class="sub">Leftover starlight against separation, in the region the design darkens, compared with the bare telescope. Dots: the planets.</p>
-        <canvas id="curve" role="img" aria-label="Radial raw-contrast curve of the coronagraph compared with the bare telescope."></canvas>
-        <div class="bar"><button class="button small" type="button" id="save-curve">Save curve (CSV)</button></div>
-        <div class="expert-only">
-          <canvas id="tp" role="img" aria-label="Planet core throughput against separation, with the inner working angle marked."></canvas>
-          <div class="bar"><button class="button small" type="button" id="tp-run">Compute throughput</button><button class="button small" type="button" id="save-tp">Save throughput (CSV)</button></div>
+      <section class="panel" id="p-results" aria-label="Results">
+        <div class="tabs" role="tablist" aria-label="Results" data-tabs="res">
+          <button type="button" role="tab" id="tab-contrast" aria-controls="res-contrast" aria-selected="true">Contrast</button>
+          <button type="button" role="tab" id="tab-wfs" aria-controls="res-wfs" aria-selected="false" tabindex="-1">Wavefront sensor</button>
+          <button type="button" role="tab" id="tab-loop" aria-controls="res-loop" aria-selected="false" tabindex="-1">Closed loop</button>
+          <button type="button" role="tab" id="tab-read" aria-controls="res-read" aria-selected="false" tabindex="-1">All numbers</button>
         </div>
-      </section>
-
-      <section class="panel" id="p-wfs" aria-labelledby="t-wfs">
-        <h2 id="t-wfs">Wavefront sensor</h2>
-        <p class="sub note" id="wfs-note">…</p>
-        <div class="views" id="wfs-views"></div>
-        <p class="stats" id="wfs-err"></p>
-      </section>
-
-      <section class="panel" id="p-loop" aria-labelledby="t-loop">
-        <h2 id="t-loop">Closed loop</h2>
-        <p class="sub">Measure, correct with the deformable mirror, repeat. Contrast is the mean in the dark hole (3–7 λ/D, one side, by default).</p>
-        <div class="bar">
-          <label for="loop-n">Iterations</label><input type="number" id="loop-n" min="1" max="30" value="10" style="width:70px">
-          <button class="button small primary" type="button" id="loop-run">Run loop</button>
-          <button class="button small" type="button" id="loop-stop" disabled>Stop</button>
-          <button class="button small" type="button" id="loop-reset">Flatten DM</button>
+        <div role="tabpanel" id="res-contrast" aria-labelledby="tab-contrast">
+          <h3 id="t-curves">Contrast and throughput</h3>
+          <p class="sub">Leftover starlight against separation, in the region the design darkens, compared with the bare telescope. Dots: the planets.</p>
+          <div class="pair">
+            <div><canvas id="curve" role="img" aria-label="Radial raw-contrast curve of the coronagraph compared with the bare telescope."></canvas>
+              <div class="bar"><button class="button small" type="button" id="save-curve">Save curve (CSV)</button></div></div>
+            <div class="expert-only"><canvas id="tp" role="img" aria-label="Planet core throughput against separation, with the inner working angle marked."></canvas>
+              <div class="bar"><button class="button small" type="button" id="tp-run">Compute throughput</button><button class="button small" type="button" id="save-tp">Save throughput (CSV)</button></div></div>
+          </div>
         </div>
-        <p class="note" id="loop-status" role="status">Loop idle.</p>
-        <canvas id="loop-c" role="img" aria-label="Dark-hole contrast against loop iteration."></canvas>
-        <canvas id="loop-r" class="expert-only" role="img" aria-label="Residual wavefront error against loop iteration in the science and sensor arms."></canvas>
-        <div class="bar expert-only"><button class="button small" type="button" id="save-loop">Save history (CSV)</button></div>
-      </section>
-
-      <section class="panel" id="p-read" aria-labelledby="t-read">
-        <h2 id="t-read">Derived quantities</h2>
-        <dl class="read" id="read" aria-label="Derived quantities"></dl>
+        <div role="tabpanel" id="res-wfs" aria-labelledby="tab-wfs" hidden>
+          <h3 id="t-wfs">Wavefront sensor</h3>
+          <p class="sub note" id="wfs-note">…</p>
+          <div class="views" id="wfs-views"></div>
+          <p class="stats" id="wfs-err"></p>
+        </div>
+        <div role="tabpanel" id="res-loop" aria-labelledby="tab-loop" hidden>
+          <h3 id="t-loop">Closed loop</h3>
+          <p class="sub">Measure, correct with the deformable mirror, repeat. Contrast is the mean in the dark hole (3–7 λ/D, one side, by default).</p>
+          <div class="bar">
+            <label for="loop-n">Iterations</label><input type="number" id="loop-n" min="1" max="30" value="10" style="width:70px">
+            <button class="button small primary" type="button" id="loop-run">Run loop</button>
+            <button class="button small" type="button" id="loop-stop" disabled>Stop</button>
+            <button class="button small" type="button" id="loop-reset">Flatten DM</button>
+            <button class="button small expert-only" type="button" id="save-loop">Save history (CSV)</button>
+          </div>
+          <p class="note" id="loop-status" role="status">Loop idle.</p>
+          <div class="pair">
+            <canvas id="loop-c" role="img" aria-label="Dark-hole contrast against loop iteration."></canvas>
+            <canvas id="loop-r" class="expert-only" role="img" aria-label="Residual wavefront error against loop iteration in the science and sensor arms."></canvas>
+          </div>
+        </div>
+        <div role="tabpanel" id="res-read" aria-labelledby="tab-read" hidden>
+          <h3 id="t-read">Derived quantities</h3>
+          <dl class="read" id="read" aria-label="Derived quantities"></dl>
+        </div>
       </section>
 
       <section class="panel" id="p-info" aria-labelledby="t-info">
         <h2 id="t-info">How it works</h2>
-        <p class="sub">The selected coronagraph, wavefront sensor and control law. Switch to Expert for the equations.</p>
-        <div class="info-block" id="info-cor"></div>
-        <div class="info-block" id="info-wfs"></div>
-        <div class="info-block" id="info-ctl"></div>
+        <p class="sub">The coronagraph, sensor and control law you selected. Open one for its theory, equations and sources.</p>
+        <div class="info-cards">
+          <article class="info-card" id="info-cor"></article>
+          <article class="info-card" id="info-wfs"></article>
+          <article class="info-card" id="info-ctl"></article>
+        </div>
       </section>
 
-      <section class="panel" id="p-notes" aria-labelledby="t-notes">
-        <h2 id="t-notes">What to look for</h2>
+      <details class="panel fold" id="p-notes">
+        <summary><h2 id="t-notes">What to look for</h2><span class="hint">8 things to try, and the limits of the model</span></summary>
         <ul>
           <li><strong>Lyot plane.</strong> Open plane C with the classical Lyot coronagraph: the starlight that leaks past the spot gathers in a bright ring on the pupil edge, and the stop cuts it away. With the vortex the inside of the pupil goes completely dark.</li>
           <li><strong>Perfect nulls need perfect pupils.</strong> The vortex and four-quadrant masks cancel the star of a clear circular telescope almost completely. Add a central obstruction or segments and the null is lost; the APLC and APP are designed for any shape.</li>
@@ -203,15 +249,18 @@
           <li><strong>Bandwidth.</strong> At 20 % bandwidth the band-limited and Lyot masks leak more light (their size is fixed in λ0/D) while the vortex, an achromatic phase in this model, keeps its null.</li>
           <li><strong>Limits of the model.</strong> Scalar Fraunhofer optics; monochromatic control at λ0; no polarisation, no time-varying turbulence, no Fresnel propagation between optics; noiseless wavefront sensors; a pixelated pupil edge that limits the phase-mask nulls near 10⁻⁸; 64 or 128 samples across the pupil. Interaction matrices and Jacobians come from the unaberrated model, as on real instruments.</li>
         </ul>
-      </section>
+      </details>
 
-      <section class="panel" id="p-bib" aria-labelledby="t-bib">
-        <h2 id="t-bib">Bibliography</h2>
-        <p class="sub">Peer-reviewed sources for every coronagraph and sensor, each checked against its DOI record. Conference papers are marked.</p>
+      <details class="panel fold" id="p-bib">
+        <summary><h2 id="t-bib">Bibliography</h2><span class="hint">Peer-reviewed sources, each checked against its DOI record</span></summary>
         <ol id="bib"></ol>
-      </section>
+      </details>
     </div>
   </main>
+  <dialog class="plane-dlg" id="info-dlg" aria-labelledby="info-dlg-title">
+    <div class="pd-head"><h2 id="info-dlg-title">How it works</h2><button type="button" id="info-close" aria-label="Close">×</button></div>
+    <div id="info-dlg-body"></div>
+  </dialog>
   <dialog class="plane-dlg" id="plane-dlg" aria-labelledby="plane-title">
     <div class="pd-head"><h2 id="plane-title">Plane</h2><button type="button" id="plane-close" aria-label="Close the large view">×</button></div>
     <div class="views" id="plane-body"></div>

@@ -23,6 +23,15 @@ Living checklist. Update after every milestone. See `SPEC.md` for the requiremen
 - Aberrated vortex: speckle halo; AO (SH, 10 iterations): 1.5e-6 → 1.6e-7; NCPA leave a halo the AO cannot remove.
 - EFC + pairwise probing: one-sided dark hole 3–7 λ/D, ~4e-6 → ~2e-10 in 8 iterations, planet revealed.
 
+## Layout (after user review)
+
+- Tour presets replaced by reversible variations (pupil choice, optical errors, bandwidth) with a status line and
+  "Reset this step".
+- Streamlined page: image and parameters side by side (image sticky); parameters in tabs (Instrument / Sensing &
+  control / Detector) with foldable groups; results in tabs (Contrast / Wavefront sensor / Closed loop / All numbers);
+  "How it works" as three short cards whose full theory opens in a dialog; "What to look for" and the bibliography
+  folded at the end. Desktop page height went from about 6600 px to 3500 px.
+
 ## Bugs found by the visual and end-to-end checks (fixed)
 
 - A loop requested while another was running was silently dropped (fast clicks through the tour); runs now queue.

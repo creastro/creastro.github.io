@@ -58,7 +58,12 @@ const distinct = (page: Page, sel: string) => page.$eval(sel, (c) => {
   return set.size
 })
 
+/** Show the tab panel that holds a control or a result. */
+const tab = (page: Page, panel: string) => page.click(`[role=tab][aria-controls="${panel}"]`)
+
 async function select(page: Page, id: string, value: string): Promise<void> {
+  if (id === 'wfs') await tab(page, 'par-sense')
+  else if (id === 'cor') await tab(page, 'par-inst')
   const c = await counts(page)
   await page.selectOption(`#${id}`, value)
   await waitFrames(page, c.frames + 1)
@@ -75,10 +80,20 @@ describe('desktop', () => {
     assert.ok(refs >= 25, `bibliography has ${refs} entries`)
     assert.ok((await page.locator('#info-cor h3').textContent())?.length)
     assert.ok((await page.locator('#info-wfs h3').textContent())?.length)
-    // Every citation link of the info panels points to a bibliography entry.
-    for (const href of await page.locator('#p-info .info-refs a').evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
-      assert.equal(await page.locator(href as string).count(), 1, `missing ${href}`)
+    // Each info card opens its theory in a dialog; every citation there points to a bibliography entry.
+    for (const slot of ['info-cor', 'info-wfs', 'info-ctl']) {
+      await page.click(`#${slot} .info-more`)
+      await page.waitForSelector('#info-dlg[open]')
+      const hrefs = await page.locator('#info-dlg .info-refs a').evaluateAll((as) => as.map((a) => a.getAttribute('href')))
+      assert.ok(hrefs.length > 0, `${slot}: no sources`)
+      for (const href of hrefs) assert.equal(await page.locator(href as string).count(), 1, `missing ${href}`)
+      await page.click('#info-close')
     }
+    // A citation link closes the dialog and unfolds the bibliography at that entry.
+    await page.click('#info-cor .info-more')
+    await page.click('#info-dlg .info-refs a >> nth=0')
+    await page.waitForSelector('#info-dlg', { state: 'hidden' })
+    assert.equal(await page.$eval('#p-bib', (d) => (d as HTMLDetailsElement).open), true)
     assert.deepEqual(errors, [])
   })
 
@@ -105,7 +120,9 @@ describe('desktop', () => {
     assert.equal(await page.locator('#lam').isVisible(), true)
     assert.equal(await page.locator('#p-tour').isVisible(), false)
     assert.ok(await page.locator('#strip [data-plane="A"] figcaption', { hasText: 'Phase before' }).count())
-    assert.ok(await page.locator('#info-cor .formula-box .katex').count())
+    await page.click('#info-cor .info-more')
+    assert.ok(await page.locator('#info-dlg .formula-box .katex').count())
+    await page.click('#info-close')
     await page.click('label[for=mode-beginner]')
     assert.equal(await page.locator('#lam').isVisible(), false)
   })
@@ -130,6 +147,8 @@ describe('desktop', () => {
       await page.click('label[for=mode-expert]')
       await page.$eval('#screen', (el) => { const i = el as HTMLInputElement; i.value = '8'; i.dispatchEvent(new Event('input', { bubbles: true })) })
       await select(page, 'wfs', wfs)
+      await tab(page, 'par-inst')
+      await tab(page, 'res-wfs')
       for (const kind of CORONAGRAPHS) {
         const c = await counts(page)
         await page.selectOption('#cor', kind)
@@ -156,6 +175,7 @@ describe('desktop', () => {
     await select(page, 'cor', 'lyot')
     await page.$eval('#screen', (el) => { const i = el as HTMLInputElement; i.value = '8'; i.dispatchEvent(new Event('input', { bubbles: true })) })
     await select(page, 'wfs', 'pairwise')
+    await tab(page, 'res-loop')
     await page.fill('#loop-n', '4')
     await page.click('#loop-run')
     await page.waitForFunction(() => /Done/.test(document.getElementById('loop-status')?.textContent ?? ''), null, { timeout: 180000 })
