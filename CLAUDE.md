@@ -92,8 +92,11 @@ src/
 tools/
 └── optics_mcp/      # Python MCP server: numpy/scipy cho ABCD và nhiễu xạ
 psf-simulator/       # Nguồn TypeScript và test của simulation PSF (FFT 2D); sinh ra simulations/telescope-psf/
+coronagraph-lab/     # Nguồn TypeScript, test vật lý, kiểm tra trích dẫn và test Playwright của Coronagraph Lab;
+                     # `npm run verify` chạy toàn bộ; sinh ra simulations/coronagraph-lab/
 simulations/
-└── telescope-psf/   # Trang tĩnh của simulation PSF, cùng định dạng với doppler/ và adaptive-optics/
+├── telescope-psf/   # Trang tĩnh của simulation PSF, cùng định dạng với doppler/ và adaptive-optics/
+└── coronagraph-lab/ # Trang tĩnh của Coronagraph Lab (coronagraph-lab.js, coronagraph-worker.js, help.js được sinh ra)
 mcp_optics_guide.md  # Hướng dẫn kết nối MCP
 ```
 

@@ -1,0 +1,24 @@
+{
+  "name": "coronagraph-lab",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "oxlint",
+    "typecheck": "tsc -b",
+    "check:citations": "node --experimental-strip-types --no-warnings scripts/check-citations.ts",
+    "build:site": "vite build -c vite.site.main.config.ts && vite build -c vite.site.worker.config.ts && vite build -c vite.site.help.config.ts",
+    "build": "tsc -b && npm run build:site",
+    "e2e": "node --experimental-strip-types --no-warnings --test e2e/site.e2e.ts",
+    "verify": "node --experimental-strip-types --no-warnings scripts/verify.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "oxlint": "^1.90.0",
+    "playwright": "1.63.0",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  }
+}
