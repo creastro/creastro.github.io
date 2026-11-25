@@ -339,10 +339,10 @@ void main(){
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   // The design as chosen by the site owner. There is no settings panel: these values are the site.
   const DEFAULTS = {
-    theme: null, hue: 150, sat: 90, tint: 20, font: 'console', hweight: 700, caps: true, tracking: .02, scale: 1, lh: 1.65, maxw: 1120, space: 1,
-    radius: 0, card: 'outline', glass: .5, blur: 6, bw: 1, shadow: 0, btn: 'outline', nav: 'line', img: 'tint', headAccent: true, underline: true,
+    theme: 'dark', hue: 150, sat: 90, tint: 22, font: 'console', hweight: 700, caps: true, tracking: .03, scale: 1, lh: 1.6, maxw: 1120, space: 1,
+    radius: 0, card: 'outline', glass: 1, blur: 5, bw: 2.5, shadow: .05, btn: 'filled', nav: 'pill', img: 'normal', headAccent: true, underline: true,
     starK: 5800, starB: 1, psize: 1, clouds: .6, atmo: 1, dens: 0, neb: 0, mw: 1, fov: 62, roll: 32, pan: 8, expo: 1, quality: .85,
-    speed: still ? 0 : 1, parallax: true, twinkle: false, text: {}, trans: still ? 'none' : 'slide', headline: 'rise'
+    speed: still ? 0 : 1.5, parallax: true, twinkle: false, text: {}, trans: still ? 'none' : 'slide', headline: 'rise'
   };
   const FONTS = {
     orbit: ['"Unbounded","Be Vietnam Pro",system-ui,sans-serif', '"Be Vietnam Pro",system-ui,sans-serif'],
@@ -353,8 +353,8 @@ void main(){
   };
   const TEXT = {
     brand: 'TIN MAI ✦', footer: '© Tin Mai (Mai Như Tín) · Looking up, asking questions.',
-    cta1: 'View my experiences', cta2: 'Download my CV', cities: 'Nice · Paris · Rome · Hanoi',
-    hint: 'The sky behind this page is live, and its five worlds are renderings of real exoplanets, one of each kind. Drag the large one to spin it, or click a distant one to bring it closer.',
+    cta1: 'View my experiences', cta2: 'Download my CV', cities: '',
+    hint: 'The sky behind this page is live, with five worlds are renderings of real exoplanets. Drag the large one to spin it, or click a distant one to bring it closer.',
     home_eyebrow: 'Astronomer · Researcher · Explorer', home_title: 'Exploring our *cosmic *neighborhood',
     home_intro: "I'm Tin Mai (Mai Như Tín), a recent Master's graduate in Astrophysics and Space Science, working across high-resolution spectroscopy for exoplanet atmospheres, adaptive optics and astronomical data analysis.",
     education_eyebrow: 'Academic path', education_title: 'Education', education_intro: 'Astrophysics and space science, across three countries.',
@@ -509,7 +509,7 @@ void main(){
     <${Head} pg="home" v=${v} eyebrow="Astronomer · Researcher · Explorer" title="Exploring our *cosmic *neighborhood." anim=${v.headline}
       intro="I'm Tin Mai (Mai Như Tín), a recent Master's graduate in Astrophysics and Space Science, working across high-resolution spectroscopy for exoplanet atmospheres, adaptive optics and astronomical data analysis."
       kids=${html`<div className="cta"><a className="btn" href="#research"><${Icon} name="Telescope" /> ${tx(v, 'cta1')}</a><a className="btn ghost" href=${SITE + 'cv.pdf'} target="_blank" rel="noopener"><${Icon} name="FileText" /> ${tx(v, 'cta2')}</a></div>
-        <p className="cities mono">${tx(v, 'cities')}</p>
+        ${tx(v, 'cities') ? html`<p className="cities mono">${tx(v, 'cities')}</p>` : null}
         <p className="hint"><${Icon} name="MousePointerClick" /><span>${tx(v, 'hint')}</span></p>`} />
     <div className="spacer" aria-hidden="true"></div>
     <div className="sec sky"><h2>Research focus</h2><a href="#research">Full experience timeline →</a></div>
