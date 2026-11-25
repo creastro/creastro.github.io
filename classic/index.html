@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Personal website of Tin Mai (Mai Như Tín), astronomer.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23080d1c'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%238fe3ff'/%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tin Mai (Mai Như Tín) | Astronomer">
+  <meta property="og:description" content="Personal website of Tin Mai (Mai Như Tín), astronomer.">
+  <meta property="og:url" content="https://creastro.github.io/classic/">
+  <meta property="og:image" content="https://creastro.github.io/images/ava.jpg">
+  <title>Tin Mai (Mai Như Tín) | Astronomer</title>
+  <style>
+    :root{--bg:#080d1c;--text:#edf2ff;--muted:#b3bfd8;--accent:#8fe3ff;--border:rgba(255,255,255,.14);--panel:#111b30e0}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 system-ui,sans-serif}
+    .sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 80% 20%,#18345a55,transparent 55%),radial-gradient(ellipse at 20% 70%,#41266344,transparent 50%)}
+    .sky:before,.sky:after{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20px 30px,#fff 99%,transparent),radial-gradient(2px 2px at 90px 110px,#b5d9ff 99%,transparent),radial-gradient(1px 1px at 160px 60px,#fff 99%,transparent),radial-gradient(1px 1px at 220px 170px,#fff 99%,transparent);background-size:260px 220px;animation:twinkle 5s ease-in-out infinite alternate}.sky:after{transform:translate(65px,85px);opacity:.4;animation-delay:-3s;animation-duration:7s}@keyframes twinkle{from{opacity:.25}to{opacity:.85}}
+    a{color:var(--accent)}a:focus-visible{outline:3px solid var(--accent);outline-offset:5px}.container{width:min(1240px,92%);margin:auto}
+    nav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px 0}.brand{color:var(--text);font-weight:750;text-decoration:none}.nav-links{display:flex;flex-wrap:wrap;gap:12px}.nav-links a{padding:5px 12px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;transition:background .2s,color .2s}.nav-links a:hover,.nav-links a:focus-visible{background:var(--accent);color:var(--bg)!important}.home-link{color:var(--accent)!important}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:60px;min-height:570px;padding:65px 0}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:700}
+    h1{font-size:clamp(2.5rem,6vw,4.8rem);line-height:1.08;letter-spacing:-.05em;margin:16px 0 24px}h2{font-size:clamp(1.7rem,3vw,2.4rem);line-height:1.2;margin:0 0 18px}h3{margin:0 0 8px}p{color:var(--muted)}
+    .hero-copy{max-width:680px}.hero-copy>p{font-size:1.08rem;max-width:600px}.buttons{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.button{display:inline-block;padding:11px 20px;border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none;transition:transform .2s,background .2s}.button.primary{background:var(--accent);color:var(--bg);font-weight:700}.button:hover{transform:translateY(-3px);background:#25405b;color:#fff}
+    .profile-area{display:grid;gap:15px;justify-items:center}.profile-frame{width:min(310px,100%);aspect-ratio:1;overflow:hidden;border:1px solid var(--accent);border-radius:24px;background:#172b4c;box-shadow:0 0 70px #478dd633}.profile-frame img{width:100%;height:100%;display:block;object-fit:cover;object-position:center 42%}.profile-note{margin:0;text-align:center;font-size:.8rem}
+    section{padding:65px 0}.section-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:28px}.section-heading p{margin:0}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.card{padding:26px;background:var(--panel);border:1px solid var(--border);border-radius:14px;transition:transform .2s,border-color .2s}.card:hover{transform:translateY(-5px);border-color:var(--accent)}.tag{color:var(--accent);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}.card p:last-child{margin-bottom:0}
+    .education{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.education .card{min-height:190px}.institution{color:var(--text);font-weight:650}.period{font:12px ui-monospace,monospace;color:var(--accent)}
+    .highlight-list{display:grid;grid-template-columns:1fr 1fr;gap:18px}.highlight-list .card ul{margin:0;padding-left:20px;color:var(--muted)}.highlight-list li{margin:6px 0}
+    .outreach{display:grid;grid-template-columns:1fr 1fr;gap:18px}.outreach .card{min-height:180px}
+    footer{margin-top:40px;padding:30px 0;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem}
+    @media(max-width:760px){.hero{grid-template-columns:1fr;padding:60px 0}.profile-area{order:-1}.profile-frame{width:230px}.grid,.education,.highlight-list,.outreach{grid-template-columns:1fr}.section-heading{display:block}.section-heading p{margin-top:8px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header class="container"><nav aria-label="Main navigation"><a class="brand" href="./">TIN MAI ✦</a><div class="nav-links"><a class="home-link" href="./">Home</a><a href="#education">Education</a><a href="research/">Research</a><a href="simulations/">Simulations</a><a href="story/">My story</a><a href="contact/">Contact</a></div></nav></header>
+  <main class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Astronomer · Researcher · Explorer</span>
+        <h1>Exploring our<br>cosmic neighborhood.</h1>
+        <p>I'm Tin Mai (Mai Như Tín), a recent Master's graduate in Astrophysics and Space Science, working across high-resolution spectroscopy for exoplanet atmospheres, adaptive optics and astronomical data analysis.</p>
+        <div class="buttons"><a class="button primary" href="research/">View my experiences</a><a class="button" href="../cv.pdf" download>Download my CV</a></div>
+      </div>
+      <div class="profile-area">
+        <div class="profile-frame"><img src="../images/ava.jpg" alt="Tin Mai in the mountains"></div>
+        <p class="profile-note">Nice · Paris · Rome · Hanoi</p>
+      </div>
+    </section>
+
+    <section id="education" aria-labelledby="education-title">
+      <div class="section-heading"><div><span class="eyebrow">Academic path</span><h2 id="education-title">Education</h2></div><p>Astrophysics and space science</p></div>
+      <div class="education">
+        <article class="card"><p class="period">Mar 2025 — Sep 2026</p><h3>Master in Astrophysics and Space Science</h3><p class="institution">Université Côte d’Azur</p><p>Nice, France</p></article>
+        <article class="card"><p class="period">Oct 2024 — Mar 2025</p><h3>Master in Astrophysics and Space Science</h3><p class="institution">Università degli studi di Roma Tor Vergata</p><p>Rome, Italy</p></article>
+        <article class="card"><p class="period">Oct 2020 — Nov 2023</p><h3>Bachelor in Space and Applications</h3><p class="institution">University of Science and Technology of Hanoi</p><p>Hanoi, Vietnam</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="research-title">
+      <div class="section-heading"><div><span class="eyebrow">Questions that drive my work</span><h2 id="research-title">Research focus</h2></div><a href="research/">Full experience timeline →</a></div>
+      <div class="grid">
+        <article class="card"><p class="tag">01 / Exoplanets</p><h3>Atmospheres of distant worlds</h3><p>Using high-resolution spectroscopy to study the atmospheres of distant worlds, from simulating the spectra of the companion VHS 1256 b to probing its time-variable atmospheric dynamics.</p></article>
+        <article class="card"><p class="tag">02 / Instrumentation</p><h3>High-contrast imaging</h3><p>Working on high-contrast imaging with adaptive optics, coronagraphy and optical interferometry, including Python tools to assess real-time adaptive optics performance at Calern Observatory.</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="highlights-title">
+      <div class="section-heading"><div><span class="eyebrow">Beyond the main projects</span><h2 id="highlights-title">Highlights</h2></div></div>
+      <div class="highlight-list">
+        <article class="card"><p class="tag">Awards & scholarships</p><ul><li>Erasmus Mundus Joint Master scholarship, 2024–2026</li><li>Merit Scholarship for Outstanding Students, 2020–2023</li><li>Silver Medal, Vietnam National Mathematics Olympiad, 2023</li><li>Silver Honour, IAAC, 2022</li></ul></article>
+        <article class="card"><p class="tag">Tools & methods</p><ul><li>Python, MATLAB, machine learning, and simulations</li><li>High-resolution spectroscopy and adaptive optics</li><li>Linux</li><li>High performance computing (HPC)</li><li>Claude Code</li></ul></article>
+      </div>
+    </section>
+
+    <section id="outreach" aria-labelledby="outreach-title">
+      <div class="section-heading"><div><span class="eyebrow">Astronomy for everyone</span><h2 id="outreach-title">Academic & outreach</h2></div></div>
+      <div class="outreach">
+        <article class="card"><h3>Teaching assistant</h3><p>Introduction to Informatics (Winter 2023) and Numerical Methods (Spring 2024) at the University of Science and Technology of Hanoi.</p></article>
+        <article class="card"><h3>Vietnam Astrophysics Club</h3><p>Content Writer and Editor (Nov 2023 — Sep 2024); Event Manager (Mar 2022 — Nov 2023).</p></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="contact-title"><span class="eyebrow">Get in touch</span><h2 id="contact-title">Let's connect.</h2><p>Interested in a collaboration, a research discussion, or an astronomy event?</p><div class="buttons"><a class="button primary" href="contact/">Contact me</a><a class="button" href="https://www.linkedin.com/in/creastro/" target="_blank" rel="noreferrer">LinkedIn</a><a class="button" href="https://github.com/creastro">GitHub</a><a class="button" href="https://orcid.org/0000-0001-6517-2338">ORCID</a></div></section>
+  </main>
+  <footer class="container">© Tin Mai (Mai Như Tín) · Looking up, asking questions.</footer>
+</body>
+</html>
