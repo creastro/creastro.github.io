@@ -127,43 +127,6 @@ figcaption{margin-top:8px;font-size:.84rem;color:var(--muted)}
 .linkrow:hover{border-color:var(--accent);transform:translateX(4px)}
 footer{margin-top:calc(30px * var(--space));color:var(--muted);font-size:.84rem}
 
-/* tweak panel */
-.tweaks{position:fixed;z-index:20;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(344px,calc(100vw - 32px));max-height:calc(100% - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;border:1px solid var(--line);border-radius:min(var(--r),22px);background:var(--solid);color:var(--fg);box-shadow:0 22px 60px -20px hsl(var(--hue) 60% 2% / .8);font-size:.83rem;line-height:1.45}
-.tweaks > header{display:flex;justify-content:space-between;align-items:center;padding:8px 10px 8px 16px}
-.tweaks > header b{display:flex;align-items:center;gap:8px;font:700 .84rem var(--display)}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:0 12px;padding:4px;border:1px solid var(--line);border-radius:var(--pill)}
-.tabs button,.seg button{display:flex;justify-content:center;align-items:center;gap:5px;min-height:30px;padding:0 4px;border:0;border-radius:var(--pill);background:none;color:var(--muted);font:600 .76rem var(--body);cursor:pointer;white-space:nowrap}
-.tabs button[aria-selected="true"],.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
-.tweaks .body{display:grid;gap:14px;padding:14px 16px 16px;overflow-y:auto;overscroll-behavior:contain}
-.tweaks h4{margin:6px 0 -4px;font:700 .68rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
-.row label,.row .lab{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px;font-weight:500}
-.row output{font:500 .7rem var(--mono);color:var(--muted)}
-.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;padding:3px;border:1px solid var(--line);border-radius:var(--pill)}
-.seg.wrap2{grid-auto-flow:row;grid-template-columns:repeat(3,1fr);border-radius:min(var(--pill),18px)}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;margin:0;border-radius:99px;background:var(--line);cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--solid);border:3px solid var(--accent)}
-input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--solid);border:3px solid var(--accent)}
-.sw{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.sw button{width:22px;height:22px;border-radius:50%;border:2px solid var(--solid);outline:1px solid var(--line);cursor:pointer;padding:0}
-.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
-.check{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500}
-.check input{appearance:none;-webkit-appearance:none;width:30px;height:18px;margin:0;border-radius:99px;background:var(--line);position:relative;cursor:pointer;flex:none;transition:background .2s}
-.check input::after{content:"";position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--solid);transition:transform .2s}
-.check input:checked{background:var(--accent)}.check input:checked::after{transform:translateX(12px)}
-.iconbtn{display:inline-grid;place-items:center;width:34px;height:34px;border:1px solid transparent;border-radius:var(--pill);background:none;color:var(--fg);cursor:pointer}
-.iconbtn:hover{border-color:var(--line)}
-.minis{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.mini{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:32px;padding:0 10px;border:1px solid var(--line);border-radius:var(--pill);background:none;color:var(--fg);font:600 .78rem var(--body);cursor:pointer}
-.mini:hover{border-color:var(--accent)}
-.note{color:var(--muted);font-size:.75rem}
-.tw-in{display:block;width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:min(var(--r),12px);background:transparent;color:var(--fg);font:400 .82rem/1.45 var(--body);resize:vertical}
-.tw-in:focus{border-color:var(--accent);outline:none}
-.worlds{display:grid;gap:6px}
-.worlds button{display:grid;gap:1px;text-align:left;padding:8px 12px;border:1px solid var(--line);border-radius:min(var(--r),14px);background:none;color:var(--fg);font:400 .78rem/1.4 var(--body);cursor:pointer}
-.worlds button:hover,.worlds button[aria-pressed="true"]{border-color:var(--accent)}
-.worlds button[aria-pressed="true"]{background:var(--soft)}
-.worlds span{color:var(--accent);font-weight:600}.worlds small{color:var(--muted)}
-.fab{position:fixed;z-index:20;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--solid);color:var(--fg);border-color:var(--line)}
 
 @media (prefers-reduced-motion:reduce){.head h1 .w,.page{animation:none!important}*{transition:none!important}}
 @media (max-width:860px){
@@ -374,17 +337,12 @@ void main(){
   const ROUTES = [['home', 'Home'], ['education', 'Education'], ['research', 'Research'], ['simulations', 'Simulations'], ['story', 'My story'], ['contact', 'Contact']];
   const routeOf = () => { const k = location.hash.slice(1); return ROUTES.some((r) => r[0] === k) ? k : 'home'; };
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The design as chosen by the site owner. There is no settings panel: these values are the site.
   const DEFAULTS = {
-    theme: null, hue: 205, sat: 85, tint: 28, font: 'orbit', hweight: 700, caps: false, tracking: -.01, scale: 1, lh: 1.65, maxw: 1120, space: 1,
-    radius: 16, card: 'glass', glass: .8, blur: 16, bw: 1, shadow: .5, btn: 'filled', nav: 'pill', img: 'normal', headAccent: false, underline: true,
+    theme: null, hue: 150, sat: 90, tint: 20, font: 'console', hweight: 700, caps: true, tracking: .02, scale: 1, lh: 1.65, maxw: 1120, space: 1,
+    radius: 0, card: 'outline', glass: .5, blur: 6, bw: 1, shadow: 0, btn: 'outline', nav: 'line', img: 'tint', headAccent: true, underline: true,
     starK: 5800, starB: 1, psize: 1, clouds: .6, atmo: 1, dens: 0, neb: 0, mw: 1, fov: 62, roll: 32, pan: 8, expo: 1, quality: .85,
     speed: still ? 0 : 1, parallax: true, twinkle: false, text: {}, trans: still ? 'none' : 'slide', headline: 'rise'
-  };
-  const LOOKS = {
-    Observatory: { hue: 205, sat: 85, tint: 28, font: 'orbit', hweight: 700, caps: false, tracking: -.01, radius: 16, card: 'glass', glass: .8, blur: 16, bw: 1, shadow: .5, btn: 'filled', nav: 'pill', img: 'normal', headAccent: false },
-    Logbook: { hue: 38, sat: 70, tint: 30, font: 'almanac', hweight: 500, caps: false, tracking: -.02, radius: 4, card: 'solid', glass: 1, blur: 0, bw: 1, shadow: .7, btn: 'outline', nav: 'bar', img: 'normal', headAccent: false },
-    Console: { hue: 150, sat: 90, tint: 20, font: 'console', hweight: 700, caps: true, tracking: .02, radius: 0, card: 'outline', glass: .5, blur: 6, bw: 1, shadow: 0, btn: 'outline', nav: 'line', img: 'tint', headAccent: true },
-    Nebula: { hue: 300, sat: 95, tint: 45, font: 'grotesk', hweight: 700, caps: false, tracking: -.03, radius: 28, card: 'glass', glass: .55, blur: 26, bw: 0, shadow: .9, btn: 'soft', nav: 'pill', img: 'normal', headAccent: true }
   };
   const FONTS = {
     orbit: ['"Unbounded","Be Vietnam Pro",system-ui,sans-serif', '"Be Vietnam Pro",system-ui,sans-serif'],
@@ -397,7 +355,7 @@ void main(){
     brand: 'TIN MAI ✦', footer: '© Tin Mai (Mai Như Tín) · Looking up, asking questions.',
     cta1: 'View my experiences', cta2: 'Download my CV', cities: 'Nice · Paris · Rome · Hanoi',
     hint: 'The sky behind this page is live, and its five worlds are renderings of real exoplanets, one of each kind. Drag the large one to spin it, or click a distant one to bring it closer.',
-    home_eyebrow: 'Astronomer · Researcher · Explorer', home_title: 'Exploring our *cosmic *neighborhood.',
+    home_eyebrow: 'Astronomer · Researcher · Explorer', home_title: 'Exploring our *cosmic *neighborhood',
     home_intro: "I'm Tin Mai (Mai Như Tín), a recent Master's graduate in Astrophysics and Space Science, working across high-resolution spectroscopy for exoplanet atmospheres, adaptive optics and astronomical data analysis.",
     education_eyebrow: 'Academic path', education_title: 'Education', education_intro: 'Astrophysics and space science, across three countries.',
     research_eyebrow: 'Research and coursework', research_title: 'Research experiences', research_intro: 'My research spans exoplanet atmospheres, adaptive optics, weak gravitational lensing, and molecular gas in star-forming environments.',
@@ -407,8 +365,7 @@ void main(){
   };
   const tx = (v, k) => (v.text && typeof v.text[k] === 'string' && v.text[k].trim() !== '' ? v.text[k] : TEXT[k]);
   const edited = (v, k) => v.text && typeof v.text[k] === 'string' && v.text[k].trim() !== '' && v.text[k] !== TEXT[k];
-  const load = () => { try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem('tinmai-site-2') || '{}') }; } catch (e) { return { ...DEFAULTS }; } };
-  const systemTheme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const load = () => ({ ...DEFAULTS });
 
   /* ---------- colour helpers ---------- */
   function hsl(hh, s, l) { hh = ((hh % 360) + 360) % 360 / 360; const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q, f = (t) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; }; return [f(hh + 1 / 3), f(hh), f(hh - 1 / 3)]; }
@@ -541,108 +498,6 @@ void main(){
     return () => { cancelAnimationFrame(raf); removeEventListener('resize', fit); removeEventListener('pointermove', onMove); canvas.removeEventListener('pointerdown', onDown); removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onUp); };
   }
 
-  /* ---------- tweak panel ---------- */
-  const Slider = ({ id, label, v, min, max, step, fmt, on, track }) => html`
-    <div className="row"><label htmlFor=${id}><span>${label}</span><output>${fmt(v)}</output></label>
-      <input id=${id} type="range" min=${min} max=${max} step=${step} value=${v} style=${track ? { background: track } : null} onInput=${(e) => on(+e.target.value)} /></div>`;
-  const Seg = ({ label, v, opts, on, id, wrap }) => html`
-    <div className="row"><div className="lab"><span>${label}</span></div>
-      <div className=${'seg' + (wrap ? ' wrap2' : '')} role="group" aria-label=${label}>${opts.map(([k, t, ic]) => html`<button key=${k} id=${id + '-' + k} aria-pressed=${v === k} onClick=${() => on(k)}>${ic ? html`<${Icon} name=${ic} />` : null}${t}</button>`)}</div></div>`;
-  const Check = ({ id, label, v, on }) => html`<label className="check" htmlFor=${id}><input id=${id} type="checkbox" checked=${v} onChange=${(e) => on(e.target.checked)} />${label}</label>`;
-  const pct = (x) => Math.round(x * 100) + ' %';
-  const RAINBOW = 'linear-gradient(90deg,' + Array.from({ length: 13 }, (_, i) => `hsl(${i * 30} 85% 55%)`).join(',') + ')';
-  const KTRACK = 'linear-gradient(90deg,' + [3000, 4500, 6000, 8000, 12000].map((k) => `rgb(${kelvin(k).map((c) => Math.round(c * 255)).join(',')})`).join(',') + ')';
-
-  const Field = ({ id, label, v, ph, on, rows }) => html`<div className="row"><label htmlFor=${id}><span>${label}</span></label>${rows
-    ? html`<textarea id=${id} className="tw-in" rows=${rows} value=${v} placeholder=${ph} onChange=${(e) => on(e.target.value)} onInput=${(e) => on(e.target.value)}></textarea>`
-    : html`<input id=${id} className="tw-in" type="text" value=${v} placeholder=${ph} onInput=${(e) => on(e.target.value)} />`}</div>`;
-  function Tweaks({ v, set, reset, focus, setFocus, route }) {
-    const [open, setOpen] = useState(() => innerWidth > 1500);
-    const [tab, setTab] = useState('look');
-    const [copied, setCopied] = useState(false);
-    if (!open) return html`<button id="tweaks-open" className="btn fab" onClick=${() => setOpen(true)}><${Icon} name="SlidersHorizontal" /> Tweaks</button>`;
-    const theme = v.theme || systemTheme();
-    const setText = (k, x) => set({ text: { ...(v.text || {}), [k]: x } });
-    const copy = () => { const p = navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(v)); if (p) p.then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }).catch(() => {}); };
-    return html`
-      <aside className="tweaks" aria-label="Design tweaks">
-        <header><b><${Icon} name="SlidersHorizontal" /> Tweaks</b>
-          <span><button className="iconbtn" id="tweaks-reset" title="Reset everything" aria-label="Reset everything" onClick=${reset}><${Icon} name="RotateCcw" /></button>
-            <button className="iconbtn" id="tweaks-close" title="Hide panel" aria-label="Hide panel" onClick=${() => setOpen(false)}><${Icon} name="X" /></button></span></header>
-        <div className="tabs" role="tablist">${[['look', 'Look'], ['scene', 'Sky'], ['motion', 'Motion'], ['text', 'Text']].map(([k, t]) => html`<button key=${k} id=${'tab-' + k} role="tab" aria-selected=${tab === k} onClick=${() => setTab(k)}>${t}</button>`)}</div>
-        ${tab === 'look' ? html`<div className="body">
-          <div className="row"><div className="lab"><span>Ready-made looks</span></div><div className="minis">${Object.keys(LOOKS).map((k) => html`<button key=${k} className="mini" id=${'look-' + k} onClick=${() => set(LOOKS[k])}>${k}</button>`)}</div></div>
-          <h4>Colour</h4>
-          <${Seg} id="theme" label="Theme" v=${theme} opts=${[['light', 'Light', 'Sun'], ['dark', 'Dark', 'Moon']]} on=${(k) => set({ theme: k })} />
-          <div><${Slider} id="tw-hue" label="Primary colour" v=${v.hue} min="0" max="360" step="1" fmt=${(x) => 'hue ' + x + '°'} track=${RAINBOW} on=${(x) => set({ hue: x })} />
-            <div className="sw">${[205, 265, 300, 345, 20, 38, 150, 175].map((x) => html`<button key=${x} aria-label=${'Hue ' + x} style=${{ background: `hsl(${x} 85% 55%)` }} onClick=${() => set({ hue: x })}></button>`)}</div></div>
-          <${Slider} id="tw-sat" label="Colour intensity" v=${v.sat} min="10" max="100" step="1" fmt=${(x) => x + ' %'} on=${(x) => set({ sat: x })} />
-          <${Slider} id="tw-tint" label="Tint of neutrals" v=${v.tint} min="0" max="60" step="1" fmt=${(x) => x === 0 ? 'pure grey' : x + ' %'} on=${(x) => set({ tint: x })} />
-          <${Check} id="ck-ha" label="Accent-coloured headings" v=${v.headAccent} on=${(x) => set({ headAccent: x })} />
-          <h4>Type</h4>
-          <${Seg} id="font" label="Typeface" wrap=${true} v=${v.font} opts=${[['orbit', 'Orbit'], ['almanac', 'Almanac'], ['grotesk', 'Grotesk'], ['human', 'Humanist'], ['console', 'Console']]} on=${(k) => set({ font: k })} />
-          <${Seg} id="hw" label="Heading weight" v=${v.hweight} opts=${[[500, 'Medium'], [700, 'Bold']]} on=${(k) => set({ hweight: k })} />
-          <${Slider} id="tw-track" label="Heading spacing" v=${v.tracking} min="-.06" max=".12" step=".01" fmt=${(x) => (x > 0 ? '+' : '') + x.toFixed(2) + ' em'} on=${(x) => set({ tracking: x })} />
-          <${Slider} id="tw-scale" label="Text size" v=${v.scale} min=".85" max="1.25" step=".05" fmt=${pct} on=${(x) => set({ scale: x })} />
-          <${Slider} id="tw-lh" label="Line height" v=${v.lh} min="1.35" max="1.95" step=".05" fmt=${(x) => x.toFixed(2)} on=${(x) => set({ lh: x })} />
-          <div className="checks"><${Check} id="ck-caps" label="Capital headings" v=${v.caps} on=${(x) => set({ caps: x })} /><${Check} id="ck-ul" label="Underlined links" v=${v.underline} on=${(x) => set({ underline: x })} /></div>
-          <h4>Layout</h4>
-          <${Seg} id="nav" label="Navigation" v=${v.nav} opts=${[['pill', 'Floating'], ['bar', 'Bar'], ['line', 'Minimal']]} on=${(k) => set({ nav: k })} />
-          <${Slider} id="tw-maxw" label="Page width" v=${v.maxw} min="760" max="1400" step="20" fmt=${(x) => x + ' px'} on=${(x) => set({ maxw: x })} />
-          <${Slider} id="tw-space" label="Spacing" v=${v.space} min=".6" max="1.6" step=".05" fmt=${(x) => x < .85 ? 'compact' : x > 1.25 ? 'airy' : pct(x)} on=${(x) => set({ space: x })} />
-          <h4>Cards and buttons</h4>
-          <${Seg} id="card" label="Card style" v=${v.card} opts=${[['glass', 'Glass'], ['solid', 'Solid'], ['outline', 'Outline'], ['bare', 'None']]} on=${(k) => set({ card: k })} />
-          <${Slider} id="tw-radius" label="Corner radius" v=${v.radius} min="0" max="32" step="1" fmt=${(x) => x === 0 ? 'square' : x >= 32 ? 'fully round' : x + ' px'} on=${(x) => set({ radius: x })} />
-          <${Slider} id="tw-glass" label="Card opacity" v=${v.glass} min=".15" max="1" step=".01" fmt=${pct} on=${(x) => set({ glass: x })} />
-          <${Slider} id="tw-blur" label="Card blur" v=${v.blur} min="0" max="36" step="1" fmt=${(x) => x + ' px'} on=${(x) => set({ blur: x })} />
-          <${Slider} id="tw-bw" label="Border width" v=${v.bw} min="0" max="4" step=".5" fmt=${(x) => x === 0 ? 'none' : x + ' px'} on=${(x) => set({ bw: x })} />
-          <${Slider} id="tw-shadow" label="Shadow depth" v=${v.shadow} min="0" max="1" step=".05" fmt=${pct} on=${(x) => set({ shadow: x })} />
-          <${Seg} id="btn" label="Button style" v=${v.btn} opts=${[['filled', 'Filled'], ['outline', 'Outline'], ['soft', 'Soft']]} on=${(k) => set({ btn: k })} />
-          <${Seg} id="img" label="Photos and figures" v=${v.img} opts=${[['normal', 'Original'], ['mono', 'Black & white'], ['tint', 'Tinted']]} on=${(k) => set({ img: k })} />
-        </div>` : tab === 'scene' ? html`<div className="body">
-          <${Slider} id="tw-k" label="Star temperature" v=${v.starK} min="3000" max="12000" step="100" fmt=${(x) => x + ' K'} track=${KTRACK} on=${(x) => set({ starK: x })} />
-          <${Slider} id="tw-sb" label="Star brightness" v=${v.starB} min="0" max="2.5" step=".05" fmt=${pct} on=${(x) => set({ starB: x })} />
-          <${Slider} id="tw-ps" label="Planet size" v=${v.psize} min=".5" max="1.8" step=".05" fmt=${pct} on=${(x) => set({ psize: x })} />
-          <h4>The sky photograph</h4>
-          <${Slider} id="tw-mw" label="Milky Way brightness" v=${v.mw} min="0" max="2.5" step=".05" fmt=${(x) => x === 0 ? 'off' : pct(x)} on=${(x) => set({ mw: x })} />
-          <${Slider} id="tw-fov" label="Field of view" v=${v.fov} min="35" max="85" step="1" fmt=${(x) => x + '°'} on=${(x) => set({ fov: x })} />
-          <${Slider} id="tw-roll" label="Tilt of the Milky Way" v=${v.roll} min="-90" max="90" step="1" fmt=${(x) => x + '°'} on=${(x) => set({ roll: x })} />
-          <${Slider} id="tw-pan" label="Pan along the Milky Way" v=${v.pan} min="-35" max="35" step="1" fmt=${(x) => 'l = ' + x + '°'} on=${(x) => set({ pan: x })} />
-          <${Slider} id="tw-cl" label="Cloud cover" v=${v.clouds} min="0" max="1" step=".05" fmt=${pct} on=${(x) => set({ clouds: x })} />
-          <${Slider} id="tw-at" label="Atmosphere glow" v=${v.atmo} min="0" max="2.5" step=".05" fmt=${pct} on=${(x) => set({ atmo: x })} />
-          <${Slider} id="tw-de" label="Added stars" v=${v.dens} min="0" max="1" step=".05" fmt=${(x) => x === 0 ? 'none' : pct(x)} on=${(x) => set({ dens: x })} />
-          <${Slider} id="tw-ne" label="Accent-coloured glow" v=${v.neb} min="0" max="1.5" step=".05" fmt=${(x) => x === 0 ? 'none' : pct(x)} on=${(x) => set({ neb: x })} />
-          <${Slider} id="tw-ex" label="Sky brightness" v=${v.expo} min=".2" max="1.8" step=".05" fmt=${pct} on=${(x) => set({ expo: x })} />
-          <${Slider} id="tw-q" label="Render quality" v=${v.quality} min=".3" max="1" step=".05" fmt=${pct} on=${(x) => set({ quality: x })} />
-          <h4>Worlds in this sky</h4>
-          <div className="worlds">${BODIES.map(([n, ty, d], i) => html`<button key=${n} id=${'world-' + i} aria-pressed=${focus === i} onClick=${() => setFocus(i)}><b>${n}</b><span>${ty}</span><small>${d}</small></button>`)}</div>
-          <p className="note">No exoplanet has been photographed as a disk. These renderings follow measured properties and published artist's concepts, and bring worlds from five different systems into one sky. The sky itself is a real photograph: the Milky Way panorama by ESO/S. Brunier, centred on the galactic centre. The star's colour follows a black body at the chosen temperature. Lower the render quality if the page feels slow.</p>
-        </div>` : tab === 'text' ? html`<div className="body">
-          <${Seg} id="tp" label="Page to edit" wrap=${true} v=${route} opts=${ROUTES.map(([k, t]) => [k, t])} on=${(k) => { location.hash = k; }} />
-          <${Field} id="tx-eb" label="Small label above the title" v=${tx(v, route + '_eyebrow')} on=${(x) => setText(route + '_eyebrow', x)} />
-          <${Field} id="tx-ti" label="Title (put * before a word to colour it)" rows="2" v=${tx(v, route + '_title')} on=${(x) => setText(route + '_title', x)} />
-          <${Field} id="tx-in" label="Introduction" rows="4" v=${tx(v, route + '_intro')} on=${(x) => setText(route + '_intro', x)} />
-          ${route === 'home' ? html`<${React.Fragment}>
-            <${Field} id="tx-c1" label="Button 1" v=${tx(v, 'cta1')} on=${(x) => setText('cta1', x)} />
-            <${Field} id="tx-c2" label="Button 2" v=${tx(v, 'cta2')} on=${(x) => setText('cta2', x)} />
-            <${Field} id="tx-ci" label="Cities line" v=${tx(v, 'cities')} on=${(x) => setText('cities', x)} />
-            <${Field} id="tx-hi" label="Hint under the buttons" rows="3" v=${tx(v, 'hint')} on=${(x) => setText('hint', x)} /><//>` : null}
-          <h4>On every page</h4>
-          <${Field} id="tx-br" label="Name in the navigation" v=${tx(v, 'brand')} on=${(x) => setText('brand', x)} />
-          <${Field} id="tx-fo" label="Footer" v=${tx(v, 'footer')} on=${(x) => setText('footer', x)} />
-          <button className="mini" id="tx-reset" onClick=${() => set({ text: {} })}><${Icon} name="RotateCcw" /> Restore the original text</button>
-          <p className="note">Edits show on the page as you type and are kept in this browser. The long descriptions on the Research, My story and Simulations cards are not editable here.</p>
-        </div>` : html`<div className="body">
-          <${Slider} id="tw-speed" label="Rotation speed" v=${v.speed} min="0" max="8" step=".1" fmt=${(x) => x === 0 ? 'paused' : pct(x)} on=${(x) => set({ speed: x })} />
-          <${Seg} id="trans" label="Page change" v=${v.trans} opts=${[['fade', 'Fade'], ['slide', 'Slide'], ['zoom', 'Zoom'], ['none', 'None']]} on=${(k) => set({ trans: k })} />
-          <${Seg} id="head" label="Headline entrance" v=${v.headline} opts=${[['rise', 'Rise'], ['blur', 'Focus'], ['swing', 'Swing'], ['none', 'None']]} on=${(k) => set({ headline: k })} />
-          <div className="checks"><${Check} id="ck-par" label="Pointer parallax" v=${v.parallax} on=${(x) => set({ parallax: x })} /></div>
-          <button className="mini" id="copy" onClick=${copy}><${Icon} name=${copied ? 'Check' : 'Copy'} /> ${copied ? 'Copied' : 'Copy these settings'}</button>
-          <p className="note">Copies every setting as JSON, to reuse the look you settled on.</p>
-        </div>`}
-      </aside>`;
-  }
-
   /* ---------- pages (content from creastro.github.io) ---------- */
   const Pic = ({ src, alt, cap }) => html`<figure><img className="pic" src=${'assets/images/' + src} alt=${alt} loading="lazy" />${cap ? html`<figcaption>${cap}</figcaption>` : null}</figure>`;
   const Head = ({ pg, v, eyebrow, title, intro, anim, kids }) => html`
@@ -753,12 +608,10 @@ void main(){
   const PAGES = { home: Home, education: Education, research: Research, simulations: Simulations, story: Story, contact: Contact };
 
   function App() {
-    const [v, setV] = useState(load);
+    const [v] = useState(load);
     const [route, setRoute] = useState(routeOf);
     const [focus, setFocus] = useState(0);
     const live = useRef({});
-    const set = (patch) => setV((old) => ({ ...old, ...patch }));
-    const reset = () => { delete document.documentElement.dataset.theme; setV({ ...DEFAULTS }); };
     live.current = { ...v, route, focus };
 
     useEffect(() => {
@@ -769,7 +622,6 @@ void main(){
       st.fontSize = 16 * v.scale + 'px';
       d.card = v.card; d.btn = v.btn; d.nav = v.nav; d.img = v.img; d.caps = v.caps ? 'on' : 'off'; d.headaccent = v.headAccent ? 'on' : 'off'; d.underline = v.underline ? 'on' : 'off';
       if (v.theme) d.theme = v.theme;
-      try { localStorage.setItem('tinmai-site-2', JSON.stringify(v)); } catch (e) { /* storage is optional */ }
     }, [v]);
     useEffect(() => startSky(document.getElementById('sky'), document.getElementById('tip'), live, setFocus), []);
     useEffect(() => { const on = () => { setRoute(routeOf()); scrollTo(0, 0); }; addEventListener('hashchange', on); return () => removeEventListener('hashchange', on); }, []);
@@ -784,7 +636,7 @@ void main(){
         <main className=${'page t-' + v.trans} key=${route + v.trans}><${Page} v=${v} /></main>
         <footer className="sky">${tx(v, 'footer')} · <a href="#home">Return home</a> · <a href=${SITE + 'cv.pdf'} target="_blank" rel="noopener">CV</a> · <a href="classic/">Classic design</a> · Sky photograph: <a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier</a>, CC BY 4.0</footer>
       </div>
-      <${Tweaks} v=${v} set=${set} reset=${reset} focus=${focus} setFocus=${setFocus} route=${route} /><//>`;
+    <//>`;
   }
 
   const first = load();

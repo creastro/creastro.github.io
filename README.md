@@ -14,7 +14,7 @@ The site includes extensionless `/research` and `/contact` pages, with `index.ht
 
 ## Site design
 
-The home page (`index.html`) is a single page with six views (Home, Education, Research, Simulations, My story, Contact) over a live night sky. React, htm and Lucide are loaded from CDNs, pinned to exact versions, and there is no build step. The sky is a photograph of the Milky Way by ESO/S. Brunier (CC BY 4.0, `assets/milkyway.jpg`). Its Tweaks panel changes colours, type, cards, sky, motion and the page text, and keeps the choices in the visitor's browser. Assets of this design are in `assets/`.
+The home page (`index.html`) is a single page with six views (Home, Education, Research, Simulations, My story, Contact) over a live night sky. React, htm and Lucide are loaded from CDNs, pinned to exact versions, and there is no build step. The sky is a photograph of the Milky Way by ESO/S. Brunier (CC BY 4.0, `assets/milkyway.jpg`). The look (colours, type, cards, sky, motion) is the `DEFAULTS` object in `index.html`; there is no settings panel, so change the values there. Assets of this design are in `assets/`.
 
 `/research/`, `/story/`, `/contact/` and `/simulations/` are small pages that forward to the matching view (`/#research` and so on), so old links keep working. The page of each simulation under `simulations/<name>/` keeps its own design for now.
 
